@@ -1,0 +1,157 @@
+﻿@model MassApplication.Models.InputClass
+
+<input type="hidden" id="titlename" name=titlename value="@ViewBag.titlename" />
+@*<div id="summary">
+    @{
+        //var isfirst = true;
+        var count = 1;
+        foreach (var item in Model.AvailableSummaryPeriod)
+        {
+            <div class="radio-inline" id="durationclass">
+                <label>
+                    @if (count == 2)
+                    {
+                        //isfirst = false;
+                        <input type="radio" name="summaryperiod" value="@item.Value" checked="checked" />@item.Text<br />
+                    }
+                    else
+                    {
+                        <input type="radio" name="summaryperiod" value="@item.Value" />@item.Text<br />
+                    }
+                </label>
+            </div>
+            count++;
+        }
+    }
+</div>*@
+
+<div class="row mb-3">
+    <div class="col-md-11">
+
+        <div style="float: left; margin-left: 10px; width: 16%;">
+            <label ID="DurationLabel" class="control-label cust-lable"> Frequency </label>
+            @Html.DropDownList("DurationList", Model.AvailableSummaryPeriod, new { @class = "form-control1 UnitClass", id = "Duration_List" })
+        </div>
+
+        <div id="Daily">
+            <div class="ml-3" style=" float: left; max-width: 80%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Date </label>
+                <input class="form-control1 calender-input" style="width: 76% !important;" type="date" id="TxtDate" name="TxtDate" placeholder="YYYY-MM-DD" value="@ViewBag.CurrentDate" />
+            </div>
+        </div>
+
+        <div id="Hourly">
+            <div class="ml-3" style="float: left; max-width: 80%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Date </label>
+                <input class="form-control1 calender-input" style="width: 50% !important;" type="date" id="HourlyTxtDate" name="HourlyTxtDate" placeholder="YYYY-MM-DD" value="@ViewBag.CurrentDate" />
+                @Html.DropDownList("HourlyHourlist", Model.AvailableHour, new { @class = "form-control1 ", id = "Hourly_HourList" })
+            </div>
+        </div>
+
+        <div id="Monthly">
+            <div class="ml-3" style=" float: left; max-width: 80%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Filter </label>
+                @Html.DropDownList("MonthlyMonthlist", Model.AvailableMonth, new { @class = "form-control1 monthname", id = "Monthly_MonthList" })
+                <select id="Monthly_YearList" name="MonthlyYearList" class="form-control1 yearname">
+                    @foreach (var item in Model.Years)
+                    {
+                        <option value="@item.ToString()">@item.ToString()</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div id="Quarterly">
+            <div class="ml-3" style=" float: left; max-width: 80%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Filter </label>
+                <select id="Quarterly_QuarterList" name="QuarterlyMonthList" class="form-control1 quarterly_monthname">
+                    <option Value="Q1">Q1 (Apr-June)</option>
+                    <option Value="Q2">Q2 (July-Sep)</option>
+                    <option Value="Q3">Q3 (Oct-Dec)</option>
+                    <option selected="selected" Value="Q4">Q4 (Jan-Mar)</option>
+                </select>
+                <select id="Quarterly_YearList" name="QuarterlyYearList" class="form-control1 quarterly_yearname">
+                    @foreach (var item in Model.Years)
+                    {
+                        <option value="@item.ToString()">@item.ToString()</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div id="HalfYearly">
+            <div class="ml-3" style=" float: left; width: 22%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Filter </label>
+                <select id="HalfYearly_MonthList" name="HalfYearlyMonthList" class="form-control1 halfyearly_monthname">
+                    <option Value="select">SELECT</option>
+                    <option Value="hf1" selected="selected">HF1 (Apr-Sep)</option>
+                    <option Value="hf2">HF2 (Oct-Mar)</option>
+                </select>
+                <select id="HalfYearly_YearList" name="HalfYearlyYearList" class="form-control1 halfyearly_yearname">
+                    @foreach (var item in Model.Years)
+                    {
+                        <option value="@item.ToString()">@item.ToString()</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div id="Yearly">
+            <div class="ml-3" style="float: left; width: 10%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Filter </label>
+                <select id="Yearly_YearList" name="YearlyYearList" class="form-control1">
+                    @foreach (var item in Model.Years)
+                    {
+                        <option value="@item.ToString()">@item.ToString()</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div id="Fortnightly">
+            <div class="ml-3" style=" float: left; max-width: 80%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Filter </label>
+                <select id="Fortnightly_DayList" name="DayList" class="form-control1 fortnightdays">
+                    <option Value="select">SELECT</option>
+                    <option Value="f1">F1 (01-15)</option>
+                    <option Value="f2">F2 (16-31)</option>
+                </select>
+                @Html.DropDownList("FortnightlyMonthlist", Model.AvailableMonth, new { @class = "form-control1 fortnightmonth", id = "Fortnightly_MonthList" })
+                <select id="Fortnightly_YearList" name="FortnightlyYearList" class="form-control1 fortnightyear">
+                    @foreach (var item in Model.Years)
+                    {
+                        <option value="@item.ToString()">@item.ToString()</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div id="Custom">
+            <div class="ml-3" style=" float: left; max-width: 80%; min-width: auto;">
+                <label ID="Label3" class="cust-lable"> Date </label>
+                <input class="form-control1 calender-input" style="width: 42% !important; float: left;" type="date" id="FromTxtDate" name="FromTxtDate" placeholder="YYYY-MM-DD" />
+                <input class="form-control1 calender-input" style="width: 42% !important; float: left;" type="date" id="ToTxtDate" name="ToTxtDate" placeholder="YYYY-MM-DD" />
+            </div>
+        </div>
+
+        <div style="float: left; margin-left: 10px; width: 12%;">
+            <label ID="Label10" class="control-label cust-lable"> Unit </label>
+            @Html.DropDownList("UnitList", new SelectList(ViewBag.UnitData, "Value", "Text"), new { @class = "form-control1 UnitClass", id = "Unit_List" })
+        </div>
+
+        @*<input id="btnSubmit" type="submit" class="btn btn-dash" style="font-size: 13px;padding:6px 10px;" value="Load Data" />
+        <input id="btnExport" type="button" class="btn btn-success" style="font-size: 13px;padding:6px 10px;" value="Export" />*@
+
+    <div style="float: left; width: 10%;">
+        <a id="btnSubmit" class="mr-2"><img src="~/Images/load.png" alt="Load" title="Load" style="width: 29px; height: 29px; cursor: pointer;" /></a>
+        <a id="btnExport"><img src="~/Images/export.png" alt="Export" title="Export" style="width: 31px; height: 32px; cursor: pointer;" /></a>
+    </div>
+
+        @*<button id="btnSubmit" class="btn btn-dash" title="Load"><i class="fas fa-upload"></i></button>
+        <button id="btnExport" class="btn btn-success" title="Export"><i class="fas fa-download" style="font-size: 16px; border-radius: 5px"></i></button>*@
+
+    </div>
+</div>
+
+
+

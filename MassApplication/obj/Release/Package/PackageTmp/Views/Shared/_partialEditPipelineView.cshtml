@@ -1,0 +1,149 @@
+﻿@model MassApplication.Models.PipelineClass
+
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+</style>
+<div class="master">
+    @Html.HiddenFor(model => model.pipelinemst_id, new { id = "edit_pipelinemst_id" })
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_name" class="col-sm-4 col-form-label">First name </label>
+                <div class="col-sm-8">
+                    <input id="edit_network_name" type="text" class="form-control" placeholder="Enter network" value="@Model.pipeline_name" />
+                    <span class="error">Network required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_shortname" class="col-sm-4 col-form-label">Last name </label>
+                <div class="col-sm-8">
+                    <input id="edit_short_name" type="text" class="form-control" placeholder="Enter short name" value="@Model.pipeline_shortname" />
+                    <span class="error">Short name required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_email" class="col-sm-4 col-form-label">From Station </label>
+                <div class="col-sm-8">
+                    @if (Model.frm_station != null)
+                    {
+                        @Html.DropDownList("edit_FromStation", new SelectList(ViewBag.ModalStationData, "Value", "Value", Model.frm_station), new { @class = "form-control" })
+                    }
+                    <span class="error">User type required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_userType" class="col-sm-4 col-form-label">To Station </label>
+                <div class="col-sm-8">
+                    @if (Model.t_station != null)
+                    {
+                        @Html.DropDownList("edit_ToStation", new SelectList(ViewBag.ModalStationData, "Value", "Value", Model.t_station), new { @class = "form-control" })
+                    }
+                    <span class="error">User type required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="padding:10px 0; text-align:right">
+    <button type="button" id="submitEditPipeline" class="btn pl-4 pr-4 btn-green">Update</button>
+    <button type="button" class="btn btn-dash pl-4 pr-4" data-dismiss="modal">Close</button>
+</div>
+
+<script src="~/Scripts/SweetAlert2/sweetalert2.all.min.js"></script>
+<script>
+    $('#submitEditPipeline').click(function () {
+       var isAllValid = true;
+       if ($('#edit_network_name').val().trim() == '') {
+           $('#edit_network_name').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_network_name').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_short_name').val().trim() == '') {
+           $('#edit_short_name').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_short_name').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_FromStation').val() == "0" || $('#edit_userType').val() == "") {
+           $('#edit_FromStation').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_FromStation').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_ToStation').val() == "0" || $('#edit_userDashboard').val() == "") {
+           $('#edit_ToStation').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_ToStation').siblings('span.error').css('visibility', 'hidden');
+       }
+       if (isAllValid)
+       {
+          var editData = {
+              pipelinemst_id: $('#edit_pipelinemst_id').val(),
+              pipeline_name: $('#edit_network_name').val().trim(),
+              pipeline_shortname: $('#edit_short_name').val().trim(),
+              frm_station: $('#edit_FromStation').val(),
+              t_station: $('#edit_ToStation').val()
+         }
+
+         $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Pipeline/EditPipelineFormData")',
+            data: JSON.stringify(editData),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.startsWith("ERROR")) {
+                    var res = data.split(";");
+                    var error = '';
+                    if (res.length > 1) {
+                        error = res[1];
+                    } else {
+                        error = data;
+                    }
+                    //alert(error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error
+                    })
+                }
+                else {
+                    swal.fire("Operation success!", "Data updated successfully!", "success").then(function () {
+                        location.reload();
+                    });
+                }
+                
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error
+                })
+            }
+
+        });
+
+       }
+    });
+</script>
+

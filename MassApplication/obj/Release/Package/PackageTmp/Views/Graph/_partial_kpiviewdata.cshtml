@@ -1,0 +1,51 @@
+﻿@model IEnumerable<MassApplication.Models.Graph.kpiview>
+
+
+@foreach (var m in Model)
+{
+    var active_checked = m.is_deleted;
+<tr>
+    <td><input type="checkbox"></td>
+    <td style="display:none">@m.kpi_id </td>
+    <td>@m.kpi_name </td>
+    <td>@m.chart_type </td>
+    <td style="word-wrap: break-word;min-width: 160px;max-width: 160px;">@m.description</td>
+    <td style="text-align:center;">
+        @{
+            if (m.is_deleted == false)
+            {
+                <p>
+                <label class="switch mb-0">
+                    <input class="active_mode" type="checkbox" checked="checked" data-id="@m.kpi_id">
+                    <span class="slider round"></span>
+                </label>
+                    </p>
+            }
+            else
+            {
+                <p>
+                <label class="switch mb-0">
+                    <input class="active_mode" type="checkbox" data-id="@m.kpi_id">
+                    <span class="slider round"></span>
+                </label>
+                    </p>
+
+            }
+
+            <a onclick="BtnEdit('Edit Report Data',@m.kpi_id)" class="dropdown_icon d-none" data-toggle="tooltip" title="Edit" style="">
+                <i class="fas fa-edit" style="margin-left: 10px;"></i>
+            </a>
+        }
+    </td>
+
+</tr>
+
+}
+<script>
+    function BtnEdit(title, report_id) {
+
+        var url = '@Url.Content("~/Graph/EditKpiViewData?report_id=")' + report_id;
+         window.location.href = url;
+}
+</script>
+

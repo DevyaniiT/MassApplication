@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/MasterStyles/css/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/css/ionicons.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/TableStyles/datatables-bs4/css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/TableStyles/datatables-responsive/css/responsive.bootstrap4.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/TableStyles/datatables-buttons/css/buttons.bootstrap4.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/dist/css/adminlte.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/docs/assets/css/style.css?v=1" />
+    <script src="~/MasterStyles/js/jquery.min.js"></script>
+    <script src="~/MasterStyles/js/moment.min.js"></script>
+
+    <style>
+
+        .dark-mode .report-detail ul li a:not(.btn):hover {
+            color: #fff !important;
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: rgb(52 58 64) !important;
+        }
+
+            .navbar-light .navbar-nav .nav-link:hover {
+                color: rgb(52 58 64);
+            }
+
+        body:not(.layout-fixed) .main-sidebar {
+            margin-left: 0px;
+        }
+
+        .main-menu-bar {
+            position: -webkit-sticky; /* Safari */
+            position: sticky;
+            top: 0;
+            z-index: 9
+        }
+
+        .lastVisit {
+            background: #000
+        }
+
+        .toolbarinner {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+            .toolbarinner li a {
+                padding: 0 14px;
+            }
+
+        .nav-icon1 {
+            color: #2a5b6c;
+            font-size: 15px;
+        }
+
+        #reportLayoutData_filter .form-control {
+            background-image: url('../../Images/loupe.png');
+            background-repeat: no-repeat;
+            background-color: #fff;
+            background-position: 4px 4px !important;
+            background-size: 14px;
+        }
+
+            #reportLayoutData_filter .form-control:focus {
+                background-image: none;
+            }
+
+        .disabled-link {
+            pointer-events: none;
+        }
+
+        .addresslink {
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F1F1F1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2A5B6C;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+    </style>
+</head>
+
+<body class="sidebar-mini sidebar-collapse">
+    @{
+        <div class="wrapper">
+
+            @{Html.RenderAction("MenuViewer", "Base");}
+
+            <div class="grey-bg " id="content">
+                @RenderBody()
+            </div>
+        </div>
+
+        <aside class="control-sidebar control-sidebar-dark" style="right:0px; top:34px; min-height:100%;">
+        </aside>
+        <script src="~/Scripts/jquery-ui.js"></script>
+        <script src="~/MasterStyles/js/bootstrap/bootstrap.bundle.min.js"></script>
+        <script src="~/MasterStyles/dist/js/adminlte.js"></script>
+        <script src="~/MasterStyles/dist/js/demo.js"></script>
+        <script src="~/MasterStyles/DaterangePicker/daterangepicker.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables/jquery.dataTables.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-responsive/js/dataTables.responsive.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-buttons/js/dataTables.buttons.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+
+        <script src="~/GraphStyles/js/luxon.min.js"></script>
+        <script src="~/GraphStyles/js/chartjs-adapter-luxon.js"></script>
+        <script src="~/GraphStyles/js/chartjs-chart-financial.js"></script>
+        <script src="~/GraphStyles/js/chartjs-chart-treemapNewVersion.js"></script>
+
+        <script>
+            $(document).ready(function () {
+                $('[data-toggle="tab"]').tooltip({
+                    trigger: 'hover',
+                    placement: 'top',
+                    animate: true,
+                    delay: 500,
+                    container: 'body'
+                });
+
+                //$('.nav-tabs a[href="' + localStorage.getItem('activeTab') + '"]').tab('show');
+                //$(localStorage.getItem('activeTab')).addClass('active');
+
+            });
+        </script>
+        <script>
+            $("#right-customise").click(function (e) {
+                $(".control-sidebar-dark").show();
+                e.stopPropagation();
+            });
+            $(".control-sidebar-dark").click(function (e) {
+                e.stopPropagation();
+            });
+            $(document).click(function () {
+                $(".control-sidebar-dark").hide();
+            });
+        </script>
+
+        <script type="text/javascript">
+            $('#myTabmains a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                localStorage.setItem('activeTab', $(e.target).attr('href'));
+            });
+            var activeTab = localStorage.getItem('activeTab');
+            var activeTabId = activeTab.replace("#", "");
+            localStorage.setItem('activeSubTab', activeTabId);
+            if (activeTab) {
+                $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+                $(activeTab).tab('show');
+            }
+        </script>
+
+        <script>
+            $("#myTabmains li.nav-item").click(function (e) {
+                $('#myTabmains li a').removeClass('lastVisit');
+                $('#myTabmains li a.active').addClass('lastVisit');
+            });
+
+            $("#innerNav").click(function () {
+                $("#myTabContentinner .tab-pane").removeClass("active");
+                $(".main-menu-bar .report-detail li a").removeClass("active");
+                $(".main-menu-bar .report-detail li a").removeClass("lastVisit");
+            });
+
+            $("#fullscreen").click(function () {
+                //$("#myTabContentinner .tab-pane").removeClass("active");
+                // $(".main-menu-bar .report-detail li a").removeClass("active");
+                // $(".main-menu-bar .report-detail li a").removeClass("lastVisit");
+            });
+
+        </script>
+        <script>
+            $("input[type=checkbox]").on("change", function () {
+                if ($(this).is(':checked')) {
+                    $(this).closest("tr").css('background-color', '#c2dbff').addClass("Dark");
+                }
+                else
+                    $(this).closest("tr").css('background-color', '').removeClass("Dark");
+            });
+        </script>
+
+        @RenderSection("scripts", required: false)
+
+    }
+
+</body>
+
+
+</html>
+

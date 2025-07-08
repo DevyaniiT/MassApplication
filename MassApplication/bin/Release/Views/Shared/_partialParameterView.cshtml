@@ -1,0 +1,262 @@
+﻿@model MassApplication.Models.InputClass
+@{
+    ViewBag.Title = "Reports Table";
+    Layout = "~/Views/Shared/_DefaultLayoutPage.cshtml";
+}
+
+<link rel="stylesheet" href="~/MasterStyles/css/WebPageStyle.css" />
+
+
+@using (Html.BeginForm("QueryData", "Demo", FormMethod.Post, new { target = "_blank" }))
+{
+    int id = (int)ViewBag.ReportID;          //contains report_id
+
+    //28 is Network Wise Flow Computer Data ReportId
+    //43 is Client Wise Flow Computer ReportId
+    //15 is Network Wise GED ReportId
+    //18 is Section Wise GED ReportId
+
+    if (id == 28 || id == 43 || id == 15 || id == 18)
+    {
+        <div class="row">
+            <div class="col-sm-4">
+                <label ID="[varDuration]" class="labelClass"> Enter [varDuration]: </label>
+            </div>
+            <div class="col-sm-8">
+                @Html.DropDownList("paramsdata", new List<SelectListItem>
+                     {
+                        new SelectListItem {Text = "Daily", Value = "Daily"},
+                        new SelectListItem {Text = "Fortnightly", Value = "Fortnightly"},
+                        new SelectListItem {Text = "Monthly", Value = "Monthly" },
+                        new SelectListItem {Text = "Quarterly", Value = "Quarterly"},
+                        new SelectListItem {Text = "Yearly", Value = "Yearly"},
+                        new SelectListItem {Text = "Half Yearly", Value = "HalfYearly" },
+                        new SelectListItem {Text = "Custom", Value = "Custom"}
+                     }, "--SELECT--", new { @class = "form-control drop_down_daily" })
+            </div>
+        </div>
+    }
+
+    if (id == 20)                          //20 is Active stream day ReportId
+    {
+        <div class="row">
+            <div class="col-sm-4">
+                <label ID="[varDuration]" class="labelClass"> Enter [varDuration]: </label>
+            </div>
+            <div class="col-sm-8">
+                @Html.DropDownList("paramsdata", new List<SelectListItem>
+                    {
+                        new SelectListItem {Text = "Half Yearly", Value = "HalfYearly"},
+                        new SelectListItem {Text = "Yearly", Value = "Yearly" }
+               }, "--SELECT--", new { @class = "form-control drop_down_daily" })
+            </div>
+        </div>
+    }
+
+
+    foreach (var items in ViewBag.Item)      //contains var variables
+    {
+        <div class="row">
+            <div class="col-sm-4">
+                <label ID="@items" class="labelClass"> Enter @items: </label>
+
+            </div>
+            <div class="col-sm-8">
+
+                @if (items == "[varDuration]")
+                {
+                    //10 is Network Wise Volume Reconciliation Report(Detail Wise) ReportId
+                    //11 is Network Wise Energy Reconciliation Report(Detail Wise) ReportId
+                    //39 is Section Wise Volume Reconciliation Report(Detail Wise) ReportId
+                    //40 is Section Wise Energy Reconciliation Report(Detail Wise) ReportId
+                    if (id == 10 || id == 11 || id == 39 || id == 40)
+                    {
+                        @Html.DropDownList("paramsdata", new List<SelectListItem>
+                    {
+                        new SelectListItem {Text = "Fortnightly", Value = "FortnightlyDaily"},
+                        new SelectListItem {Text = "Monthly", Value = "MonthlyDaily" },
+                        new SelectListItem {Text = "Quarterly", Value = "QuarterlyDaily"},
+                        new SelectListItem {Text = "Yearly", Value = "YearlyDaily"},
+                        new SelectListItem {Text = "Half Yearly", Value = "HalfYearlyDaily" },
+                        new SelectListItem {Text = "Custom", Value = "CustomDaily"}
+                    }, "--SELECT--", new { @class = "form-control drop_down_daily" })
+                    }
+                    else
+                    {
+                        @Html.DropDownList("paramsdata", new List<SelectListItem>
+                     {
+                        new SelectListItem {Text = "Daily", Value = "Daily"},
+                        new SelectListItem {Text = "Fortnightly", Value = "Fortnightly"},
+                        new SelectListItem {Text = "Monthly", Value = "Monthly" },
+                        new SelectListItem {Text = "Quarterly", Value = "Quarterly"},
+                        new SelectListItem {Text = "Yearly", Value = "Yearly"},
+                        new SelectListItem {Text = "Half Yearly", Value = "HalfYearly" },
+                        new SelectListItem {Text = "Custom", Value = "Custom"}
+                     }, "--SELECT--", new { @class = "form-control drop_down_daily" })
+                    }
+
+                }
+                else if (items == "[varstartCalDate]")
+                {
+                    <div class='input-group date' id='datetimepicker1'>
+                        <input class="form-control" type="text" name="paramsdata" placeholder="YYYY-MM-DD" />
+                        <span class="input-group-addon">
+                            <span class="fa fa-calendar"></span>
+                        </span>
+                    </div>
+                }
+                else if (items == "[varendCalDate]")
+                {
+                    <div class='input-group date' id='datetimepicker2'>
+                        <input class="form-control" type="text" name="paramsdata" placeholder="YYYY-MM-DD" />
+                        <span class="input-group-addon">
+                            <span class="fa fa-calendar"></span>
+                        </span>
+                    </div>
+                }
+                else if (items == "[varPipelinemst_id]")
+                {
+                    @Html.DropDownList("paramsdata", new SelectList(Model.AvailableNetworks, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily", id = "NetworkList" })
+                }
+                else if (items == "[varUnitFactor]")
+                {
+                    @Html.DropDownList("paramsdata", new SelectList(Model.AvailableVolumeUnit, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily" })
+                }
+                else if (items == "[varCheck_meter_id]")
+                {
+                    @Html.DropDownList("paramsdata", new SelectList(Model.AvailableCheckMeters, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily" })
+                }
+                else if (items == "[varSection_id]")
+                {
+                    <div id="partialSectionDiv">
+                        @Html.Partial("~/Views/Shared/_partialDropdwnSection.cshtml")
+                    </div>
+                }
+                else if (items == "[varStation_id]")
+                {
+                    <div id="partialStationDiv">
+                        @Html.Partial("~/Views/Shared/_partialDropdwnStation.cshtml")
+                    </div>
+                }
+                else if (items == "[varPipeline_group]")
+                {
+                    @Html.DropDownList("paramsdata", new SelectList(Model.AvailablePipeGroups, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily" })
+                }
+                else if (items == "[varStation_id]")
+                {
+                    <div id="partialStationDiv">
+                        @Html.Partial("~/Views/Shared/_partialDropdwnStation.cshtml")
+                    </div>
+                }
+                else if (items == "[vargc_id]")
+                {
+                    @Html.DropDownList("paramsdata", new SelectList(Model.AvailableGC, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily" })
+                }
+                else if (items == "[varMaintenance_base_id]")
+                {
+                    <div id="partialMBDiv">
+                        @Html.Partial("~/Views/Shared/_partialDropdwnMB.cshtml")
+                    </div>
+                }
+                else if (items == "[varStation_type]")
+                {
+                    <div id="_partialDropdwnStationTagDiv">
+                        @Html.Partial("~/Views/Shared/_partialDropdwnStationTag.cshtml")
+                    </div>
+                }
+                else if (items == "[varType]")
+                {
+                    @Html.DropDownList("paramsdata", new List<SelectListItem>
+                    {
+                        new SelectListItem {Text = "One Million Below", Value = "<=1"},
+                        new SelectListItem {Text = "One Million Above", Value = ">=1" }
+               }, "--SELECT--", new { @class = "form-control drop_down_daily" })
+                }
+                else
+                {
+                    <input class="form-control drop_down_daily" type="text" name="paramsdata" />
+                }
+
+            </div>
+        </div>
+
+    }
+
+
+    <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-8 pt-3">
+            <input type="submit" class="button" value="Submit" onclick="BtnSubmit()" />
+        </div>
+    </div>
+
+}
+
+
+<script src="~/MasterStyles/js/WebPageScript.js"></script>
+<script>
+        $(document).ready(function () {
+            $("#NetworkList").on("change", function () {
+                $.ajax(
+                    {
+                        url: '@Url.Content("~/Base/GetSectionDropDwnData?PipelineId=")' + $("#NetworkList option:selected").val(),
+                        type: 'GET',
+                        data: "",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            $("#partialSectionDiv").html(data);
+                        },
+                        error: function () {
+                            alert("error");
+                        }
+                    });
+                 $.ajax(
+                    {
+                     url: '@Url.Content("~/Base/GetStationDropDwnData?PipelineId=")' + $("#NetworkList option:selected").val(),
+                     type: 'GET',
+                     data: "",
+                     contentType: 'application/json; charset=utf-8',
+                     success: function (data) {
+                        $("#partialStationDiv").html(data);
+                    },
+                    error: function () {
+                        alert("error");
+                    }
+                     });
+               $.ajax(
+                {
+                    url: '@Url.Content("~/Base/GetMBDropDwnData?PipelineId=")' + $("#NetworkList option:selected").val(),
+                    type: 'GET',
+                    data: "",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        $("#partialMBDiv").html(data);
+                    },
+                    error: function () {
+                        alert("error");
+                    }
+                   });
+                $.ajax(
+                {
+                    url: '@Url.Content("~/Base/GetStationTagDropDwnData?PipelineId=")' + $("#NetworkList option:selected").val(),
+                    type: 'GET',
+                    data: "",
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        $("#_partialDropdwnStationTagDiv").html(data);
+                    },
+                    error: function () {
+                        alert("error");
+                    }
+                });
+            });
+        });
+</script>
+<script>
+    $(".button").click(function () {
+        $("#form-modal").modal('hide');
+    });
+</script>
+
+
+

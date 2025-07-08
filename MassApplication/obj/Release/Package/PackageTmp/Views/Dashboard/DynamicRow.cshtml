@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "Dynamic Row";
+}
+<style>
+    .table tr td input {
+        display: block;
+    }
+</style>
+
+<body style="overflow:hidden;">
+        <section class="content">
+            <div class="container contain_min">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card mt-3 ">
+                            <div class="card-header data-head">
+                                <div class="row mb-0">
+                                    <div class="col-sm-8">
+                                        <h3 class="card-title pt-2">@ViewBag.Title</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body mt-5">
+                                @*<button type="button" id="BtnAddRow" class="btn btn-dash" onclick="callNext()"><i class="fa fa-plus pr-1"></i></button>*@
+                                <button type="button" id="BtnAddRow" class="btn btn-dash"><i class="fa fa-plus"></i></button>
+                                <table id="DynamicRow" class="table mt-3">
+                                    <tr id="d_row"></tr>
+                                </table>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+
+            </div>
+        </section>
+</body>
+
+<script>
+    $(document).ready(function () {
+        var count = 0;
+
+        $("#BtnAddRow").click(function () {
+            count++;
+            var dropData1 = '<td id=' + count + '><select id="Col' + count + '" class="form-control SelectiveCol" name="SelectiveCol">'
+                + '<option value="">--SELECT--</option>'
+                + '<option value="volvo">Volvo</option>'
+                + '<option value="saab">Saab</option>'
+                + '<option value="opel">Opel</option>'
+                + '<option value="audi">Audi</option>'
+                + '</select>'
+                + '<input id="Alias' + count +'" type="text" class="form-control mt-1" placeholder="Enter alias"></td>';
+
+            $("#d_row").append(dropData1);
+        })
+
+});
+
+</script>
+<script>
+    $('body').on('change', '.SelectiveCol', function () {
+        var selVal = $(this).val();
+        var Id_Val = $(this).attr('id');
+        Id_Val = Id_Val.split(/(\d+)/);
+        $('#Alias' + Id_Val[1]).val(selVal);
+    })
+</script>

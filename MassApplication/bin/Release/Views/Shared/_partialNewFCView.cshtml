@@ -1,0 +1,809 @@
+﻿@model MassApplication.Models.FCAssetClass
+
+<style>
+    .USMTag, #FCChordDiv {
+        display: none;
+    }
+
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    #tabFCTag .nav-link {
+        color: #000;
+        background-color: #e1e1e1;
+        border: 0;
+        margin: 0 4px;
+        padding: 13px 23px;
+        font-size: 13px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+        #tabFCTag .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+            color: #ffffff;
+            background-color: #2a5b6c;
+            border: 0;
+            padding: 13px 23px;
+            margin: 0 4px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-size: 13px;
+            font-weight: 600;
+        }
+</style>
+
+<div class="form-horizontal">
+    <div class="master">
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_fcname" class="col-sm-4 col-form-label">FC Name: </label>
+                    <div class="col-sm-8">
+                        <input id="fc_name" type="text" class="form-control" placeholder="Enter FC Name ">
+                        <span class="error">FC name required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_network" class="col-sm-4 col-form-label">Network: </label>
+                    <div class="col-sm-8">
+                        @Html.DropDownList("DDNetwork", Enumerable.Empty<SelectListItem>(), "--SELECT--", new { @class = "form-control" })
+                        <span class="error">Network required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_FCstation" class="col-sm-4 col-form-label">FC Station: </label>
+                    <div class="col-sm-8">
+                        <div id="fc_stationTag">
+                            <input list="fc_station" name="fcStationName" class="form-control" placeholder="Search to select any station name" />
+                            <datalist id="fc_station"></datalist>
+                            <span class="error">FC station required</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_FCtype" class="col-sm-4 col-form-label">FC Type: </label>
+                    <div class="col-sm-8">
+                        @Html.DropDownList("DDFCType", new List<SelectListItem>
+                                          {
+                                              new SelectListItem {Text = "FC", Value = "fc"},
+                                              new SelectListItem {Text = "FC_UM", Value = "fc_um" }
+                                     }, "--SELECT--", new { @class = "form-control" })
+                        <span class="error">FC type required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_gcname" class="col-sm-4 col-form-label">GC Name: </label>
+                    <div class="col-sm-8">
+                        @Html.DropDownList("DDGCName", Enumerable.Empty<SelectListItem>(), "--SELECT--", new { @class = "form-control" })
+                        <span class="error">GC name required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_metertype" class="col-sm-4 col-form-label">Meter Type: </label>
+                    <div class="col-sm-8">
+                        @Html.DropDownList("DDMeterType", Enumerable.Empty<SelectListItem>(), "--SELECT--", new { @class = "form-control" })
+                        <span class="error">Meter Type required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row" id="FCChordDiv">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_fcchord" class="col-sm-4 col-form-label">Number of Chord: </label>
+                    <div class="col-sm-8">
+                        <input id="fc_chord" type="text" class="form-control" placeholder="Enter Chord" onfocusout="chordFunction(this)">
+                        <span class="error">Chord required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <ul class="newnavconn nav nav-tabs border-bottom-0" id="tabFCTag">
+            <li class="nav-item"><a href="#newVolumeTab" class="nav-link active" data-toggle="tab">Volume Tag</a></li>
+            <li class="nav-item"><a href="#newEnergyTab" class="nav-link" data-toggle="tab">Energy Tag</a></li>
+            <li class="nav-item USMTag"><a href="#newVOSTab" class="nav-link" data-toggle="tab">VOS</a></li>
+            <li class="nav-item USMTag"><a href="#newVOGTab" class="nav-link" data-toggle="tab">VOG</a></li>
+            <li class="nav-item USMTag"><a href="#newPerformanceTab" class="nav-link" data-toggle="tab">Performance</a></li>
+            <li class="nav-item USMTag"><a href="#newAGCTab" class="nav-link" data-toggle="tab">AGC</a></li>
+            <li class="nav-item USMTag"><a href="#newSNRTab" class="nav-link" data-toggle="tab">SNR</a></li>
+            <li class="nav-item USMTag"><a href="#newOthersTab" class="nav-link" data-toggle="tab">Others</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="newVolumeTab">
+                <div class="VolumeDetails mt-2">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_currentVolume" class="col-sm-4 col-form-label">Current Volume: </label>
+                                <div class="col-sm-8">
+                                    <input list="fc_current_volume" name="fcCurrentVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fc_current_volume"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_yesterdayVolume" class="col-sm-4 col-form-label">Yesterday Volume: </label>
+                                <div class="col-sm-8">
+                                    <input list="fc_yesterday_volume" name="fcYesterdayVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fc_yesterday_volume"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_hourlyVolume" class="col-sm-4 col-form-label">Hourly Volume: </label>
+                                <div class="col-sm-8">
+                                    <input list="fc_hourly_volume" name="fcHourlyVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fc_hourly_volume"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_accumulativeFlowVolume" class="col-sm-4 col-form-label">Accumulative Flow: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVolume_accumulative_flow" name="fcAFVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVolume_accumulative_flow"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_uncorrectedFlowRateVolume" class="col-sm-4 col-form-label">Uncorrected Flow Rate: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVolume_uncorrected_flow_rate" name="fcUNFRVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVolume_uncorrected_flow_rate"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_uncorrectedHourlyTotalizerVolume" class="col-sm-4 col-form-label">Uncorrected Hourly Totalizer: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVolume_uncorrected_hourly_totalizer" name="fcUNHTVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVolume_uncorrected_hourly_totalizer"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_uncorrectedYesterdayFlowVolume" class="col-sm-4 col-form-label">Uncorrected Yesterday Flow: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVolume_uncorrected_yesterday_flow" name="fcUNYFVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVolume_uncorrected_yesterday_flow"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_frequencyVolume" class="col-sm-4 col-form-label">Frequency: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVolume_frequency" name="fcFrequencyVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVolume_frequency"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_differentialPressureVolume" class="col-sm-4 col-form-label">Differential Pressure: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVolume_differential_pressure" name="fcDPVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVolume_differential_pressure"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_velocityVolume" class="col-sm-4 col-form-label">Velocity: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVolume_velocity" name="fcVelocityVolume" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVolume_velocity"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="newEnergyTab">
+                <div class="EnergyDetails mt-2">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_currentEnergy" class="col-sm-4 col-form-label">Current Energy: </label>
+                                <div class="col-sm-8">
+                                    <input list="fc_current_energy" name="fcCurrentEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fc_current_energy"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_yesterdayEnergy" class="col-sm-4 col-form-label">Yesterday Energy: </label>
+                                <div class="col-sm-8">
+                                    <input list="fc_yesterday_energy" name="fcYesterdayEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fc_yesterday_energy"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_hourlyEnergy" class="col-sm-4 col-form-label">Hourly Energy: </label>
+                                <div class="col-sm-8">
+                                    <input list="fc_hourly_energy" name="fcHourlyEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fc_hourly_energy"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_accumulativeFlowEnergy" class="col-sm-4 col-form-label">Accumulative Flow: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcEnergy_accumulative_flow" name="fcAFEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcEnergy_accumulative_flow"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_uncorrectedFlowRateEnergy" class="col-sm-4 col-form-label">Uncorrected Flow Rate: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcEnergy_uncorrected_flow_rate" name="fcUNFREnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcEnergy_uncorrected_flow_rate"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_uncorrectedHourlyTotalizerEnergy" class="col-sm-4 col-form-label">Uncorrected Hourly Totalizer: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcEnergy_uncorrected_hourly_totalizer" name="fcUNHTEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcEnergy_uncorrected_hourly_totalizer"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_uncorrectedYesterdayFlowEnergy" class="col-sm-4 col-form-label">Uncorrected Yesterday Flow: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcEnergy_uncorrected_yesterday_flow" name="fcUNYFEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcEnergy_uncorrected_yesterday_flow"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_frequencyEnergy" class="col-sm-4 col-form-label">Frequency: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcEnergy_frequency" name="fcFrequencyEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcEnergy_frequency"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_differentialPressureEnergy" class="col-sm-4 col-form-label">Differential Pressure: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcEnergy_differential_pressure" name="fcDPEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcEnergy_differential_pressure"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_velocityEnergy" class="col-sm-4 col-form-label">Velocity: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcEnergy_velocity" name="fcVelocityEnergy" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcEnergy_velocity"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="newVOSTab">
+                <div class="VOSDetails mt-2">
+                    <div class="form-group row">
+                        <label ID="Lbl_VOS" class="col-sm-4 col-form-label" style="text-decoration: underline;">Velocity of Sound </label>
+                    </div>
+                    <div class="form-group row ChordWiseDiv"></div>
+                    <div class="form-group row">
+                        <label ID="Lbl_VOSAvg" class="col-sm-4 col-form-label" style="text-decoration: underline;">VOS Average </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcVOSAvgpath" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVOS_avgpath" name="fcVOSAVGPath" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVOS_avgpath"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_VOSDev" class="col-sm-4 col-form-label" style="text-decoration: underline;">VOS Deviation </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcVOSDevpath" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVOS_devpath" name="fcVOSDEVPath" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVOS_devpath"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_VOSCal" class="col-sm-4 col-form-label" style="text-decoration: underline;">Calculated VOS </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcVOSCalpath" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVOS_calpath" name="fcVOSCALPath" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVOS_calpath"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_VOSMeas" class="col-sm-4 col-form-label" style="text-decoration: underline;">Measured VOS </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcVOSMeaspath" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVOS_measpath" name="fcVOSMEASPath" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVOS_measpath"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="newVOGTab">
+                <div class="VOGDetails mt-2">
+                    <div class="form-group row">
+                        <label ID="Lbl_VOG" class="col-sm-4 col-form-label" style="text-decoration: underline;">Velocity of Gas </label>
+                    </div>
+                    <div class="form-group row ChordWiseDiv"></div>
+                    <div class="form-group row">
+                        <label ID="Lbl_VOGAvg" class="col-sm-4 col-form-label" style="text-decoration: underline;">VOG Average </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcVOGAvgpath" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcVOG_avgpath" name="fcVOGAVGPath" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcVOG_avgpath"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane" id="newPerformanceTab">
+                <div class="PerformanceDetails mt-2">
+                    <div class="form-group row">
+                        <label ID="Lbl_Performance" class="col-sm-4 col-form-label" style="text-decoration: underline;">Performance </label>
+                    </div>
+                    <div class="form-group row ChordWiseDiv"></div>
+                </div>
+            </div>
+            <div class="tab-pane" id="newAGCTab">
+                <div class="AGCDetails mt-2">
+                    <div class="form-group row">
+                        <label ID="Lbl_AGC" class="col-sm-4 col-form-label" style="text-decoration: underline;">AGC </label>
+                    </div>
+                    <div class="form-group row ChordWiseDiv"></div>
+                    <div class="form-group row">
+                        <label ID="Lbl_AGCLimit" class="col-sm-4 col-form-label" style="text-decoration: underline;">AGC Limit </label>
+                    </div>
+                    <div class="form-group row ChordWiseDiv"></div>
+                </div>
+            </div>
+            <div class="tab-pane" id="newSNRTab">
+                <div class="SNRDetails mt-2">
+                    <div class="form-group row">
+                        <label ID="Lbl_SNR" class="col-sm-4 col-form-label" style="text-decoration: underline;">SNR </label>
+                    </div>
+                    <div class="form-group row ChordWiseDiv"></div>
+                </div>
+            </div>
+            <div class="tab-pane" id="newOthersTab">
+                <div class="OthersDetails mt-2">
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersRate" class="col-sm-4 col-form-label" style="text-decoration: underline;">Sample Rate </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersRatepath" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_ratepath" name="fcOthersRatePath" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_ratepath"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersSignal" class="col-sm-4 col-form-label" style="text-decoration: underline;">Signal Acceptance </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersSignal" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_signal" name="fcOthersSignal" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_signal"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersSecond" class="col-sm-4 col-form-label" style="text-decoration: underline;">Current Second </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersSecond" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_second" name="fcOthersSecond" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_second"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersMinute" class="col-sm-4 col-form-label" style="text-decoration: underline;">Current Minute </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersMinute" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_minute" name="fcOthersMinute" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_minute"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersHour" class="col-sm-4 col-form-label" style="text-decoration: underline;">Current Hour </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersHour" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_hour" name="fcOthersHour" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_hour"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersDay" class="col-sm-4 col-form-label" style="text-decoration: underline;">Current Day </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersDay" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_day" name="fcOthersDay" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_day"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersMonth" class="col-sm-4 col-form-label" style="text-decoration: underline;">Current Month </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersMonth" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_month" name="fcOthersMonth" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_month"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersYear" class="col-sm-4 col-form-label" style="text-decoration: underline;">Current Year </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersYear" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_year" name="fcOthersYear" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_year"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label ID="Lbl_OthersOpHour" class="col-sm-4 col-form-label" style="text-decoration: underline;">Operating Hours </label>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <label ID="Lbl_fcOthersOpHour" class="col-sm-4 col-form-label">Path: </label>
+                                <div class="col-sm-8">
+                                    <input list="fcOthers_opHour" name="fcOthersOpHour" type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">
+                                    <datalist id="fcOthers_opHour"></datalist>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="padding:10px 0; text-align:right">
+        <button type="button" id="submitFCDetail" class="btn btn-dash pl-4 pr-4 disabled">Save</button>
+        <button type="button" class="btn btn-default pl-4 pr-4" data-dismiss="modal">Close</button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var dd_network = @Html.Raw(Json.Encode(ViewBag.DDNetwork));
+        var dd_metertype = @Html.Raw(Json.Encode(ViewBag.DDMeteringType));
+        var dd_gc = @Html.Raw(Json.Encode(ViewBag.DDGC));
+        $.each(dd_network, function (i, data) {      // bind the dropdown list using json result
+            $('<option>',
+                {
+                    value: data.pipelinemst_id,
+                    text: data.pipeline_name
+                }).html(data.pipeline_name).appendTo("#DDNetwork");
+        });
+        $.each(dd_metertype, function (i, data) {
+            $('<option>',
+                {
+                    value: data.value,
+                    text: data.key
+                }).html(data.key).appendTo("#DDMeterType");
+        });
+        $.each(dd_gc, function (i, data) {
+            $('<option>',
+                {
+                    value: data.gcid,
+                    text: data.gcname
+                }).html(data.gcname).appendTo("#DDGCName");
+        });
+    });
+</script>
+<!-- SCRIPT FOR SUBMIT BUTTON -->
+<script>
+    $('#submitFCDetail').click(function () {
+        var isAllValid = true;//fc_station
+        if ($('#fc_name').val().trim() == '') {
+            $('#fc_name').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#fc_name').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#DDNetwork').val() == "0" || $('#DDNetwork').val() == "") {
+            $('#DDNetwork').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#DDNetwork').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('input[name="fcStationName"]').val() == "0" || $('input[name="fcStationName"]').val() == "") {
+            $('input[name="fcStationName"]').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('input[name="fcStationName"]').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#DDFCType').val() == "0" || $('#DDFCType').val() == "") {
+            $('#DDFCType').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#DDFCType').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#DDGCName').val() == "0" || $('#DDGCName').val() == "") {
+            $('#DDGCName').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#DDGCName').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#DDMeterType').val() == "0" || $('#DDMeterType').val() == "") {
+            $('#DDMeterType').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#DDMeterType').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var data = {
+                fc_name: $('#fc_name').val().trim(),
+                fc_station_name: $('#fc_station').val().trim(),
+                fc_network: $('#DDNetwork').val(),
+                fc_type: $('#DDFCType').val(),
+                fc_gc_name: $('#DDGCName').val(),
+                fc_meter_type: $('#DDMeterType').val()
+            }
+
+            console.log("data:", data);
+
+            @*$.ajax({
+                type: 'POST',
+                url: '@Url.Content("~/Asset/AddNewFCData")',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                 success: function (data) {
+                  if (data.startsWith("ERROR")) {
+                      var res = data.split(";");
+                      var error = '';
+                      if (res.length > 1) {
+                          error = res[1];
+                      }
+                      else {
+                          error = data;
+                      }
+                      alert(error);
+                  } else {
+                      alert('Data inserted successfully!!!');
+                      location.reload();
+                  }
+            },
+                 error: function (error) {
+                    alert("Error");
+                }
+            });*@
+
+        }
+
+    });
+</script>
+<!-- SCRIPT FOR DROPDOWN EVENT -->
+<script>
+    $(document).on('change', 'select#DDMeterType', function () {
+        var meter_type = $('select[name=DDMeterType]').val();
+        if (meter_type == "4") {
+            $(".USMTag").css("display", "block");
+            $("#FCChordDiv").css("display", "block");
+        }
+        else {
+            $(".USMTag").css("display", "none");
+            $("#FCChordDiv").css("display", "none");
+            $("#fc_chord").val("");
+            $(".ChordWiseDiv").empty();
+            $('#tabFCTag li a.active').removeClass('active');
+            $('#tabFCTag li a[href="#newVolumeTab"]').addClass('active');
+            $(".master .tab-content .active").removeClass("active");
+            $(".tab-content #newVolumeTab").addClass('active');
+        }
+    });
+    $(document).on('change', 'select#DDNetwork', function () {
+        $("#fc_station").empty();
+        //$("#fc_station option").eq(0).remove();
+        var networkId = $('select[name=DDNetwork]').val();
+        if (networkId != null && networkId != '') {
+            $.ajax({
+                url: '@Url.Content("~/Asset/GetStationDropdown?id=")' + networkId,
+                type: "get",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#fc_station").empty();
+                    $.each(data, function (i, data) {
+                        $('<option>',
+                            {
+                                value: data.station_short_name,
+                            }).html(data.station_short_name).attr("data-val", data.station_id).appendTo("#fc_station");
+                    });
+                },
+                error: function () {
+                    alert("Error");
+                }
+            });
+        }
+    });
+</script>
+<!-- SCRIPT FOR DATALIST TAG -->
+<script>
+    $(document).on('keyup', '.fcTag', function () {
+        var currentDiv = $(this).attr('list');
+        $("#" + currentDiv).empty();
+        var data = (this).value;
+        getSearchData(data, currentDiv);
+    });
+    function getSearchData(key, divName) {
+          $.ajax({
+            url: '@Url.Content("~/Asset/SearchFCKey?searchKey=")' + key,
+            type: "get",
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+              success: function (data) {
+                $("#" + divName).empty();
+                $.each(data, function (i, data) {
+                    $('<option>',
+                        {}).html(data.longid).attr("data-val", data.pointid).appendTo("#" + divName);
+                });
+            },
+            error: function () {
+                alert("Error");
+            }
+        });
+    }
+    function chordFunction(mytext) {
+        //console.log('mytext:', mytext);
+        var txtdata = mytext.value;
+        txtdata = parseInt(txtdata);
+        $(".ChordWiseDiv").empty();
+        var newDivData = getPathDiv(txtdata);
+        //console.log('newDivData:', newDivData);
+        $(".ChordWiseDiv").append(newDivData);
+    }
+    function getPathDiv(txtdata) {
+        var newDiv = '';
+        var input_name = '';
+        for (var i = 0; i < txtdata; i++) {
+            input_name = 'fc_path' + i;
+            path_name = 'Path ' + (i + 1) + ':';
+            newDiv += '<div class="col-md-6 col-sm-6">'
+                + '<div class="row">'
+                + '<label class="col-sm-4 col-form-label" >' + path_name + '</label>'
+                + '<div class="col-sm-8">'
+                + '<input list=' + input_name + ' type="text" class="fcTag form-control" placeholder="Search to select" autocomplete="off">'
+                + '<datalist id=' + input_name + '></datalist>'
+                + '</div></div></div>'
+        }
+        return newDiv;
+    }
+</script>
+
+

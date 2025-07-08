@@ -1,0 +1,957 @@
+﻿
+@{
+    ViewBag.Title = ViewBag.chartname + " Chart Viewer";
+}
+
+<style>
+    .plainCard {
+        width: 100%;
+        height:350px;
+    }
+    .stickyHeader {
+        text-align: center;
+        font-size: 18px;
+        color:tomato;
+    }
+    .page-title {
+        margin: 5px 0;
+        font-size: 20px;
+        font-weight: bolder;
+    }
+</style>
+
+<section class="content">
+    <div class="container contain_min">
+        <div class="row mt-2">
+            <div class="col-12 pt-1">
+                <div id="main-container" class="row">
+                   @{
+                       var title = ViewBag.titlename + " " + "(" + ViewBag.UnitValue + ")";
+                       <h3 class="ml-3 page-title ">@title</h3>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="~/Scripts/Chart-js/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var unit_data = '@ViewBag.UnitData';
+        var unit_value = '@ViewBag.UnitValue';
+        var typename = '@ViewBag.typename';
+        var chartmodel1 = @Html.Raw(Json.Encode(ViewBag.ChartData1));
+        var chart1_msg = '@ViewBag.ChartData1_Message';
+        console.log("unit_data:", unit_data);
+        console.log("unit_value:", unit_value);
+        console.log("chartmodel1:", chartmodel1);
+        console.log("chart1_msg:", chart1_msg);
+
+        var stickySet = [];
+        stickySet.push({
+            key: "chartmodel1",
+            value: chart1_msg.toLowerCase()
+        });
+        var headerText = [];
+        headerText.push('Gain/(Loss) (%)');
+
+        var chartmodel2 = [];
+        var chart2_msg = '';
+        if (@Html.Raw(Json.Encode(ViewBag.ChartData2)) != null) {
+            chartmodel2 = @Html.Raw(Json.Encode(ViewBag.ChartData2));
+            chart2_msg = '@ViewBag.ChartData2_Message';
+
+            console.log("chartmodel2:", chartmodel2);
+            console.log("chart2_msg:", chart2_msg);
+
+            stickySet.push({
+                key: "chartmodel2",
+                value: chart2_msg.toLowerCase()
+            });
+
+            headerText.push('@ViewBag.chartname');
+
+        }
+
+        var reportType = '@ViewBag.chartname';
+        if (reportType.toLowerCase() == 'volume reconciliation')
+        {
+            DrawChart(headerText, stickySet);
+            if (typename.toLowerCase() == 'section')
+            {
+                createVolumeSectionChart(chartmodel1, chartmodel2, headerText, stickySet);
+            }
+            else {
+                createVolumePipelineChart(chartmodel1, chartmodel2, headerText, stickySet);
+            }
+        }
+        else if (reportType.toLowerCase() == 'energy reconciliation')
+        {
+            DrawChart(headerText, stickySet);
+            createEnergyChart(chartmodel1, headerText, stickySet);
+        }
+        else
+        {
+            headerText.pop();
+            headerText.push('CHECK METER & SUPPLIER METER', 'GAIN/(LOSS) (%)');
+            createCheckChart(chartmodel1, headerText, stickySet, unit_data);
+        }
+    });
+
+    function DrawChart(headingText, sticky_set)
+    {
+        var newNote = '';
+        for (var i = 0; i < sticky_set.length; i++) {
+            if (sticky_set[i].value == 'false') {
+                newNote = $("<div class='card ml-3 mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                    + "<div class='card-header pb-0 border-0'><h2 class='mr-2 card-title w-100 stickyHeader' id='mainHeader" + i + "'>" + headingText[i] + "</h2>"
+                    + "<h5 class='mr-2 card-title w-100' style='text-align:center;font-size:12px;'>Last 30 days</h5></div>"
+                    + "<div class='card-body pt-0 chartCard" + i + "'>"
+                    + "<canvas id='myChart" + i + "' class='chartCanvas'></canvas>"
+                    + "</div></div>");
+
+                $("#main-container").append(newNote);
+
+            }
+
+            else {
+                newNote = $("<div class='card ml-3 mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                    + "<div class='card-header pb-0 border-0'><h2 class='mr-2 card-title w-100 stickyHeader' id='mainHeader" + i + "'>" + headingText[i] + "</h2>"
+                    + "<h5 class='mr-2 card-title w-100' style='text-align:center;font-size:12px;'>Last 30 days</h5></div>"
+                    //+ "<div class='card-body pt-0 chartCard" + i + "'>No data to display"
+                    //+ "<div id='myChart" + i + "'>No data to display</div>"
+                    + "<div class='card-body align-items-center d-flex justify-content-center chartCard" + i + "'' style='font-size:12px;font-weight:bold;color:#666666;fill:#666666;'>No data to display"
+                    + "</div></div>");
+
+                $("#main-container").append(newNote);
+            }
+
+        }
+    }
+
+    function createVolumePipelineChart(model1, model2) {
+        if (model1 != null && model2 != null)
+        {
+            var colors = ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "purple", "gray", "violet", "black"];//#FFD580(orange), #cb504d(light red)
+            //var colors = ["red", "yellow", "green", "lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "purple", "gray", "violet", "black"];
+            var Xaxisvalue = ["Opening Stock", "Actual Closing Stock", "Purchase", "Sales", "Internal Consumption", "Closing Stock Derived"]
+            var XaxisIndex = [2, 3, 4, 6, 7, 9]
+            var dataSet = [];
+            var labelSet = [];
+            var labelSet1 = [];
+            var datasset = [];
+
+            for (let i = 0; i < model1.length; i++) {
+                labelSet.push(model1[i][0]);
+                dataSet.push(model1[i][1]);
+            }
+            var data1 = {
+                labels: labelSet,
+                datasets: [{
+                    label: 'Real Data',
+                    data: dataSet,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgb(75, 192, 192)'
+                }]
+            };
+            var config = {
+                type: 'line',
+                data: data1,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 20,
+                                font: {
+                                    size: 15,
+                                    family: 'Arial',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    'day': 'yyyy-MM-dd',
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    style: 'normal',
+                                },
+                                padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                            },
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+
+
+            var reconcile_data = [];
+            for (let i = 0; i < model2.length; i++) {
+                var dataval = XaxisIndex[i];
+                reconcile_data.push({
+                    key: Xaxisvalue[i],
+                    value: model2.map((item) => {
+                        return item[dataval];
+                    })
+                });
+
+                labelSet1.push(model2[i][0]);
+            }
+            for (let i = 0; i < Xaxisvalue.length; i++) {
+                datasset.push({
+                    label: reconcile_data[i].key,
+                    backgroundColor: colors[i],
+                    borderColor: colors[i],
+                    data: reconcile_data[i].value,
+                    fill: false,
+                });
+            }
+            //console.log("datasset:", datasset);
+            var data2 = {
+                labels: labelSet1,
+                datasets: datasset
+            };
+            //console.log("data2:", data2);
+            var config_2 = {
+                type: 'line',
+                data: data2,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 20,
+                                font: {
+                                    size: 15,
+                                    family: 'Arial',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    'day': 'yyyy-MM-dd',
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    style: 'normal',
+                                },
+                                padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                            },
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var chartElement = "myChart0";
+            var ctx = document.getElementById(chartElement).getContext('2d');
+
+            var temp = jQuery.extend(true, {}, config);
+            temp.type = 'line';
+            var myChart = new Chart(ctx, temp);
+
+            var ctx2 = document.getElementById("myChart1").getContext('2d');
+
+            var temp2 = jQuery.extend(true, {}, config_2);
+            temp2.type = 'line';
+            var myChart2 = new Chart(ctx2, temp2);
+        }
+    }
+    function createVolumeSectionChart(model1, model2) {
+        if (model1 != null && model2 != null) {
+            var colors = ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "purple", "gray", "violet", "black"];//#FFD580(orange), #cb504d(light red)
+            //var colors = ["red", "yellow", "green", "lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "purple", "gray", "violet", "black"];
+            var Xaxisvalue = ["Opening Stock", "Actual Closing Stock", "Purchase", "Sales", "Internal Consumption", "Closing Stock Derived"]
+            var Xaxisvalue1 = ["opening_stock", "actual_closing_stock", "purchases", "sales", "internal_consumption", "closing_stock_derived"]
+
+            var labelSet = [];
+            var datasset1 = [];
+            var labelSet1 = [];
+            var datasset = [];
+
+            var reconcile_data1 = [];
+            for (let i = 0; i < 1; i++) {
+                var dataval = "loss_gain_percentage";
+                reconcile_data1.push({
+                    key: 'Real Data',
+                    value: model1.map((item) => {
+                        return item[dataval];
+                    })
+                });
+
+                labelSet.push(model1[i]["data_data"]);
+            }
+            //console.log("reconcile_data1:", reconcile_data1);
+            //console.log("labelSet:", labelSet);
+            for (let i = 0; i < 1; i++) {
+                datasset1.push({
+                    label: reconcile_data1[i].key,
+                    backgroundColor: colors[i],
+                    borderColor: colors[i],
+                    data: reconcile_data1[i].value,
+                    fill: false,
+                });
+            }
+            //console.log("datasset1:", datasset1);
+            var data1 = {
+                labels: labelSet,
+                datasets: datasset1
+            };
+            console.log("data1:", data1);
+
+            var reconcile_data = [];
+            for (let i = 0; i < Xaxisvalue1.length; i++) {
+                var dataval = Xaxisvalue1[i];
+                reconcile_data.push({
+                    key: Xaxisvalue[i],
+                    value: model2.map((item) => {
+                        return item[dataval];
+                    })
+                });
+
+                //labelSet1.push(model2[i]["data_data"]);
+            }
+            for (let i = 0; i < reconcile_data.length; i++) {
+                datasset.push({
+                    label: reconcile_data[i].key,
+                    backgroundColor: colors[i],
+                    borderColor: colors[i],
+                    data: reconcile_data[i].value,
+                    fill: false,
+                });
+            }
+            //console.log("datasset:", datasset);
+            var data2 = {
+                labels: labelSet,
+                datasets: datasset
+            };
+            console.log("data2:", data2);
+
+
+            var config = {
+                type: 'line',
+                data: data1,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 20,
+                                font: {
+                                    size: 15,
+                                    family: 'Arial',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    'day': 'yyyy-MM-dd',
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    style: 'normal',
+                                },
+                                padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                            },
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+            var config_2 = {
+                type: 'line',
+                data: data2,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 20,
+                                font: {
+                                    size: 15,
+                                    family: 'Arial',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    'day': 'yyyy-MM-dd',
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    style: 'normal',
+                                },
+                                padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                            },
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var chartElement = "myChart0";
+            var ctx = document.getElementById(chartElement).getContext('2d');
+
+            var temp = jQuery.extend(true, {}, config);
+            temp.type = 'line';
+            var myChart = new Chart(ctx, temp);
+
+            var ctx2 = document.getElementById("myChart1").getContext('2d');
+
+            var temp2 = jQuery.extend(true, {}, config_2);
+            temp2.type = 'line';
+            var myChart2 = new Chart(ctx2, temp2);
+        }
+    }
+    function createEnergyChart(model1) {
+
+        if (model1 != null) {
+            var colors = ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "purple", "gray", "violet", "black"];//#FFD580(orange), #cb504d(light red)
+            //var colors = ["red", "yellow", "green", "lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "purple", "gray", "violet", "black"];
+
+            var dataSet = [];
+            var labelSet = [];
+
+            for (let i = 0; i < model1.length; i++) {
+                labelSet.push(model1[i]["data_data"]);
+                dataSet.push(model1[i]["loss_gain_percentage"]);
+            }
+            var data1 = {
+                labels: labelSet,
+                datasets: [{
+                    label: 'Loss Gain Data',
+                    data: dataSet,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgb(75, 192, 192)'
+                }]
+            };
+
+            var config = {
+                type: 'line',
+                data: data1,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 20,
+                                font: {
+                                    size: 15,
+                                    family: 'Arial',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    'day': 'yyyy-MM-dd',
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    style: 'normal',
+                                },
+                                padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                            },
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var chartElement = "myChart0";
+            var ctx = document.getElementById(chartElement).getContext('2d');
+
+            var temp = jQuery.extend(true, {}, config);
+            temp.type = 'line';
+            var myChart = new Chart(ctx, temp);
+        }
+
+    }
+
+    function createCheckChart(model1, headingText, sticky_set, unit_data) {
+
+        var newNote = '';
+        if (sticky_set[0].value == 'false') {
+            for (var i = 0; i < headingText.length; i++) {
+                newNote = $("<div class='card ml-3 mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                    + "<div class='card-header pb-0 border-0'><h2 class='mr-2 card-title w-100 stickyHeader' id='mainHeader" + i + "'>" + headingText[i] + "</h2>"
+                    + "<h5 class='mr-2 card-title w-100' style='text-align:center;font-size:12px;'>Last 30 days</h5></div>"
+                    + "<div class='card-body pt-0 chartCard" + i + "'>"
+                    + "<canvas id='myChart" + i + "' class='chartCanvas'></canvas>"
+                    + "</div></div>");
+
+                $("#main-container").append(newNote);
+
+            }
+        }
+        else {
+            for (var i = 0; i < headingText.length; i++) {
+                newNote = $("<div class='card ml-3 mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                    + "<div class='card-header pb-0 border-0'><h2 class='mr-2 card-title w-100 stickyHeader' id='mainHeader" + i + "'>" + headingText[i] + "</h2>"
+                    + "<h5 class='mr-2 card-title w-100' style='text-align:center;font-size:12px;'>Last 30 days</h5></div>"
+                    //+ "<div class='card-body pt-0 chartCard" + i + "'>No data to display"
+                    //+ "<div id='myChart" + i + "'>No data to display</div>"
+                    + "<div class='card-body align-items-center d-flex justify-content-center chartCard" + i + "'' style='font-size:12px;font-weight:bold;color:#666666;fill:#666666;'>No data to display"
+                    + "</div></div>");
+
+                $("#main-container").append(newNote);
+
+            }
+        }
+
+        if (model1 != null) {
+            var colors = ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "purple", "gray", "violet", "black"];//#FFD580(orange), #cb504d(light red)
+            //var colors = ["red", "yellow", "green", "lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "purple", "gray", "violet", "black"];
+            var Xaxisvalue = ["check_meter_flow", "supplier_meter_flow"];
+            var dataSet = [];
+            var labelSet = [];
+            var datasset = [];
+            var date_labelSet = [];
+            var t = [model1];
+            for (let i = 0; i < model1.length; i++) {
+                labelSet.push(model1[i]["data_data"]);
+                dataSet.push(model1[i]["loss_gain_percentage"]);
+            }
+            var data1 = {
+                labels: labelSet,
+                datasets: [{
+                    label: 'Loss Gain Data',
+                    data: dataSet,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgb(75, 192, 192)'
+                }]
+            };
+
+            var config = {
+                type: 'line',
+                data: data1,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 20,
+                                font: {
+                                    size: 15,
+                                    family: 'Arial',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    'day': 'yyyy-MM-dd',
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    style: 'normal',
+                                },
+                                padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                            },
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+
+            var reconcile_data = [];
+           
+            for (let i = 0; i < Xaxisvalue.length; i++) {
+                var item = Xaxisvalue[i];
+                var arrayData = [];
+                console.log("item:", item);
+                for (let j = 0; j < model1.length; j++) {
+                    var dataval = model1[j][item];
+                    //dataval = (parseFloat(dataval) / unit_data).toFixed(2);
+                    dataval = (parseFloat(dataval) / unit_data);
+                    //console.log("dataval:", dataval);
+                    arrayData.push((parseFloat(dataval)));
+                    date_labelSet.push(model1[j]['time']);
+                }
+
+                reconcile_data.push({
+                    key: item,
+                    value: arrayData
+                });
+                
+            }
+            console.log("reconcile_data", reconcile_data);
+
+            for (let i = 0; i < Xaxisvalue.length; i++) {
+                datasset.push({
+                    label: reconcile_data[i].key,
+                    backgroundColor: colors[i],
+                    borderColor: colors[i],
+                    data: reconcile_data[i].value,
+                    fill: false,
+                });
+            }
+            console.log("datasset:", datasset);
+
+            var data2 = {
+                labels: date_labelSet,
+                datasets: datasset
+            };
+            console.log("data2:", data2);
+
+            var config_2 = {
+                type: 'line',
+                data: data2,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                            align: 'center',
+                            labels: {
+                                boxWidth: 20,
+                                font: {
+                                    size: 15,
+                                    family: 'Arial',
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: false
+                            },
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    'day': 'yyyy-MM-dd',
+                                }
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: 'Values',
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    style: 'normal',
+                                },
+                                padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                            },
+                            ticks: {
+                                display: true,
+                                font: {
+                                    family: 'Arial',
+                                    size: 10,
+                                    //weight: 'bold',
+                                    //align: 'center',
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+
+
+            var chartElement = "myChart0";
+            var ctx = document.getElementById(chartElement).getContext('2d');
+
+            var temp = jQuery.extend(true, {}, config_2);
+            temp.type = 'line';
+            var myChart = new Chart(ctx, temp);
+        }
+    }
+
+</script>

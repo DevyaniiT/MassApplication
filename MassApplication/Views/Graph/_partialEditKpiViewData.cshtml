@@ -1,0 +1,193 @@
+﻿
+@model MassApplication.Models.Graph.kpiview
+
+<style>
+    .tab-pane {
+        margin-top: 10px;
+    }
+
+    table td.qry_id {
+        display: none;
+    }
+
+    table td.param_id {
+        display: none;
+    }
+</style>
+
+@using (Html.BeginForm("EditKpiViewData", "Graph", FormMethod.Post, new { target = "_blank" }))
+{
+    @Html.AntiForgeryToken()
+
+
+<div class="form-horizontal">
+
+   
+    <div class="row">
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <label ID="rpt_id"> Chart Type: </label>
+        </div>
+        <div class="col-sm-8">
+            <input id="report_name" class="form-control drop_down_daily" type="text" value="@Model.chart_type" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-4">
+            <label ID="Lbl_name"> KPI Name Recent Change: </label>
+        </div>
+        <div class="col-sm-8">
+            <input id="report_name" class="form-control drop_down_daily" type="text" value="@Model.kpi_name" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-4">
+            <label ID="Lbl_description"> KPI Description Recent Change: </label>
+        </div>
+        <div class="col-sm-8">
+            <textarea id="report_description" class="form-control" rows="2">@Model.description</textarea>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-4">
+            <label ID="Lbl_description"> KPI Query: </label>
+        </div>
+        <div class="col-sm-8">
+            <textarea id="report_description" class="form-control" rows="2">@Model.query_script</textarea>
+        </div>
+    </div>
+
+    <div style="padding:10px 0; text-align:right">
+        <input id="submitEditDetail" type="button" value="Save" class="btn btn-warning" style="padding:10px 20px" />
+    </div>
+</div>
+
+}
+
+<script>
+    $('.nav li').click(function (e) {
+
+        $('.nav li').removeClass('active');
+
+        var $this = $(this);
+        if (!$this.hasClass('active')) {
+            $this.addClass('active');
+        }
+        //e.preventDefault();
+    });
+</script>
+<script>
+    $('#submitEditDetail').click(function () {
+        alert('Successfully saved!!!');
+        location.reload();
+        var param_list = [];
+        //$('#reportItems tbody tr').each(function (index, ele) {
+        //    var param_rptItem = {
+        //        param_id: $('.param_id', this).text(),
+        //        param_type: $('.type', this).text(),
+        //        param_method: $('.method', this).text(),
+        //        param_label: $('.labelTxt', this).text(),
+        //        param_variable: $('.variable', this).text(),
+        //        param_query: $('.query', this).text()
+        //    }
+        //    param_list.push(param_rptItem);
+
+        //})
+        //var query_list = [];
+        //$('#querytabledata tbody tr').each(function (index, ele) {
+        //    var qry_rptItem = {
+        //        queryId: $('.qry_id', this).text(),
+        //        type: $('.qry_type', this).text(),
+        //        parameterData: $('.qry_parameter', this).text(),
+        //        //query_qrydata: $('.script', this).text(),
+        //        query_qrydata: $('textarea.report_query', this).val(),
+        //    }
+
+        //    query_list.push(qry_rptItem);
+
+        //})
+
+        //var conndata = {
+        //    connection_id: $('#connect_id').val().trim(),
+        //    dsn_name: $('#conn_dsn_name').val().trim(),
+        //    user_id: $('#conn_user_name').val().trim(),
+        //    password: $('#conn_password').val().trim(),
+        //    db_schema_name: $('#conn_db_name').val().trim()
+        //}
+
+        var data = {
+            report_id: $('#rpt_id').val().trim(),
+            report_name: $('#report_name').val().trim(),
+            report_description: $('#report_description').val().trim(),
+            report_query: $('#report_query').val().trim(),
+            report_file: $('#report_file').val().replace(/.*(\/|\\)/, ''),
+            param_data: param_list,
+            query_data: query_list,
+            connData: conndata
+        }
+
+        //alert(data);
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Graph/EditKpiViewData")',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (data) {
+                 if (data.startsWith("ERROR")) {
+                      var res = data.split(";");
+                      var error = '';
+                      if (res.length > 1) {
+                          error = res[1];
+                      } else {
+                          error = data;
+                      }
+                      alert(error);
+                 }
+                 else {
+                       alert('Successfully saved!!!');
+                       param_list = [];
+                       query_list = [];
+                       location.reload();
+                 }
+            },
+            error: function (error) {
+                alert("Error");
+            }
+
+        });
+
+
+    });
+</script>
+<script>
+    $('[data-toggle="tooltip"]').tooltip();
+    var actions = $("#querytabledata td:last-child").html();
+    $(document).on('click', '.add-new-query', function () {
+        //alert(report_id);
+        var index = $("#querytabledata tbody tr:last-child").index();
+        var row = '<tr>' +
+            '<td><input type="text" class="qry_type form-control"></td>' +
+            '<td><input type="text" class="qry_parameter form-control"></td>' +
+            '<td> <textarea class="report_query form-control" rows="4"></textarea></td>' +
+            '<td>' + actions + '</td>' +
+            '</tr>';
+        $("#querytabledata").append(row);
+        $("#querytabledata tbody tr").eq(index + 1).find(".add, .edit").toggle();
+        $('[data-toggle="tooltip"]').tooltip();
+        $('.add-new-query').attr("disabled", "disabled");
+    });
+</script>
+<script>
+     $(document).on('click', '#querytabledata .deleteQuerydata', function () {
+        $(this).parents('tr').remove();
+    });
+</script>
+
+
+
+
+

@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<section class="content">
+    <div class="container contain_min">
+        <div class="row mt-2">
+            <div class="col-12 pt-1">
+                <div class="card">
+                    <!-- card-body -->
+                    <div class="card-body table-responsive ">
+                        <table id="AssetData" class="table table-bordered table-striped"></table>
+                    </div>
+                    <!-- card-body -->
+                </div>
+                <!-- card -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- POPUP MODAL FOR Asset -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="asset_modal">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/MasterStyles/TableStyles/datatables/jquery.mockjax.min.js"></script>
+<script>
+    // FOR DEMONSTRATION ONLY: AJAX emulation
+    $.mockjax({
+        url: '/test/0',
+        responseTime: 1000,
+        response: function (settings) {
+            var json_data = @Html.Raw(Json.Encode(ViewBag.AssetFCData));
+            var arrData = [];
+            for (var i = 0; i < json_data.length; i++) {
+                arrData.push([json_data[i]['assetid'],
+                    json_data[i]['assetregion'],
+                    json_data[i]['assetregionname'],
+                    json_data[i]['stationname'],
+                    json_data[i]['assetname'],
+                    json_data[i]['assettype'],
+                    json_data[i]['count'],
+                    json_data[i]['created_byy']
+                ]);
+            }
+            //console.log("Request arrData: ", arrData);
+            this.responseText = {
+                data: [],
+            };
+            for (var i = 0; i < arrData.length; i++) {
+                this.responseText.data.push(arrData[i]);
+            }
+        }
+    });
+</script>
+<!-- DATATABLE INITIALIZING FORMAT -->
+<script>
+    var myTable;
+    var columnsData = [];
+    $(document).ready(function () {
+        columnsData = [
+            { 'title': 'AssetId' },
+            { 'title': 'PipelineId' },
+            { 'title': 'Network' },
+            { 'title': 'Station Name' },
+            { 'title': 'FC Name' },
+            { 'title': 'FC Type' },
+            { 'title': 'Count' },
+            { 'title': 'Created By' },
+            { 'title': 'Action' }
+        ];
+        myTable = $('#AssetData').DataTable({
+            ajax: '/test/0',
+            'columns': columnsData,
+            'processing': true,
+            'paging': true,
+            'scrollY': "350px",
+            "scrollCollapse": true,
+            'order': [[2, 'asc']],
+            'dom': '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'deferRender': true,
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                },
+                "search": '',
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "lengthMenu": "Rows :  _MENU_",
+            },
+            'columnDefs': [
+                { 'visible': false, 'targets': [0 , 1] },
+                { 'orderable': false, 'targets': [8] },
+                { 'targets': [8], 'className': 'text-center' },
+                {
+                    'targets': [8], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="editAssetFC dropdown_icon" title="Edit" onclick="BtnEditAssetFC(' + meta.row + ')">'
+                            + '<i class="fas fa-edit" style="margin-left: 10px;color: #248742;"></i>'
+                            + '</a>'
+                            + '<a class="dropdown_icon" data-toggle="tooltip" title="Delete" onclick="BtnDeleteAssetFC(' + meta.row + ')">'
+                            + '<i class="fa fa-trash" style="margin-left: 10px;color: #dc5252;"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                }
+            ]
+        });
+        $("div.toolbar").html('<div style="display:flex;"><p><strong> FC List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="#"> <i class="fas fa-upload nav-icon1"></i></a></li><li class="list-inline-item"><a data-toggle="modal" data-target="#asset_modal" onclick="BtnAddAssetFC()"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#"><i class="fas fa-trash nav-icon1"></i></a></li></ul></div>')
+    });
+</script>
+<!-- SCRIPT FOR EDIT AND DELETE BUTTON -->
+<script>
+    $('#asset_modal').on('hidden.bs.modal', function (e) {
+        $(this)
+            .find("input,textarea,select,datalist")
+            .val('')
+            .end()
+            .find("input[type=checkbox], input[type=radio]")
+            .prop("checked", "")
+            .end();
+    });
+    function BtnAddAssetFC() {
+        $.ajax({
+            url: '@Url.Content("~/Asset/AddNewFC")', 
+            success: function (data) {
+                $('#asset_modal .modal-body').html("");
+                $('#asset_modal .modal-body').html(data);
+                $('#asset_modal .modal-title').html('Add Flow Computer');
+                $('#asset_modal').modal('show');
+            }
+        });
+    }
+    function BtnEditAssetFC(rowData) {
+        var table = $('#AssetData').DataTable();
+        var form_data = table.rows(rowData).data();
+        var id_column;
+        $.each(form_data, function (key, value, index) {
+            id_column = value[0];
+        });
+        //console.log("id_column:", id_column);
+
+        @*$.ajax({
+             url: '@Url.Content("~/Asset/EditAssetFCData?Id=")' + id_column, // The method name + parameter
+             success: function (data) {
+                 $('#asset_modal .modal-title').html('Edit Flow Computer');
+                 $('#asset_modal .modal-body').html(data);
+                 $('#asset_modal').modal('show');
+             }
+        });*@
+    }
+    function BtnDeleteAssetFC(rowData) {
+        var table = $('#AssetData').DataTable();
+        var form_data = table.rows(rowData).data();
+        var id_column;
+        $.each(form_data, function (key, value, index) {
+            id_column = value[0];
+        });
+        //console.log("id_column:", id_column);
+        @*var url_data = '@Url.Content("~/Asset/DeleteAssetFCData?Id=")' + id_column
+        window.location.href = url_data;*@
+
+    }
+</script>
+

@@ -1,0 +1,465 @@
+﻿@model MassApplication.Models.FCAssetClass
+
+<style>
+    .EditUSMTag {
+        display: none;
+    }
+
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    #tabEditFCTag .nav-link {
+        color: #000;
+        background-color: #e1e1e1;
+        border: 0;
+        margin: 0 4px;
+        padding: 13px 23px;
+        font-size: 13px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    #tabEditFCTag .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+        color: #ffffff;
+        background-color: #2a5b6c;
+        border: 0;
+        padding: 13px 23px;
+        margin: 0 4px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="master">
+    @Html.HiddenFor(model => model.fc_id, new { id = "edit_fc_id" })
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_fcname" class="col-sm-4 col-form-label">FC Name: </label>
+                <div class="col-sm-8">
+                    <input id="edit_FCname" type="text" class="form-control" placeholder="Enter network" value="@Model.fc_name" />
+                    <span class="error">FC name required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_fcnetwork" class="col-sm-4 col-form-label">Network: </label>
+                <div class="col-sm-8">
+                    @if (Model.fc_network != null)
+                    {
+                        @Html.DropDownList("edit_FCnetwork", Enumerable.Empty<SelectListItem>(), "--SELECT--", new { @class = "form-control" })
+                    }
+                    <span class="error">Network required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_fcstation" class="col-sm-4 col-form-label">FC Station: </label>
+                <div class="col-sm-8">
+                    @if (Model.fc_station_name != null)
+                    {
+                        @Html.DropDownList("edit_FCstation", Enumerable.Empty<SelectListItem>(), "--SELECT--", new { @class = "form-control" })
+                    }
+                    <span class="error">FC station required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_fctype" class="col-sm-4 col-form-label">FC Type: </label>
+                <div class="col-sm-8">
+                    @Html.DropDownList("edit_FCtype", new List<SelectListItem>
+                                      {
+                                          new SelectListItem {Text = "FC", Value = "FC"},
+                                          new SelectListItem {Text = "FC_UM", Value = "FC_UM" }
+                                 }, "--SELECT--", new { @class = "form-control" })
+                    <span class="error">FC type required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_fcgcname" class="col-sm-4 col-form-label">GC Name: </label>
+                <div class="col-sm-8">
+                    @if (Model.fc_gc_name != null)
+                    {
+                        @Html.DropDownList("edit_FCgcname", Enumerable.Empty<SelectListItem>(), "--SELECT--", new { @class = "form-control" })
+                    }
+                    <span class="error">GC name required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_fcmetertype" class="col-sm-4 col-form-label">Meter Type: </label>
+                <div class="col-sm-8">
+                    @Html.DropDownList("edit_FCmetertype", Enumerable.Empty<SelectListItem>(), "--SELECT--", new { @class = "form-control" })
+                    <span class="error">Meter Type required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="newnavconn nav nav-tabs border-bottom-0" id="tabEditFCTag">
+        <li class="nav-item"><a href="#newEditVolumeTab" class="nav-link active" data-toggle="tab">Volume Tag</a></li>
+        <li class="nav-item"><a href="#newEditEnergyTab" class="nav-link" data-toggle="tab">Energy Tag</a></li>
+        <li class="nav-item EditUSMTag"><a href="#newEditVOSTab" class="nav-link" data-toggle="tab">VOS</a></li>
+        <li class="nav-item EditUSMTag"><a href="#newEditVOGTab" class="nav-link" data-toggle="tab">VOG</a></li>
+        <li class="nav-item EditUSMTag"><a href="#newEditPerformanceTab" class="nav-link" data-toggle="tab">Performance</a></li>
+        <li class="nav-item EditUSMTag"><a href="#newEditAGCTab" class="nav-link" data-toggle="tab">AGC</a></li>
+        <li class="nav-item EditUSMTag"><a href="#newEditSNRTab" class="nav-link" data-toggle="tab">SNR</a></li>
+        <li class="nav-item EditUSMTag"><a href="#newEditOthersTab" class="nav-link" data-toggle="tab">Others</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="newEditVolumeTab">
+            <div class="EditVolumeDetails mt-2">
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_currentVolume" class="col-sm-4 col-form-label">Current Volume: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fc_current_volume" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_yesterdayVolume" class="col-sm-4 col-form-label">Yesterday Volume: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fc_yesterday_volume" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_hourlyVolume" class="col-sm-4 col-form-label">Hourly Volume: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fc_hourly_volume" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_accumulativeFlowVolume" class="col-sm-4 col-form-label">Accumulative Flow: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcVolume_accumulative_flow" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_uncorrectedFlowRateVolume" class="col-sm-4 col-form-label">Uncorrected Flow Rate: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcVolume_uncorrected_flow_rate" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_uncorrectedHourlyTotalizerVolume" class="col-sm-4 col-form-label">Uncorrected Hourly Totalizer: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcVolume_uncorrected_hourly_totalizer" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_uncorrectedYesterdayFlowVolume" class="col-sm-4 col-form-label">Uncorrected Yesterday Flow: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcVolume_uncorrected_yesterday_flow" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_frequencyVolume" class="col-sm-4 col-form-label">Frequency: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcVolume_frequency" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_differentialPressureVolume" class="col-sm-4 col-form-label">Differential Pressure: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcVolume_differential_pressure" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_velocityVolume" class="col-sm-4 col-form-label">Velocity: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcVolume_velocity" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="newEditEnergyTab">
+            <div class="EditEnergyDetails mt-2">
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_currentEnergy" class="col-sm-4 col-form-label">Current Energy: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fc_current_energy" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_yesterdayEnergy" class="col-sm-4 col-form-label">Yesterday Energy: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fc_yesterday_energy" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_hourlyEnergy" class="col-sm-4 col-form-label">Hourly Energy: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fc_hourly_energy" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_accumulativeFlowEnergy" class="col-sm-4 col-form-label">Accumulative Flow: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcEnergy_accumulative_flow" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_uncorrectedFlowRateEnergy" class="col-sm-4 col-form-label">Uncorrected Flow Rate: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcEnergy_uncorrected_flow_rate" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_uncorrectedHourlyTotalizerEnergy" class="col-sm-4 col-form-label">Uncorrected Hourly Totalizer: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcEnergy_uncorrected_hourly_totalizer" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_uncorrectedYesterdayFlowEnergy" class="col-sm-4 col-form-label">Uncorrected Yesterday Flow: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcEnergy_uncorrected_yesterday_flow" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_frequencyEnergy" class="col-sm-4 col-form-label">Frequency: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcEnergy_frequency" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_differentialPressureEnergy" class="col-sm-4 col-form-label">Differential Pressure: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcEnergy_differential_pressure" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <label ID="LblEdt_velocityEnergy" class="col-sm-4 col-form-label">Velocity: </label>
+                            <div class="col-sm-8">
+                                <input id="edit_fcEnergy_velocity" type="text" class="form-control" placeholder="Search to select">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div style="padding:10px 0; text-align:right">
+    <button type="button" id="submitEditFCDetail" class="btn pl-4 pr-4 btn-green">Update</button>
+    <button type="button" class="btn btn-default pl-4 pr-4" data-dismiss="modal">Close</button>
+</div>
+
+<script src="~/Scripts/SweetAlert2/sweetalert2.all.min.js"></script>
+<script>
+    $('#submitEditFCDetail').click(function () {
+       var isAllValid = true;
+        if ($('#edit_FCname').val().trim() == '') {
+            $('#edit_FCname').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+        }
+        else {
+            $('#edit_FCname').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#edit_FCnetwork').val() == "0" || $('#edit_FCnetwork').val() == "") {
+            $('#edit_FCnetwork').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#edit_FCnetwork').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#edit_FCstation').val() == "0" || $('#edit_FCstation').val() == "") {
+            $('#edit_FCstation').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#edit_FCstation').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#edit_FCtype').val() == "0" || $('#edit_FCtype').val() == "") {
+            $('#edit_FCtype').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#edit_FCtype').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#edit_FCgcname').val() == "0" || $('#edit_FCgcname').val() == "") {
+            $('#edit_FCgcname').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#edit_FCgcname').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#edit_FCmetertype').val() == "0" || $('#edit_FCmetertype').val() == "") {
+            $('#edit_FCmetertype').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#edit_FCmetertype').siblings('span.error').css('visibility', 'hidden');
+        }
+       if (isAllValid)
+       {
+          var editData = {
+              fc_id: $('#edit_fc_id').val(),
+              fc_name: $('#edit_FCname').val().trim(),
+              fc_station_name: $('#edit_FCstation').val().trim(),
+              fc_network: $('#edit_FCnetwork').val(),
+              fc_type: $('#edit_FCtype').val(),
+              fc_gc_name: $('#edit_FCgcname').val(),
+              fc_meter_type: $('#edit_FCmetertype').val()
+         }
+
+         $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Asset/EditFCFormData")',
+            data: JSON.stringify(editData),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.startsWith("ERROR")) {
+                    var res = data.split(";");
+                    var error = '';
+                    if (res.length > 1) {
+                        error = res[1];
+                    } else {
+                        error = data;
+                    }
+                    //alert(error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error
+                    })
+                }
+                else {
+                    swal.fire("Operation success!", "Data updated successfully!", "success").then(function () {
+                        location.reload();
+                    });
+                }
+
+            },
+            error: function (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error
+                })
+            }
+
+        });
+
+       }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        var dd_network = @Html.Raw(Json.Encode(ViewBag.DDEditNetwork));
+        var dd_metertype = @Html.Raw(Json.Encode(ViewBag.DDEditMeteringType));
+        var dd_gc = @Html.Raw(Json.Encode(ViewBag.DDEditGC));
+        var edit_data = @Html.Raw(Json.Encode(ViewBag.DDEditData));
+        $.each(dd_network, function (i, data) {      // bind the dropdown list using json result
+            $('<option>',
+                {
+                    value: data.pipelinemst_id,
+                    text: data.pipeline_name
+                }).html(data.pipeline_name).appendTo("#edit_FCnetwork");
+        });
+        $.each(dd_metertype, function (i, data) {
+            $('<option>',
+                {
+                    value: data.value,
+                    text: data.key
+                }).html(data.key).appendTo("#edit_FCmetertype");
+        });
+        $.each(dd_gc, function (i, data) {
+            $('<option>',
+                {
+                    value: data.gcid,
+                    text: data.gcname
+                }).html(data.gcname).appendTo("#edit_FCgcname");
+        });
+        $.each(edit_data, function (i, data) {
+            $('<option>',
+                {
+                    value: data.assetstation,
+                    text: data.stationname
+                }).html(data.stationname).appendTo("#edit_FCstation");
+
+            $('select#edit_FCnetwork option[value=' + data.assetregion +']').attr("selected", "selected");
+            $('select#edit_FCgcname option[value=' + data.gcid +']').attr("selected", "selected");
+            $('select#edit_FCstation option[value=' + data.assetstation + ']').attr("selected", "selected");
+            $('select#edit_FCtype option[value=' + data.assettype + ']').attr("selected", "selected");
+            $('select#edit_FCmetertype option[value=' + data.meter_type + ']').attr("selected", "selected");
+        });
+    });
+</script>

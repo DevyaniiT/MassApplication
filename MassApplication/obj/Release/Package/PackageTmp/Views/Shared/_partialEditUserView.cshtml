@@ -1,0 +1,354 @@
+﻿@model MassApplication.Models.UserWise_Class
+
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+</style>
+<link href="~/MasterStyles/css/chips.css" rel="stylesheet" />
+
+<div class="master">
+    @Html.HiddenFor(model => model.userwiseId, new { id = "edit_user_id" })
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_firstname" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">First name </label>
+                <div class="col-sm-8">
+                    <input id="edit_first_name" type="text" class="form-control" placeholder="Enter first name" value="@Model.first_name" />
+                    <span class="error">First name required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_lastname" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Last name </label>
+                <div class="col-sm-8">
+                    <input id="edit_last_name" type="text" class="form-control" placeholder="Enter last name" value="@Model.last_name" />
+                    <span class="error">Last name required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_email" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Email Id </label>
+                <div class="col-sm-8">
+                    <input id="edit_email" type="text" class="form-control" placeholder="Enter email id" value="@Model.user_email_id" />
+                    <span class="error">Email id required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_userType" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">User Type: </label>
+                <div class="col-sm-8">
+                    @Html.DropDownList("edit_userType", new SelectList(ViewBag.EditUserTypeData, "Value", "Value", Model.user_type), new { @class = "form-control" })
+                    @*@if (Model.user_type != null)
+                    {
+                        @Html.DropDownList("edit_userType", new SelectList(ViewBag.EditUserTypeData, "Value", "Value", Model.user_type), new { @class = "form-control" })
+                    }*@
+                    <span class="error">User type required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_password" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Password </label>
+                <div class="col-sm-8">
+                    <input id="edit_password" type="password" class="form-control" placeholder="Enter password" value="@Model.user_password" />
+                    <span class="error">Password required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdt_cpassword" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Confirm Password </label>
+                <div class="col-sm-8">
+                    <input id="edit_cpassword" type="password" class="form-control" placeholder="Enter confirm password" value="@Model.user_password" />
+                    <span class="error">Correct confirm password required</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="Lbl_editrole" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">User Role </label>
+                <div class="col-sm-8">
+                    @Html.DropDownList("edit_userRole", new SelectList(ViewBag.EditRoleData, "Text", "Value", Model.user_role_id), new { @class = "form-control" })
+                    @*@if (Model.user_role != null)
+                    {
+                        @Html.DropDownList("edit_userRole", new SelectList(ViewBag.EditRoleData, "Text", "Value", Model.user_role_id), new { @class = "form-control" })
+                    }*@
+                    <span class="error">User role required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="LblEdit_UserState" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">User Active </label>
+                <div class="col-sm-8">
+                    @{
+                        if (Model.is_active == true)
+                        {
+                            @*<input class="active_mode" type="checkbox" checked="checked" data-id="@m.report_id">*@
+
+                            <label class="switch mt-2">
+                                <input class="edit_user_active_mode" type="checkbox" checked="checked" data-id="@Model.userwiseId" name="edit_user_active_mode">
+                                <span class="slider round"></span>
+                            </label>
+
+                        }
+                        else
+                        {
+                            @*<input class="active_mode" type="checkbox" data-id="@m.report_id">*@
+
+                            <label class="switch mt-2">
+                                <input class="edit_user_active_mode" type="checkbox" data-id="@Model.userwiseId" name="edit_user_active_mode">
+                                <span class="slider round"></span>
+                            </label>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="Lbl_dashboard" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Default Dashboard </label>
+                <div class="col-sm-8">
+                    @{
+                        var userdbdata = Model.user_dashboard;
+                        var userdbid = Model.user_dashboard_id;
+                    }
+
+                    @Html.DropDownList("edit_userDashboard", new SelectList(ViewBag.EditDashboardData, "Text", "Value", userdbid), new { @class = "form-control" })
+                    <span class="error">Default dashboard required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row"></div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div id="edit_regiondata" class="col-md-12">
+            <label ID="LblEdt_region" style="font-weight:500; font-size:14px">Region: </label>
+            <div id="chips-autocomplete-test1" class="chips chips-autocomplete"></div>
+            <span class="error">Region required</span>
+        </div>
+    </div>
+</div>
+
+<div style="padding:10px 0; text-align:right">
+    <button type="button" id="submitEditUserDetail" class="btn pl-4 pr-4 btn-green">Update</button>
+    <button type="button" class="BtnCloseDb btn btn-dash pl-4 pr-4" data-dismiss="modal">Close</button>
+</div>
+
+<script src="~/MasterStyles/js/materialize.min.js"></script>
+<script>
+    $(document).ready(() => {
+        var Clist=[]
+        var Cdata = '@Html.Raw(Json.Encode(Model.userwiseregion))';
+        //console.log("Cdata:", Cdata);
+
+        var datac = eval('(' + Cdata + ')');
+        //console.log("datac:", datac);
+        for (let i = 0; i < datac.length; i++) {
+            let item = datac[i];
+            Clist.push({
+                tag: item
+            });
+        }
+       // console.log("Arr:", Clist);
+
+        $('#chips-autocomplete-test1').chips({
+            autocompleteOptions: {
+                data: {
+                    'MAHARASTRA': null,
+                    'KKBMPL': null,
+                    'KMKRPL': null,
+                    'SOUTH GUJARAT': null,
+                    'HAZIRAA': null,
+                    'VAGHODIA': null,
+                    'JHABUA': null,
+                    'KHERA': null,
+                    'VIJAIPUR': null,
+                    'DIBYAPUR': null,
+                    'KAILARASSS': null,
+                    'API_TEST_NETWORK': null,
+                    'DBPLL': null,
+                    'AGRA': null
+                },
+                limit: Infinity,
+                minLength: 1
+            },
+            placeholder: 'Enter a region',
+            secondaryPlaceholder: '+ Region',
+            data: Clist
+        });
+    })
+</script>
+<script>
+    $(document).on('change', 'select#edit_userRole', function () {
+        $("#edit_userDashboard").empty();
+        var roleId = $('select[name=edit_userRole]').val();
+        if (roleId != null && roleId != '') {
+            $.ajax({
+                url: '@Url.Content("~/User/GetDashboardDropdown?id=")' + roleId,
+                type: "get",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#edit_userDashboard").empty();
+                    $('<option value="0">---SELECT---</option>').appendTo("#edit_userDashboard");
+                    var jsonData = JSON.parse(data);
+                    console.log('Dashboard jsonData:', jsonData);
+                    $.each(jsonData, function (i, data) {
+                        $('<option>',
+                            {
+                                value: data.dashboard_id,
+                            }).html(data.dashboard_name).appendTo("#edit_userDashboard");
+                    });
+                },
+                error: function () {
+                    alert("Error");
+                }
+            });
+        }
+    });
+   $('#submitEditUserDetail').click(function () {
+       var isAllValid = true;
+       if ($('#edit_first_name').val().trim() == '') {
+           $('#edit_first_name').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_first_name').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_last_name').val().trim() == '') {
+           $('#edit_last_name').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_last_name').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_email').val().trim() == '') {
+           $('#edit_email').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_email').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_password').val().trim() == '') {
+           $('#edit_password').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_password').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_cpassword').val().trim() == '' || $('#user_cpassword').val() != $('#user_password').val()) {
+           $('#edit_cpassword').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_cpassword').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_userType').val() == "0" || $('#edit_userType').val() == "") {
+           $('#edit_userType').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_userType').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_userDashboard').val() == "0" || $('#edit_userDashboard').val() == "") {
+           $('#edit_userDashboard').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_userDashboard').siblings('span.error').css('visibility', 'hidden');
+       }
+       if ($('#edit_userRole').val() == "0" || $('#edit_userRole').val() == "") {
+           $('#edit_userRole').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_userRole').siblings('span.error').css('visibility', 'hidden');
+       }
+
+       var edit_chipList = [];
+       $('.chip').each(function () {
+           var editchartItems = $(this).text();
+           //editchartItems = editchartItems.substring(0, chartItemss.Length - 1);
+           editchartItems = editchartItems.slice(0, -1);
+           editchartItems = editchartItems.toUpperCase();
+           edit_chipList.push(editchartItems);
+       });
+       //console.log("editChipList:", edit_chipList);
+
+       if (edit_chipList.length == 0)
+       {
+           alert("Please add atleast one region!!!");
+           $('#edit_regiondata').siblings('span.error').css('visibility', 'visible');
+           isAllValid = false;
+       }
+       else {
+           $('#edit_regiondata').siblings('span.error').css('visibility', 'hidden');
+       }
+
+       if (isAllValid)
+       {
+           var editData = {
+               userwiseId: $('#edit_user_id').val(),
+               first_name: $('#edit_first_name').val().trim(),
+               last_name: $('#edit_last_name').val().trim(),
+               user_email_id: $('#edit_email').val().trim(),
+               user_password: $('#edit_password').val().trim(),
+               user_confirm_password: $('#edit_cpassword').val().trim(),
+               user_type: $('#edit_userType').val(),
+               user_role_id: $('#edit_userRole').val(),
+               user_dashboard: $('#edit_userDashboard').val(),
+               //userwiseregion: edit_list,
+               userwiseregion: edit_chipList,
+               is_active: $('input[name="edit_user_active_mode"]').is(':checked')
+           }
+           console.log("editData:", editData);
+           $.ajax({
+               type: 'POST',
+               url: '@Url.Content("~/User/EditUserFormData")',
+               data: JSON.stringify(editData),
+               contentType: 'application/json',
+               success: function (data) {
+                   if (data.startsWith("ERROR")) {
+                       var res = data.split(";");
+                       var error = '';
+                       if (res.length > 1) {
+                           error = res[1];
+                       } else {
+                           error = data;
+                       }
+                       alert(error);
+                   }
+                   else {
+                       alert('Data updated successfully!!!');
+                       //$('#edit_modal').modal('hide');
+                       param_list = [];
+                       query_list = [];
+                       location.reload();
+                   }
+               },
+               error: function (error) {
+                   alert("Error");
+               }
+
+           });
+       }
+    });
+</script>

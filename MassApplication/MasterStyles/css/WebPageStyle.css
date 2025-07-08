@@ -1,0 +1,292 @@
+﻿#Fortnightly, #Monthly, #Quarterly, #HalfYearly, #Yearly, #Custom, #detail, #Hourly {
+    display: none;
+}
+.form-control1 {
+        display: block;
+        width: 100%;
+        height: 34px;
+        padding: 6px 10px !important;
+        font-size: 13px !important;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        background-image: none;
+        border: 1px solid #ccc !important;
+        border-radius: 4px;
+        box-shadow: inset 0 1px 1px rgb(0 0 0 / 8%);
+        transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+        font-family: Roboto, Arial, sans-serif !important;
+    }
+
+    .UnitClass {
+        float: left;
+        width: 65%;
+        margin-left: 8px;
+    }
+
+    .cust-lable {
+        float: left !important;
+        margin-top: 7px !important;
+    }
+
+    .control-label {
+        font-size: 12.5px;
+    }
+
+    .calender-input {
+        float: left;
+        margin-left: 10px;
+    }
+
+    .monthname {
+        float: left;
+        width: 46%;
+        margin-left: 10px;
+    }
+
+    .yearname {
+        float: left;
+        width: 32%;
+        margin-left: 10px;
+    }
+
+    #Yearly_YearList {
+        float: left;
+        width: 65%;
+        margin-left: 10px;
+    }
+.quarterly_monthname {
+    float: left;
+    width: 51%;
+    margin-left: 10px;
+}
+
+.quarterly_yearname {
+    float: left;
+    width: 30%;
+    margin-left: 8px;
+}
+
+    .halfyearly_monthname {
+        float: left;
+        width: 52%;
+        margin-left: 10px;
+    }
+
+    .halfyearly_yearname {
+        float: left;
+        width: 29%;
+        margin-left: 8px;
+    }
+    .fortnightdays {
+        float: left;
+        width: 31%;
+        margin-left: 10px;
+    }
+    .fortnightmonth {
+        float: left;
+        width: 27%;
+        margin-left: 8px;
+    }
+    .fortnightyear {
+        float: left;
+        width: 25%;
+        margin-left: 8px;
+    }
+
+    #Hourly_HourList {
+        float: left;
+        width: 30%;
+        margin-left: 8px;
+    }
+
+input[type="radio"] {
+    margin-right: 3px;
+}
+
+#durationclass {
+    font-size: 14px;
+}
+
+.radio-inline {
+    position: relative;
+    display: inline-block;
+    padding-left: 20px;
+    margin-bottom: 0;
+    font-weight: 400;
+    vertical-align: middle;
+    cursor: pointer;
+}
+label {
+    font-weight: normal !important;
+}
+.dot {
+    height: 18px;
+    width: 18px;
+    background-color: #ddd;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 1px #a5a5a5;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    line-height: 21px;
+}
+
+.dotColor:hover {
+    color: #000;
+}
+
+.dotColormain {
+    font-size: 12px;
+}
+
+.dotColor {
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px #da1414;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    line-height: 21px;
+}
+
+.dotColorGreen {
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px #05b11eb8;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    line-height: 21px;
+}
+
+.dotColorYellow {
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px #FFFF00;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    line-height: 21px;
+}
+
+.dotColorOrange {
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px #e2dd3f;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    line-height: 21px;
+}
+
+.dotColorBlue {
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px #0f0ca9;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    line-height: 21px;
+}
+
+.dotred {
+    height: 16px;
+    width: 16px;
+    background-color: #bb0707;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 3px #bb0707;
+}
+
+.dotBlue {
+    height: 16px;
+    width: 16px;
+    background-color: #0f0ca9;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 3px #0f0ca9;
+}
+
+.dotgreen {
+    height: 16px;
+    width: 16px;
+    background-color: #0c610b;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 3px #0c610b;
+}
+
+.dotorange {
+    height: 16px;
+    width: 16px;
+    background-color: #e2dd3f;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 3px #e2dd3f;
+}
+
+.dotblack {
+    height: 16px;
+    width: 16px;
+    background-color: #000;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 3px #000;
+}
+
+.dotmain {
+    /* height: 18px; */
+    /* width: 18px; */
+    background-color: #ddd;
+    /* border-radius: 50%; */
+    display: inline-block;
+    box-shadow: 0 0 0 2px #a5a5a5;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    /* line-height: 21px; */
+    padding: 3px;
+    margin-right: 15px;
+}
+
+.dotColorMain:hover {
+    background-color: #2a5b6c;
+    color: #fff;
+}
+
+.dotColorMain:focus {
+    background-color: #2a5b6c;
+    color: #fff;
+}
+
+.dotColorMain {
+    /* height: 18px; */
+    /* width: 18px; */
+    background-color: #f5f5f5;
+    /* border-radius: 50%; */
+    display: inline-block;
+    box-shadow: 0 0 0 2px #2a5b6c;
+    color: #000;
+    font-size: 9px;
+    text-align: center;
+    /* line-height: 21px; */
+    padding: 3px;
+    margin-right: 15px;
+}

@@ -1,0 +1,113 @@
+﻿@using MassApplication.Models.Graph;
+@model ChartParameters
+@using System.Data;
+
+<style>
+    .dataTables_filter {
+        display: none;
+    }
+
+    table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control, table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control {
+        position: relative;
+        padding-left: 25px;
+        cursor: pointer;
+        padding-top: 26px;
+    }
+
+    div.dataTables_wrapper div.dataTables_paginate {
+        padding-right: 50px;
+    }
+</style>
+
+<div>
+    <div id="tabular_data_show" class="indet"></div>
+    <button type="button" id="BtnAddRow" class="btn btn-dash mr-1" style="float:right"><i class="fa fa-plus"></i></button>
+    <table id="DynamicRow" class="table mt-3">
+        <tr id="d_row"></tr>
+    </table>
+</div>
+
+<script>
+    var count = 0;
+    var array = [];
+    $("#BtnAddRow").click(function () {
+        var rawData = '';
+        createNewColumn(rawData);
+    });
+
+    $('body').on('change', '.SelectiveCol', function () {
+        var selVal = $(this).val();
+        var Id_Val = $(this).attr('id');
+        Id_Val = Id_Val.split(/(\d+)/);
+        $('#getdatapass' + Id_Val[1]).val(selVal);
+        array = array.slice(0, -1);
+        array.push(selVal);
+    });
+
+    $("#tabular_column_data").droppable({
+        accept: ".card2",
+        hoverClass: 'active',
+        drop: function (event, ui) {
+            var ColumnName = ui.draggable[0].getAttribute("data-id");
+            //this.value += ',' + (ui.draggable[0].getAttribute("data-id"));
+            this.value = (ui.draggable[0].getAttribute("data-id"));
+            array.push(this.value);
+            //array = this.value.split(",");
+            console.log("ADD ARRAY:", array);
+            var seen = array.filter((s => v => s.has(v) || !s.add(v))(new Set));
+            if (seen.length != 0) {
+                alert('Error: you have duplicates values!!!');
+                this.value = this.value.replace(/,[^,]+$/, "");
+                console.log("VALUE:", this.value);
+                array = array.slice(0, -1);
+                console.log("SEEN ARRAY:", array);
+            }
+            else {
+                createNewColumn(ColumnName);
+            }
+           
+        }
+    });
+
+    function createNewColumn(data_name) {
+        console.log("data_name", data_name);
+        count++;
+        var modelData = @Html.Raw(Json.Encode(Model.keyvalue_tuple));
+        console.log("modelData:", modelData);
+        var keys = [];
+        var ctmp = '';
+        var subhtml = '';
+        for (j = 0; j < modelData.length; j++) {
+            ctmp = modelData[j];
+            if (j == 0)
+                //subhtml = subhtml + "<option value=''>--SELECT--</option>";
+                subhtml = subhtml + "<option value=''>--SELECT--</option><option value=" + ctmp.Key + "> " + ctmp.Key + "  </option> ";
+            else
+                subhtml = subhtml + "<option value=" + ctmp.Key + "> " + ctmp.Key + "  </option> ";
+        }
+
+        var dropData1 = '<td id=' + count + '>'
+            + '<select class="form-control SelectiveCol" name="SelectiveCol" id ="datavalue' + count + '">' + subhtml + '</select>'
+            + '<input id="getdatapass' + count + '" type="text" class="getdatapass form-control mt-1" placeholder="Enter alias"></td>';
+
+        $("#d_row").append(dropData1);
+
+        if (count == 1) {
+            var removeBtnHtml = '<button type="button" id="BtnRemoveRow" class="btn btn-dash mb-1" style="float:right"><i class="fa fa-minus"></i></button>';
+            $("#tabular_data_show").append(removeBtnHtml);
+
+            $("#BtnRemoveRow").click(function () {
+                $('#DynamicRow tr td:last').remove();
+                //array = array.pop();
+                array = array.slice(0, -1);
+                console.log("ARRAY:", array);
+            });
+
+        }
+
+        if (data_name != '') {
+            $('#datavalue' + count).val(data_name);
+            $('#getdatapass' + count).val(data_name);
+        }
+    }
+</script>

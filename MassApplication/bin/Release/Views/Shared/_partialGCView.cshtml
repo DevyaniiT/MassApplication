@@ -1,0 +1,1310 @@
+﻿@model MassApplication.Models.GC_Class
+<style>
+    .headerText {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container">
+    <div class="row" id="gcContainer">
+        <div class="col-4">
+            <div class="card mt-3 mr-3 pb-5" id="sticky0">
+                <div class="card-body chartCard0 pb-5 pt-4" id="myChart0">
+                    <div class="row" id="mylabel0">
+                        <div class="col-sm-5">
+                            <div class="float-left mt-3">
+                                <img src="~/Images/3d-meter-icon.png" class="mt-2 " style="width:140px" />
+                            </div>
+                        </div>
+                        <div class="col-sm-7 consumer-details pt-4 pl-3">
+                            <h3 class="headerText pt-2"> Consumer Details</h3>
+                            <p><span style="font-weight:bold; font-style:italic; font-size: 16px;">@Html.Raw(Model.gc_name)</span></p>
+                            <p><span class="pr-3" style="font-weight:bold;">Network</span><span>@Model.gc_network </span></p>
+                            <p><span class="pr-4" style="font-weight:bold;">Station</span><span>@Model.gc_station_name </span></p>
+                            <p><span style="margin-right: 32px; font-weight: bold;">Date</span><span>@Model.gc_date </span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/Chart-js/chart.js"></script>
+<script type="text/javascript">
+    $(window).on('load', function () {
+        $("#myTabContentinner .tab-pane").removeClass("active");
+        $(".main-menu-bar .report-detail li a").removeClass("active");
+        $(".main-menu-bar .report-detail li a").removeClass("lastVisit");
+    });
+    $(document).ready(function () {
+        LoadData();
+    });
+    function LoadData() {
+        var chart;
+        var chartId = 1;
+        var kpiList = @Html.Raw(Json.Encode(Model.kpiItems));
+        console.log("kpiList:", kpiList);
+        if (kpiList != null) {
+            for (var i = 0; i < kpiList.length; i++) {
+                var jsonData = kpiList[i].json_tuple;
+                var chartName = kpiList[i].kpi_name;
+                var dataval = kpiList[i].chart_params;
+                var chartType = kpiList[i].chart_type;
+                var chart_caption = kpiList[i].chart_caption;
+                var chart_color = kpiList[i].chart_color;
+                var QueryId = kpiList[i].kpi_query_id;
+                var tval = eval('(' + dataval + ')');
+                var newNote = "";
+                if (chartType.toLowerCase() == 'tabular') {
+
+                    newNote = $("<div class='col-4'><div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chViewBagrtId + "' style='overflow:auto'>"
+                        + "<div class= 'card-header border-0'><h3 class='card-title'>"
+                        + "<i class='fa fa-th mr-1'></i>" + chartName + "</h3></div>"
+                        + "<div class='card-body chartCard" + chartId + "'>"
+                        + "<div id='myChart" + chartId + "' class='chartCanvas' ></div>"
+                        + "</div></div></div>");
+
+                    $("#gcContainer").append(newNote);
+                    DrawTheTable(tval, dataval, QueryId, chartType, chartId);
+
+                }
+                else if (chartType.toLowerCase() == 'label') {
+
+                    newNote = $("<div class='col-4'><div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chartId + "'>"
+                        + "<div class='card-body chartCard" + chartId + "' id='myChart" + chartId + "'>"
+                        + "</div></div></div>");
+
+                    $("#gcContainer").append(newNote);
+                    DrawTheLabel(tval, dataval, QueryId, chartType, chartId, chart_caption, chart_color);
+
+                }
+                else {
+
+                    newNote = $("<div class='col-4'><div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chartId + "'>"
+                        + "<div class= 'card-header border-0'><h3 class='card-title'>"
+                        + "<i class='fa fa-th mr-1'></i>" + chartName + "</h3></div>"
+                        + "<div class='card-body chartCard" + chartId + "'>"
+                        + "<canvas id='myChart" + chartId + "' class='chartCanvas'></canvas>"
+                        + "</div></div></div>");
+
+                    $("#gcContainer").append(newNote);
+                    DrawTheGraph(tval, chartType, jsonData, chartId);
+
+                }
+
+                chartId++;
+            }
+        }
+    }
+</script>
+<!-- CREATE DYNAMIC CHARTS -->
+<script>
+    var myChart;
+    function DrawTheGraph(data, name, jsonData, chartId) {
+        var t = [data];
+        var xvl;
+        var hvl;
+        var gvl;
+        var cvlOld;
+        var cvl = [];
+
+        var dvl;
+        var highvl;
+        var lowvl;
+        var openvl;
+        var closevl;
+
+        var actualHeightData = [];
+        var myObject = eval('(' + jsonData + ')');
+        let obj = Object.keys(t[0]);
+        let Arr = [];
+        for (let i = 0; i < obj.length; i++) {
+
+            let item = obj[i];
+
+            if (item == 'Xaxis') {
+                xvl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[xvl];
+                    })
+                }
+                Arr.push(data);
+            }
+            //else if (item == 'Height') {
+            //    //alert(t[0][item]);
+            //    hvl = t[0][item];
+            //      let data = {
+            //        key: item,
+            //      value: myObject.map((item) => {
+            //          return item[hvl];
+            //            })
+            //    }
+            //    Arr.push(data);
+            //}
+            else if (item == 'Height') {
+                //alert(t[0][item]);
+                hvl = t[0][item].split(",");
+                for (let j = 0; j < hvl.length; j++) {
+                    var dataval = hvl[j];
+                    let data = {
+                        key: item,
+                        value: myObject.map((item) => {
+                            return item[dataval];
+                        })
+                    }
+                    actualHeightData.push(data);
+                    Arr.push(data);
+                }
+            }
+            else if (item == 'Group') {
+                //alert(t[0][item]);
+                gvl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[gvl];
+                    })
+                }
+                Arr.push(data);
+            }
+            else if (item == 'Color') {
+                cvlOld = t[0][item].split("),");
+                for (let j = 0; j < cvlOld.length; j++) {
+                    var color_dataval = cvlOld[j];
+                    color_dataval = color_dataval + ")";
+                    color_dataval = color_dataval.replace("))", ")");
+                    cvl.push(color_dataval);
+                }
+            }
+
+            else if (item == 'Date') {
+                dvl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[dvl];
+                    })
+                }
+                Arr.push(data);
+            }
+            else if (item == 'High') {
+                openvl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[openvl];
+                    })
+                }
+                Arr.push(data);
+            }
+            else if (item == 'Low') {
+                lowvl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[lowvl];
+                    })
+                }
+                Arr.push(data);
+            }
+            else if (item == 'Open') {
+                openvl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[openvl];
+                    })
+                }
+                Arr.push(data);
+            }
+            else if (item == 'Close') {
+                closevl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[closevl];
+                    })
+                }
+                Arr.push(data);
+            }
+
+            else { }
+        }
+
+        DrawDynamicGraph(Arr, actualHeightData, name, xvl, gvl, hvl, cvl, dvl, highvl, lowvl, openvl, closevl, chartId);
+    }
+    function DrawDynamicGraph(data, actualHeightData, name, xval, gval, hval, cval, dval, highval, lowval, openval, closeval, chartId) {
+        var Xaxisvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Xaxis';
+        });
+
+        if (result.length > 0) {
+            Xaxisvalue = (result[0].value);
+        }
+
+        var Hightvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Height';
+        });
+
+        if (result.length > 0) {
+            for (let i = 0; i < result.length; i++) {
+                Hightvalue.push(result[i].value);
+            }
+        }
+
+        var Groupvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Group';
+        });
+
+        if (result.length > 0) {
+            Groupvalue = (result[0].value);
+        }
+
+        var Colorvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Color';
+        });
+
+        if (result.length > 0) {
+            Colorvalue = (result[0].value);
+        }
+
+        var Datevalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Date';
+        });
+
+        if (result.length > 0) {
+            Datevalue = (result[0].value);
+        }
+
+        var Highvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'High';
+        });
+
+        if (result.length > 0) {
+            Highvalue = (result[0].value);
+        }
+
+        var Lowvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Low';
+        });
+
+        if (result.length > 0) {
+            Lowvalue = (result[0].value);
+        }
+
+        var Openvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Open';
+        });
+
+        if (result.length > 0) {
+            Openvalue = (result[0].value);
+        }
+
+        var Closevalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Close';
+        });
+
+        if (result.length > 0) {
+            Closevalue = (result[0].value);
+        }
+
+        change(name, Xaxisvalue, actualHeightData, Hightvalue, Groupvalue, Colorvalue, Datevalue, Highvalue, Lowvalue, Openvalue, Closevalue, xval, hval, gval, cval, dval, highval, lowval, openval, closeval, chartId);
+
+    }
+    function change(newType, Xaxisvalue, actualHeightData, Hightvalue, Groupvalue, Colorvalue, Datevalue, Highvalue, Lowvalue, Openvalue, Closevalue, xvll, hvll, gvll, cvll, dval, highvll, lowvll, openvll, closevll, chartId) {
+        var datasset = [];
+        var heightValueData = Hightvalue[0];
+        var colors = ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "purple", "gray", "violet", "black"];//#FFD580(orange), #cb504d(light red)
+
+        for (let i = 0; i < actualHeightData.length; i++) {
+            datasset.push({
+                label: hvll[i],
+                data: actualHeightData[i].value,
+                backgroundColor: colors[i],
+                borderColor: colors[i]
+            });
+        }
+        if (newType.toLowerCase() == 'pie' || newType.toLowerCase() == 'doughnut' || newType.toLowerCase() == 'polararea') {
+            var config = {
+                type: newType,
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: [
+                        {
+                            backgroundColor: ["Green", "Blue", "orange", "Purple", "Yellow", "Red", "Black", "purple", "violet", "Gray"],
+                            //backgroundColor: ["#FFD580", "#cb504d", "lightblue", "lightgreen", "pink", "yellow", "orange", "purple", "violet", "blue", "green", "red"],
+                            data: heightValueData,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                fontColor: 'black',
+                                boxWidth: 10,
+                                fontSize: 10,
+                                font: {
+                                    size: 10,
+                                    family: 'arial',
+                                    style: 'normal'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "bubble" || newType.toLowerCase() == "scatter") {
+            var xlabel = [];
+            var label_data = [];
+            while (datasset.length > 0) {
+                datasset.pop();
+            }
+            if (Hightvalue.length > 0) {
+                if (newType == "bubble") {
+                    for (let i = 0; i < actualHeightData.length; i++) {
+                        var datal = [];
+                        for (let j = 0; j < Xaxisvalue.length; j++) {
+                            if (i == 0) {
+                                xlabel.push(Xaxisvalue[j]);
+                            }
+                            datal.push({
+                                x: Xaxisvalue[j],
+                                y: Hightvalue[i][j],
+                                r: 6
+                            });
+                        }
+                        label_data.push({
+                            label: hvll[i],
+                            data: datal,
+                            backgroundColor: colors[i],// random_rgba()
+                        });
+                    }
+                }
+                else if (newType == "scatter") {
+                    for (let i = 0; i < actualHeightData.length; i++) {
+                        var datal = [];
+                        for (let j = 0; j < Xaxisvalue.length; j++) {
+                            if (i == 0) {
+                                xlabel.push(Xaxisvalue[j]);
+                            }
+                            datal.push({
+                                x: Xaxisvalue[j],
+                                y: Hightvalue[i][j]
+                            });
+                        }
+                        label_data.push({
+                            label: hvll[i],
+                            data: datal,
+                            backgroundColor: colors[i]
+                        });
+                    }
+                }
+                var config = {
+                    type: newType,
+                    data: {
+                        labels: Xaxisvalue,
+                        datasets: label_data
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'center',
+                                labels: {
+                                    fontColor: 'black',
+                                    boxWidth: 10,
+                                    fontSize: 10,
+                                    font: {
+                                        size: 10,
+                                        family: 'arial',
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltips: {
+                                enabled: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                display: true,
+                                ticks: {
+                                    //color: 'black',
+                                    font: {
+                                        family: 'arial',
+                                        size: 10,
+                                        style: 'normal'
+                                    }
+                                },
+                                grid: {
+                                    display: true
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                display: true,
+                                ticks: {
+                                    //callback: function (val, index) {
+                                    //    return val / 100000;
+                                    //},
+                                    //color: 'black',
+                                    font: {
+                                        family: 'arial',
+                                        size: 10,
+                                        style: 'normal'
+                                    }
+                                },
+                                grid: {
+                                    display: true
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        }
+        else if (newType.toLowerCase() == "line" || newType.toLowerCase() == "bar" || newType.toLowerCase() == "area" || newType.toLowerCase() == "spline") {
+            while (datasset.length > 0) {
+                datasset.pop();
+            }
+            var fl = false;
+            var sl = false;
+            var stked = false;
+            var splin = 0;
+            if (actualHeightData.length > 0) {
+                if (newType.toLowerCase() == "area") {
+                    fl = true;
+                    newType = "line";
+                    sl = false;
+                }
+                else if (newType.toLowerCase() == "spline") {
+                    //colors = ["red", "yellow", "green", "lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "purple", "gray", "violet", "black"];
+
+                    newType = "line";
+                    splin = 0.6;
+                    fl = false;
+                    sl = false;
+                    stked = false;
+                }
+
+                for (let i = 0; i < actualHeightData.length; i++) {
+                    datasset.push({
+                        label: hvll[i],
+                        backgroundColor: colors[i],
+                        borderColor: colors[i],
+                        data: actualHeightData[i].value,
+                        lineTension: splin,
+                        fill: fl,
+                        steppedLine: sl,
+                    });
+                }
+                var config = {
+                    type: newType,
+                    data: {
+                        labels: Xaxisvalue,
+                        datasets: datasset
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'center',
+                                labels: {
+                                    fontColor: 'black',
+                                    boxWidth: 10,
+                                    fontSize: 10,
+                                    font: {
+                                        size: 10,
+                                        family: 'arial',
+                                        style: 'normal'
+                                    }
+                                }
+                            },
+                            tooltips: {
+                                enabled: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false,
+                                display: true,
+                                ticks: {
+                                    font: {
+                                        family: 'arial',
+                                        size: 10,
+                                        style: 'normal'
+                                    }
+                                },
+                                grid: {
+                                    display: true
+                                }
+                            },
+                            y: {
+                                stacked: false,
+                                display: true,
+                                ticks: {
+                                    font: {
+                                        family: 'arial',
+                                        size: 10,
+                                        style: 'normal'
+                                    }
+                                },
+                                grid: {
+                                    display: true
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        }
+        else if (newType.toLowerCase() == "radar") {
+            var radarData = {
+                labels: Xaxisvalue,
+                datasets: [{
+                    label: hvll,
+                    data: heightValueData,
+                    fill: true,
+                    backgroundColor: "lightblue",
+                    borderColor: "blue",
+                }]
+            };
+            var config = {
+                type: newType,
+                data: radarData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                fontColor: 'black',
+                                boxWidth: 10,
+                                fontSize: 10,
+                                font: {
+                                    size: 10,
+                                    family: 'arial',
+                                    style: 'normal'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
+                },
+            };
+        }
+        else if (newType.toLowerCase() == "stacked_bar") {
+            newType = 'bar';
+
+            var config = {
+                type: newType,
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: datasset
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                fontColor: 'black',
+                                boxWidth: 10,
+                                fontSize: 10,
+                                font: {
+                                    size: 10,
+                                    family: 'arial',
+                                    style: 'normal'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            display: true,
+                            ticks: {
+                                font: {
+                                    family: 'arial',
+                                    size: 10,
+                                    style: 'normal'
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            display: true,
+                            ticks: {
+                                font: {
+                                    family: 'arial',
+                                    size: 10,
+                                    style: 'normal'
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "step_line") {
+            newType = 'line';
+            while (datasset.length > 0) {
+                datasset.pop();
+            }
+            for (let i = 0; i < actualHeightData.length; i++) {
+                datasset.push({
+                    label: hvll[i],
+                    data: actualHeightData[i].value,
+                    borderColor: colors[i],
+                    fill: false,
+                    stepped: true
+                });
+            }
+            var config = {
+                type: 'line',
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: datasset,
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        axis: 'x'
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                fontColor: 'black',
+                                boxWidth: 10,
+                                fontSize: 10,
+                                font: {
+                                    size: 10,
+                                    family: 'arial',
+                                    style: 'normal'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            display: true,
+                            ticks: {
+                                font: {
+                                    family: 'arial',
+                                    size: 10,
+                                    style: 'normal'
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            display: true,
+                            ticks: {
+                                font: {
+                                    family: 'arial',
+                                    size: 10,
+                                    style: 'normal'
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        else if (newType.toLowerCase() == "treemap") {
+            let arrayData = [];
+            for (let i = 0; i < actualHeightData.length; i++) {
+                arrayData.push(actualHeightData[i].key);
+            }
+            let arr = [];
+            Xaxisvalue.map((val, index) => {
+                let obj = { [xvll]: val, [hvll]: Hightvalue[0][index] };
+                arr.push(obj);
+            });
+
+            //console.log("ARRAY:", arr);
+
+            var config = {
+                type: newType,
+                data: {
+                    datasets: [{
+                        //label: hvll,
+                        tree: arr,
+                        key: hvll,
+                        groups: [xvll],
+                        spacing: 0.5,
+                        borderWidth: 1.5,
+                        fontColor: "black",
+                        fontSize: 9,
+                        borderColor: "grey",
+                        backgroundColor: colors[0],
+                        hoverBackgroundColor: colors[1]
+                        //backgroundColor: 'rgba(75, 00, 150, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        /* legend: { display: false },*/
+                        tooltips: {
+                            callbacks: {
+                                title: function (item, data) {
+                                    return data.datasets[item[0].datasetIndex].key;
+                                },
+                                label: function (item, data) {
+                                    var dataset = data.datasets[item.datasetIndex];
+                                    var dataItem = dataset.data[item.index];
+                                    return dataItem.g + ': ' + dataItem.v;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+        else if (newType.toLowerCase() == "histogram") {
+            newType = 'bar';
+            while (datasset.length > 0) {
+                datasset.pop();
+            }
+            for (let i = 0; i < actualHeightData.length; i++) {
+                datasset.push({
+                    label: hvll[i],
+                    data: actualHeightData[i].value,
+                    backgroundColor: colors[i],
+                    borderColor: colors[i],
+                    borderWidth: 1,
+                    barPercentage: 1.3
+                });
+            }
+
+            var histoData = {
+                labels: Xaxisvalue,
+                datasets: datasset
+            };
+            var config = {
+                type: newType,
+                data: histoData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center',
+                            labels: {
+                                fontColor: 'black',
+                                boxWidth: 10,
+                                fontSize: 10,
+                                font: {
+                                    size: 10,
+                                    family: 'arial',
+                                    style: 'normal'
+                                }
+                            }
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            display: true,
+                            ticks: {
+                                font: {
+                                    family: 'arial',
+                                    size: 10,
+                                    style: 'normal'
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            display: true,
+                            ticks: {
+                                font: {
+                                    family: 'arial',
+                                    size: 10,
+                                    style: 'normal'
+                                }
+                            },
+                            grid: {
+                                display: true
+                            }
+                        }
+                    }
+                }
+            };
+
+        }
+        else if (newType.toLowerCase() == "candlestick") {
+
+            var dateData = ["2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01", "2020-05-01", "2020-06-01", "2020-07-01", "2020-08-01", "2020-09-01", "2020-10-01", "2020-11-01", "2020-12-01"];
+            let arr = [];
+            dateData.map((val, index) => {
+                let obj = {
+                    x: luxon.DateTime.fromSQL(dateData[index])["ts"],
+                    o: Openvalue[index],
+                    h: Highvalue[index],
+                    l: Lowvalue[index],
+                    c: Closevalue[index]
+                };
+                arr.push(obj);
+            });
+            //console.log("ARRAY:", arr);
+
+            var config = {
+                type: newType,
+                data: {
+                    datasets: [{
+                        label: 'CHRT - Chart.js Corporation',
+                        data: arr
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        //legend: {
+                        //    display: legendShow
+                        //},
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            title: {
+                                //display: Boolean(x_showtitle),
+                                display: x_showtitle,
+                                text: x_titlename,
+                                color: x_color,
+                                font: {
+                                    family: x_fontfamily,
+                                    size: parseInt(x_fontsize),
+                                    weight: x_fontstyle,
+                                    lineHeight: 1.2,
+                                }
+                            },
+                            ticks: {
+                                //display: Boolean(AxisShow),
+                                display: AxisShow,
+                                color: x_label_color,
+                                font: {
+                                    family: x_label_fontfamily,
+                                    size: parseInt(x_label_fontsize),
+                                    weight: x_label_fontstyle,
+                                    align: x_label_align,
+                                }
+                            },
+                            grid: {
+                                //display: Boolean(gridLinesShow)
+                                display: gridLinesShow
+                            }
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                //display: Boolean(y_showtitle),
+                                display: y_showtitle,
+                                text: y_titlename,
+                                color: y_color,
+                                font: {
+                                    family: y_fontfamily,
+                                    size: parseInt(y_fontsize),
+                                    weight: y_fontstyle,
+                                    lineHeight: 1.2,
+                                }
+                            },
+                            ticks: {
+                                //display: Boolean(AxisShow),
+                                display: AxisShow,
+                                color: y_label_color,
+                                font: {
+                                    family: y_label_fontfamily,
+                                    size: parseInt(y_label_fontsize),
+                                    weight: y_label_fontstyle,
+                                    align: y_label_align,
+                                }
+                            },
+                            grid: {
+                                //display: Boolean(gridLinesShow)
+                                display: gridLinesShow
+                            }
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "gauge") {
+            newType = 'doughnut';
+
+            var randomValue = function (data) {
+                return parseFloat(Math.max.apply(null, data) * Math.random()).toFixed(2);
+            };
+
+            var sum = heightValueData.reduce(function (a, b) { return a + b; }, 0);
+
+            var needle_data_val = randomValue(heightValueData) / sum * 100;
+            needle_data_val = Math.round(needle_data_val);
+
+            if (Xaxisvalue.length != 0) {
+                var GaugeData = {
+                    labels: Xaxisvalue,
+                    datasets: [
+                        {
+                            label: hvll,
+                            backgroundColor: ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "orange", "purple", "violet", "blue", "green", "red"],
+                            data: heightValueData,
+                            needleValue: randomValue(heightValueData),
+                            borderColor: 'Black',
+                            borderWidth: 1,
+                            //cutout: '90%',
+                            circumference: 180,
+                            rotation: 270
+                        }
+                    ]
+                };
+            }
+
+            //console.log("Gauge Data:", GaugeData);
+
+            var gaugeNeedle = {
+                id: 'gaugeNeedle',
+                afterDatasetDraw(chart, args, options) {
+                    var { ctx, config, data, chartArea: { top, bottom, left, right, width, height } } = chart;
+                    ctx.save();
+                    var needleValue = data.datasets[0].needleValue;
+                    var dataTotal = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    var angle = Math.PI + (1 / dataTotal * needleValue * Math.PI);
+                    var cx = width / 2;
+                    var cy = (chart._metasets[0].data[0].y - 10);
+
+                    //needle
+                    ctx.translate(cx, cy);
+                    ctx.rotate(angle);
+                    ctx.beginPath();
+                    ctx.moveTo(0, -10);
+                    ctx.lineTo(height - (ctx.canvas.offsetTop + 50), 0);
+                    ctx.lineTo(0, 10);
+                    ctx.fillStyle = '#444';
+                    ctx.fill();
+                    ctx.restore();
+
+                    // needle dot
+                    //ctx.translate(-cx,-cy);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 5, 0, 10);
+                    ctx.fill();
+                    ctx.restore();
+
+                    ctx.font = '20px black';
+                    ctx.fillStyle = '#444';
+                    //ctx.fillText(needleValue + '%', cx + 20, cy - 90);
+                    ctx.fillText(needleValue + '%', cx + 50, cy - 50);
+                    ctx.textAlign = 'center';
+                    ctx.restore();
+                }
+            }
+
+            var config = {
+                type: newType,
+                data: GaugeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function (context) {
+                                    //return context['dataset']['label'] + ": " + context['dataset']['data'][context.dataIndex];
+                                    return context.chart.data.labels[context.dataIndex] + ":" + context['dataset']['data'][context.dataIndex];
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [gaugeNeedle]
+            };
+
+        }
+
+        var chartElement = "myChart" + chartId;
+        var ctx = document.getElementById(chartElement).getContext('2d');
+
+        var temp = jQuery.extend(true, {}, config);
+        temp.type = newType;
+        myChart = new Chart(ctx, temp);
+    };
+</script>
+<script>
+    function createdynamictable(yourdata, chartname, id) {
+
+        var tablename = '#mytable' + id;
+        var parsedata = JSON.parse(yourdata);
+        var table = document.createElement("table");
+        table.setAttribute("id", tablename);
+        table.classList.add('table');
+
+        for (var i = 0; i <= parsedata.length; i++) {
+            tr = table.insertRow(-1);
+
+            for (var key in parsedata[0]) {
+                if (i == 0) {
+                    //Inserting columns fields to the table
+                    var trCell = tr.insertCell(-1);
+                    trCell.innerHTML = key;
+                }
+                else {
+                    //Inserting table values to the table
+                    var trCell = tr.insertCell(-1);
+                    trCell.innerHTML = parsedata[i - 1][key];
+                }
+            };
+
+        }
+
+
+        var div = document.getElementById(chartname);
+        div.innerHTML = "";
+        div.appendChild(table);
+
+        $(function () {
+            $(tablename).DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false
+            });
+        });
+
+
+
+    }
+    function createdynamiclabel(yourdata, chartname, caption, color, id) {
+        var dataValue = '';
+        var eleName = "#" + chartname;
+        var label_id = "#mylabel" + id;
+        var newLabel = "";
+        var newDiv = $('<div class="col" id="mylabel' + id + '"></div>').appendTo(eleName);
+        for (var i = 0; i < yourdata.length; i++) {
+            //var array = yourdata[i].split(/:|}|]/g);
+            //dataValue = array[1];
+            //dataValue = parseFloat(dataValue).toFixed(5);
+            dataValue = parseFloat(yourdata[i]).toFixed(5);
+            newLabel = $('<div class="row">'
+                + '<div class="col-sm-10">'
+                + '<h3 class="headerText" style="font-size:40px; overflow:hidden; font-weight:500; color:#fff; padding:10px;">' + dataValue + '</h3>'
+                + '<p class="text-white pl-3 headerText" style="font-size:20px; font-weight:500;">' + caption[i] + '</p>'
+                + '</div><div class="col-sm-2">'
+                + '<div class="float-right">'
+                + '<div class="icon"><i class="fas fa-signal" style="color:#fff; font-size:60px"></i></div>'
+                + '</div></div></div>');
+
+            $(newDiv).append(newLabel);
+        }
+
+        var colorName = '';
+        if (color.indexOf("#") < 0)
+            colorName = '#' + color;
+        else
+            colorName = color;
+
+        $(eleName).css("backgroundColor", colorName);
+        $(eleName).css("border-radius", "0.25rem");
+        $('.iconClass').css("color", "White");
+        $('.headerText').css("color", "White");
+    }
+    function createdynamicMultilabel(yourdata, chartname, caption, labelposition, color, id) {
+        var dataValue = '';
+        var eleName = "#" + chartname;
+        var newLabel = "";
+
+        var newDiv = $('<div class="container" id="stickyContainer' + id + '"></div>').appendTo(eleName);
+        $('#stickyContainer' + id).css("display", "grid");
+        $('#stickyContainer' + id).css("grid-template-columns", "repeat(" + yourdata.length + ", 1fr)");
+        $('#stickyContainer' + id).css("grid-template-rows", "repeat(" + yourdata.length + ", 1fr)");
+
+        for (var i = 0; i < yourdata.length; i++) {
+            //var array = yourdata[i].split(/:|}|]/g);
+            //dataValue = array[1];
+            //dataValue = parseFloat(dataValue).toFixed(5);
+            dataValue = parseFloat(yourdata[i]).toFixed(5);
+            newLabel = $('<div class="col" id="mylabel' + id + i + '">'
+                + '<div class="row">'
+                + '<div class="col-sm-10">'
+                + '<h3 class="headerText" style="font-size:40px; overflow:hidden; font-weight:500; color:#fff; padding:10px;">' + dataValue + '</h3>'
+                + '<p class="text-white pl-3 headerText" style="font-size:20px; font-weight:500;">' + caption[i] + '</p>'
+                + '</div><div class="col-sm-2">'
+                + '<div class="float-right">'
+                + '<div class="icon"><i class="fas fa-signal" style="color:#fff; font-size:60px"></i></div>'
+                + '</div></div></div></div>');
+
+            $(newDiv).append(newLabel);
+
+            var alignVal = labelposition[i];
+            var alignDataSet = getAlignmentValue(alignVal);
+            $('#mylabel' + id + i).css('grid-row', alignDataSet[0]);
+            $('#mylabel' + id + i).css('grid-column', alignDataSet[1]);
+
+        }
+
+        var colorName = '';
+        if (color.indexOf("#") < 0)
+            colorName = '#' + color;
+        else
+            colorName = color;
+
+        $(eleName).css("backgroundColor", colorName);
+    }
+    function getAlignmentValue(alignValue) {
+        var alignSet = [];
+        if (alignValue == 'ul') {
+            alignSet.push('1', '1');
+        }
+        else if (alignValue == 'um') {
+            alignSet.push('1', '2');
+        }
+        else if (alignValue == 'ur') {
+            alignSet.push('1', '3');
+        }
+        else if (alignValue == 'll') {
+            alignSet.push('3', '1');
+        }
+        else if (alignValue == 'lm') {
+            alignSet.push('3', '2');
+        }
+        else if (alignValue == 'lr') {
+            alignSet.push('3', '3');
+        }
+        else if (alignValue == 'ml') {
+            alignSet.push('2', '1');
+        }
+        else if (alignValue == 'mm') {
+            alignSet.push('2', '2');
+        }
+        else if (alignValue == 'mr') {
+            alignSet.push('2', '3');
+        }
+        else { }
+
+        return alignSet;
+    }
+</script>
+<script>
+    function DrawTheTable(tval, data, qid, chartType, chartId) {
+        $.ajax({
+                type: "POST",
+                //contentType: false,
+                url: '@Url.Content("~/DashBoard/KpiTabularData?QueryId=")' + qid + "&chartparams=" + data,
+                success: function (modelval) {
+                    var mainTab = "myChart" + chartId;
+                    createdynamictable(modelval, mainTab, chartId);
+                }
+            });
+
+    };
+    function DrawTheLabel(tval, data, qId, chartType, chartId, chart_caption, chart_color) {
+        data = data.replace("#", "");
+           $.ajax({
+                type: "POST",
+               url: '@Url.Content("~/DashBoard/KpiLabelData?QueryId=")' + qId + "&chartparams=" + data,
+                success: function (modelval) {
+                    var modelData = modelval.Success;
+                    var modelColor = modelval.Message;
+                    var modelCaption = modelval.DataVal;
+                    var mainTab = "myChart" + chartId;
+                    createdynamiclabel(modelData, mainTab, modelCaption, modelColor, chartId);
+                }
+            });
+
+    };
+</script>
+
+
+
+
+
+

@@ -1,0 +1,3072 @@
+﻿@using MassApplication.Models.Graph;
+@model ChartParameters
+@using System.Data;
+
+@{
+    ViewBag.Title = "Edit Chart View";
+}
+
+<link rel="stylesheet" href="~/GraphStyles/css/styles.css?v=1">
+<link rel="stylesheet" href="~/LoginStyles/css/font-awesome.min.css" />
+<link rel="stylesheet" href="~/GraphStyles/css/spectrum.css" />
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.24/themes/smoothness/jquery-ui.css" />
+
+
+<style>
+    .table tr td input {
+        display: block;
+    }
+
+    #data_container, #container {
+        display: none;
+    }
+
+    #myTabInner a.card1:hover img {
+        filter: brightness(0) invert(1);
+    }
+
+    #myTabInner .nav-link.active h5 {
+        color: #ffffff;
+    }
+
+    #myTabInner .nav-link.active p {
+        color: #ffffff;
+    }
+
+    #myTabInner .nav-link.active img {
+        filter: brightness(0) invert(1);
+    }
+
+    #myTabInnerData a.card1 {
+        color: #ffffff;
+        border-radius: 5px;
+        text-transform: uppercase;
+        padding: 6px 10px;
+    }
+
+        #myTabInnerData a.card1:hover h5 {
+            color: #ffffff;
+            text-transform: uppercase;
+        }
+
+        #myTabInnerData a.card1:hover p {
+            color: #ffffff;
+            text-transform: capitalize;
+        }
+
+    #myTabInnerData .nav-link.active h5 {
+        color: #ffffff;
+        text-transform: uppercase;
+    }
+
+    #myTabInnerData .nav-link.active p {
+        color: #ffffff;
+        text-transform: capitalize;
+    }
+
+    #myTabInnerData .nav-link.active p {
+        color: #ffffff;
+        text-transform: capitalize;
+    }
+</style>
+<style>
+    .panel-right {
+        padding: 10px;
+    }
+
+    .drag-style {
+        border: 1px solid #ddd;
+        background: #ddd;
+        text-align: center;
+        padding-right: 15px;
+        padding-left: 15px;
+        border-radius: 4px;
+        z-index: -1;
+        /*height:84px;*/
+    }
+
+    .drag-style1 {
+        border: 1px solid #ddd;
+        background: #ddd;
+        text-align: center;
+        padding-right: 15px;
+        padding-left: 15px;
+        border-radius: 4px;
+        z-index: -1;
+        /*height: 96px;*/
+    }
+
+    .drag-style2 {
+        border: 1px solid #ddd;
+        background: #ddd;
+        text-align: center;
+        padding-right: 15px;
+        padding-left: 15px;
+        border-radius: 4px;
+        z-index: -1;
+        /* height: 96px;*/
+    }
+
+    .picker {
+        border-radius: 5px;
+        width: 25px;
+        height: 20px;
+        cursor: pointer;
+        -webkit-transition: all linear .2s;
+        -moz-transition: all linear .2s;
+        /* -ms-transition: all linear .2s;*/
+        -o-transition: all linear .2s;
+        transition: all linear .2s;
+        border: thin solid #eee;
+    }
+
+        .picker:hover {
+            transform: scale(1.1);
+        }
+
+    .sp-preview {
+        border: none;
+    }
+
+    .sp-replacer {
+        width: 50px;
+        background: none;
+        /* background: #f4f6f9;*/
+        /* background: white;*/
+        border: none;
+    }
+
+    .sp-preview, .sp-alpha, .sp-thumb-el {
+        width: 60%;
+    }
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="page-container" style="width:100%;">
+                <div class="panel-container">
+                    <div class="panel-left card mt-2">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist" style="position:relative">
+                            <li class="nav-item">
+                                <a class="nav-link" href="#editChartTab" data-toggle="tab">Chart</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#editDataTab" data-toggle="tab">Data</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#editMappingTab" data-toggle="tab">Mapping</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane tab" id="editChartTab">
+                                <div class="row contact-trap">
+                                    <ul class="nav nav-tabs border-bottom-0" id="myTabInner" role="tablist">
+                                        @for (var i = 0; i < Model.chartlist.Count; i++)
+                                        {
+                                            var chartCol = "chartTab-" + Model.chartlist[i].charttype;
+                                            <li class="nav-item">
+                                                <a class="nav-link card1" id="@chartCol" data-toggle="tab" href="#" role="tab" data-id="@Model.chartlist[i].chart_type_id" data_type="@Model.chartlist[i].charttype">
+                                                    <div class="media button" data-value="@Model.chartlist[i].ChartParams" id="@Model.chartlist[i].chart_type_id" name="@Model.chartlist[i].charttype" data-id="@Model.chartlist[i].charttype" data-img="@Model.chartlist[i].image_path" data-description="@Model.chartlist[i].description">
+                                                        <img src=@Url.Content(@Model.chartlist[i].icon_path) style="width:48px" class="pr-3" />
+                                                        <div class="media-body">
+                                                            <h5>@Model.chartlist[i].charttype</h5>
+                                                            <p>Correlations, proportions </p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                                <button type="button" class="next btn btn-dash float-right mr-3 pl-3 pr-3 mt-4 mb-3 tab-active">Next</button>
+                            </div>
+                            <div class="tab-pane tab" id="editDataTab">
+                                <div class="row contact-trap">
+                                    <ul class="nav nav-tabs border-bottom-0" id="myTabInnerData" role="tablist">
+                                        @for (var i = 0; i < Model.Listquery.Count; i++)
+                                        {
+                                            var dataCol = "dataTab-" + Model.Listquery[i].query_id;
+                                            <li class="nav-item">
+                                                <a class="nav-link card1" id="@dataCol" data-toggle="tab" href="#" role="tab">
+                                                    <div class="media databtn" data-id="@Model.Listquery[i].query_id">
+                                                        <div class="media-body">
+                                                            <h5 class=" mt-2"> @Model.Listquery[i].function_name</h5>
+                                                            <p class="pt-1">Dendrogram </p>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                                <button type="button" class="next btn btn-dash  float-right mr-3 pl-3 pr-3 mt-4 mb-3 tab-active1" onclick="show_functions();">Next</button>
+                            </div>
+                            <div class="tab-pane tab active" id="editMappingTab">
+                                <div class="row contact-trap">
+                                    <div id="left_container" class="draggable" style="z-index:2">
+                                        @{Html.RenderAction("_partialgetEditdataby_id_columns", "Graph", new { query_id = Model.Active_queryID });}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="splitter"> </div>
+                    <div class="panel-right card mt-2" id="div2">
+                        <div class="map_data mb-2">
+                            <p class="d-flex float-right">
+                                <input type="button" id="loadChart_edit" class="btn  btn-dash mr-2" value="View Chart" style="width:100px;">
+                                <button type="button" id="saveChart_edit" class="btn btn-green" data-toggle="modal" data-target="#myEditKpiModal" style="width:100px;">Save</button>
+                            </p>
+                        </div>
+
+                        <div id="container" class="chartContainer"></div>
+                        <div id="chartDataPortion">
+                            <div id="chartDiv" class="chartbar mt-1 p-2" style="display: block; height: 334px; box-sizing: border-box; width: 1002px;">
+                                <canvas id="myChart" style="height:334px"></canvas>
+
+                                <div id="tabular_container" class="tabular pb-3"></div>
+
+                                <div id="labelgraph_container" class="labelgraph card pb-3 pt-3">
+
+                                </div>
+                            </div>
+
+                            <div class="chartContainer2 mb-3 mt-2" style="margin-top:5px">
+                                <form>
+                                    <div class="form-row" id="container_chart" style="display: flex;"></div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="data_container" class="chartContainer" style="margin-top: 0px;">
+                            @*@{Html.RenderAction("GetEditDataById", "Graph", new { getQuery_id = Model.Active_queryID });}*@
+                            @*@Html.Partial("~/Views/Shared/_partialKPIDataTable.cshtml")*@
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- The Modal -->
+<div class="modal" id="myEditKpiModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Generate KPI </h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form action="/action_page.php">
+                    @Html.HiddenFor(model => model.kpi_data_id, new { id = "edit_kpi_id" })
+                    <div class="form-group">
+                        <label for="email" class="mb-1 mt-2"> KPI Name </label>
+                        <input type="text" class="form-control form-height" placeholder="KPI Name" id="edit_kpi_name" value="@Model.kpi_data_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="pwd" class="mb-1 mt-2">Description</label>
+                        <input type="text" class="form-control form-height" placeholder="Description" id="edit_kpi_description" value="@Model.description">
+                    </div>
+                    <div class="form-group">
+                        <label for="pwd" class="mb-1 mt-2">User Type</label>
+                        @Html.DropDownList("edit_kpi_user_type", new SelectList(ViewBag.EditUserRoleType, "Value", "Text", Model.kpi_user_type_id), new { @class = "form-control" })
+                    </div>
+
+                    @*<div class="form-check">
+                            @{
+                                bool checkVal = Model.IsChecked;
+                                if (checkVal)
+                                {
+                                    <input type="checkbox" class="form-check-input" id="dashboardCheck" checked="checked">
+                                    <label class="form-check-label mt-1" for="dashboardCheck">System KPI</label>
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="form-check-input" id="dashboardCheck">
+                                    <label class="form-check-label mt-1" for="dashboardCheck">System KPI</label>
+                                }
+                            }
+                        </div>*@
+
+                </form>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+                <input type="button" class="BtnEditSubmitKpi btn btn-green mt-2 pl-4 pr-4" value="Update" />
+                <button type="button" class="BtnEditCloseKpi btn btn-dash pl-4 pr-4" data-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/docs.js"></script>
+<script src="~/Scripts/prettify.js"></script>
+<script src="~/GraphStyles/js/spectrum.js"></script>
+<script src="~/Scripts/toc.js"></script>
+<script src="~/Scripts/Chart-js/chart.js"></script>
+<script src="~/Scripts/SweetAlert2/sweetalert2.all.min.js"></script>
+
+<script>
+    var myChart;
+    var modelData;
+    var objArray = [];
+    var count = 0; //FOR TABLUAR CHART
+    var tabularArray = [];  //FOR TABLUAR CHART
+    $(document).ready(function () {
+        modelData = null;
+        var heightData = [];
+        var xvl;
+        var hvl;
+        var thvl;
+        var cvl;
+        var colorarray = '@ViewBag.DefineColor';
+        var tempcolor = colorarray.split(",");
+        var chart_type = '@Model.chart_type_name_edit';
+        var dictData = @Html.Raw(Json.Encode(Model.json_tuple));
+        //console.log("dictData:", dictData);
+        var keytupleData = @Html.Raw(Json.Encode(Model.keyvalue_tuple));
+        //console.log("keytupleData:", keytupleData);
+        var chartparams = @Html.Raw(Json.Encode(Model.ChartParams));
+        var chartparamData = eval('(' + chartparams + ')');
+        var query_id = @Html.Raw(Model.Active_queryID);
+        var imgPath = "@Html.Raw(Model.image_path)";
+        imgPath = imgPath.trim();
+        imgPath = imgPath.replace("~", "..");
+        GetTableView(query_id);
+        GetMappingColumnView(query_id);
+        GetChartImageView(chart_type, imgPath);
+
+        var dataColVal = "dataTab-" + query_id;
+        var chartColVal = "chartTab-" + chart_type;
+        $('#' + dataColVal).addClass("active");
+        $('#' + chartColVal).addClass("active");
+
+        var paramData = @Html.Raw(Json.Encode(Model.chart_selected_params_edit));
+        var paramObject = eval('(' + paramData + ')');
+        //console.log("paramObject:", paramObject);
+        var tData = [paramObject];
+        var colorData = [];
+        let obj = Object.keys(tData[0]);
+        for (let i = 0; i < obj.length; i++) {
+            let item = obj[i];
+            if (item == 'Xaxis') {
+                xvl = tData[0][item];
+                let data = {
+                    key: item,
+                    value: xvl
+                }
+                heightData.push(data);
+            }
+            else if (item == 'Height') {
+                hvl = tData[0][item].split(",");
+                for (let j = 0; j < hvl.length; j++) {
+                    var dataval = hvl[j];
+                    let data = {
+                        key: item,
+                        value: dataval
+                    }
+                    heightData.push(data);
+                }
+            }
+            else if (item == 'Threshold') {
+                thvl = tData[0][item].split(",");
+                for (let j = 0; j < thvl.length; j++) {
+                    var threshold_dataval = thvl[j];
+                    let data = {
+                        key: item,
+                        value: threshold_dataval
+                    }
+                    heightData.push(data);
+                }
+            }
+            else if (item.toLowerCase() == 'color') {
+                //cvl = tData[0][item].split("),");
+                cvl = tData[0][item].split(/,(?![^()]*\))\s*/g);
+                //console.log("cvl", cvl);
+                for (let j = 0; j < cvl.length; j++) {
+                    var color_dataval = cvl[j];
+                    //color_dataval = color_dataval + ")";
+                    //color_dataval = color_dataval.replace("))", ")");
+                    let data = {
+                        key: item,
+                        value: color_dataval
+                    }
+                    colorData.push(color_dataval);
+                    heightData.push(data);
+                }
+            }
+            else { }
+        }
+        if (chart_type.toLowerCase() == "tabular")
+        {
+            $('#container_chart').css('display', 'block');
+            createTabularColumn(paramObject, keytupleData);
+            createTabularChart();
+        }
+        else if (chart_type.toLowerCase() == "label")
+        {
+            createDefaultLabelColumn(chart_type, chartparamData, paramObject, keytupleData);
+        }
+        else
+        {
+            DrawEditChartViewLayout(paramObject, chart_type, dictData, heightData, tempcolor);
+            createChartColumn(chart_type, chartparamData, heightData, tempcolor, colorData);
+        }
+
+        //FOR TABULAR CHART, ADD OR REMOVE COLUMN FUNCTIONALITY
+        $("#BtnAddRow").click(function () {
+            var column_name = '';
+            var rawData = @Html.Raw(Json.Encode(Model.keyvalue_tuple));
+            createNewTabularColumn(column_name, rawData);
+        });
+        $("#BtnRemoveRow").click(function () {
+            $('#DynamicRow tr td:last').remove();
+            tabularArray = tabularArray.slice(0, -1);
+            //console.log("ARRAY:", tabularArray);
+        });
+
+        //FOR LABEL CHART, ADD OR REMOVE COLUMN FUNCTIONALITY
+        $('#BtnAddLabelRow').click(function () {
+            $('#BtnRemoveLabelRow').css('display', 'block');
+            var chart_type = '@Model.chart_type_name_edit';
+            var chartparams = @Html.Raw(Json.Encode(Model.ChartParams));
+            var chartparamData = eval('(' + chartparams + ')');
+            createNewLabelColumn(chart_type, chartparamData, null);
+        });
+        $('#BtnRemoveLabelRow').click(function () {
+            for (var i = 0; i < 3; i++) {
+                $('#container_chart .newlabel:last').remove();
+            }
+            var newdata = $('#container_chart .newlabel').html();
+            //console.log("newdata:", newdata);
+            if (newdata == null || newdata == '' || newdata == undefined) {
+                $('#BtnRemoveLabelRow').css('display', 'none');
+            }
+        });
+    });
+    //FOR TABULAR CHART
+    $(document).on('change', '.SelectiveCol', function () {
+        var selVal = $(this).val();
+        var Id_Val = $(this).attr('id');
+        Id_Val = Id_Val.split(/(\d+)/);
+        $('#getdatapass' + Id_Val[1]).val(selVal);
+        tabularArray = tabularArray.slice(0, -1);
+        tabularArray.push(selVal);
+    });
+</script>
+<!-- CLICK EVENT FOR CHART, DATA AND MAPPING TAB -->
+<script>
+    //CLICK EVENT FOR CHART TAB
+    $('a[href="#editChartTab"]').click(function () {
+        $('#container').css("display", "block");
+        $('#chartDataPortion').css("display", "none");
+        $('#data_container').css("display", "none");
+    });
+    //CLICK EVENT FOR DATA TAB
+    $('a[href="#editDataTab"]').click(function () {
+        $('#data_container').css("display", "block");
+        $('#chartDataPortion').css("display", "none");
+        $('#container').css("display", "none");
+    });
+    //CLICK EVENT FOR MAPPING   TAB
+    $('a[href="#editMappingTab"]').click(function () {
+        $('#chartDataPortion').css("display", "block");
+        $('#data_container').css("display", "none");
+        $('#container').css("display", "none");
+    });
+</script>
+<!-- CLICK EVENT FOR CHART NAME ITEMS -->
+<!-- CLICK EVENT FOR DATA QUERY ITEMS -->
+<!-- DEFINING add, add1, and colorpicker FUNCTION -->
+<script>
+    var addColorData = [];
+    var colorVal = '#fff';
+    var countNumber = 1;
+    $(".button").click(function () {
+        var chart_type = $(this).attr('data-id');
+        var chart_params = $(this).attr('data-value');
+        var resultJSON = chart_params;
+        var imgpath = $(this).attr('data-img');
+        imgpath = imgpath.replace("~", "..");
+
+        $('.chartContainer2').addClass('card p-3');
+        var container = document.getElementById("container_chart");
+        container.innerHTML = "";
+
+        var newNote = $("<div class='card p-2'><img class='card-img-top mt-1'  src= " + imgpath + " alt=" + chart_type + ">");
+        var newChartDiv = document.getElementById("container");
+        newChartDiv.innerHTML = "";
+        $(newChartDiv).append(newNote);
+
+        var result = $.parseJSON(resultJSON);
+        //console.log("RESULT:", result);
+        if (chart_type.toLowerCase() == "label") {
+            $('#container_chart').css('display', 'flex');
+            $.each(result, function (k, v) {
+                if (k.toLowerCase() == "label") {
+                    $(container).append('<div class="col-12 mb-2"><button type="button" id="BtnAddLabelRow" class="btn btn-dash ml-2 float-right"><i class="fa fa-plus"></i></button>'
+                        + '<button type="button" id="BtnRemoveLabelRow" class="btn btn-dash ml-2 float-right"><i class="fa fa-minus"></i></button>'
+                        + '</div>');
+
+                    $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label> <div style="display:flex"> <input type="search"'
+                        + 'placeholder=' + v + ' name=' + chart_type + '  class="indet form-control mb-3 labelInputTag" id=' + k + ' data-id="' + k + '" /><select name="drop_down_label"  style="width: 87px;" class="indet form-control mb-3" id=' + k + '>'
+                        + '<option>Select</option><option value=Avg>Avg</option><option value=Sum>Sum</option></select></div></div></div>');
+                }
+                else if (k.toLowerCase() == "color") {
+                    $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>'
+                        + '<div style="display:flex"><input type="text" class="mb-3 togglePaletteOnly" name="togglePaletteOnly" id=' + k + ' />'
+                        + '<select name = "drop_down_position"  style = "width: 140px;height: 25px;" class= "indet form-control mb-3" id = ' + k + ' > '
+                        + '<option>Select</option><option value=ul>Upper Left</option><option value=ur>Upper Right</option><option value=um>Upper Middle</option>'
+                        + '<option value=ml>Middle Left</option><option value=mr>Middle Right</option><option value=mm>Middle Middle</option>'
+                        + '<option value=ll>Lower Left</option><option value=lr>Lower Right</option><option value=lm>Lower Middle</option>'
+                        + '</select></div></div></div>');
+                }
+                else if (k.toLowerCase() == "caption") {
+                    $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label><input type="search"' +
+                        'placeholder=' + v + ' name=' + k + ' class="indet form-control mb-3" id=' + k + ' data-id="' + k + '" data-val="' + chart_type + '" /> </div></div>');
+                }
+                else { }
+
+                colorpicker();
+                $('#' + k).droppable({
+                    hoverClass: 'active',
+                    drop: function (event, ui) {
+                        this.value += (ui.draggable[0].getAttribute("data-id"));
+                    }
+                });
+            })
+            $('#BtnDeleteLabelRow').css('display', 'none');
+
+            $('#BtnAddLabelRow').click(function () {
+                //alert('ADD');
+                $('#BtnRemoveLabelRow').css('display', 'block');
+                var chartparamData = eval('(' + chart_params + ')');
+                createNewLabelColumn(chart_type, chartparamData, null);
+            });
+            $('#BtnRemoveLabelRow').click(function () {
+                //alert('REMOVE');
+                for (var i = 0; i < 3; i++) {
+                    $('#container_chart .newlabel:last').remove();
+                }
+                var newdata = $('#container_chart .newlabel').html();
+                //console.log("newdata:", newdata);
+                if (newdata == null || newdata == '' || newdata == undefined) {
+                    $('#BtnRemoveLabelRow').css('display', 'none');
+                }
+            });
+        }
+        else if (chart_type.toLowerCase() == "tabular") {
+            tabularArray = [];
+            $('#container_chart').html('');
+            createNewTabularFormat();
+        }
+        else {
+            $('#container_chart').css('display', 'flex');
+            createNewChartColumn(chart_type, result);
+        }
+    });
+    $(".databtn").on('click', function () {
+        var query_id = $(this).attr('data-id');
+        var chartType = $('.card1.active ').find('.button').attr('data-id');
+        //console.log("chartType:", chartType);
+        if (chartType.toLowerCase() == "tabular") {
+            tabularArray = [];
+            $('#container_chart').html('');
+            createNewTabularFormat();
+        }
+        GetTableView(query_id);
+        GetMappingColumnView(query_id);
+    });
+    function add(k, v, charttype, count_color_height) {
+        var functiondata = "add('" + k + "','" + v + "','" + charttype + "','" + count_color_height + "')";
+        var randomChars = '0123456789';
+        var result = '';
+        for (var i = 0; i < 20; i++) {
+            result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+        }
+        var idd = result;
+        countNumber++;
+        //var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-2" placeholder="number" data_id_name="Height" ondrop="add(1,1,1)"  id=' + result + ' /> <input type="text" class="togglePaletteOnly"  name="togglePaletteOnly"/><i style="margin-top: 9px;" class="fa fa-remove" onclick="$(this).parent().Urlemove();"></i></div>');
+        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="Height" ondrop=' + functiondata + '  id=' + result + ' />'
+            + '<input type="text" id="' + countNumber + '" class="togglePaletteOnly"  name="togglePaletteOnly" value="#fff"/>'
+            + '<i style="margin-top: 9px;" class="fa fa-remove" onclick="$(this).parent().remove();"></i></div>');
+
+        $(".drag-style1").append(fieldHTML);
+
+        if (addColorData.length != 0) {
+            colorVal = getColorValue(addColorData, countNumber);
+        }
+
+        $('#' + result).droppable({
+            hoverClass: 'active',
+            drop: function (event, ui) {
+                this.value += (ui.draggable[0].getAttribute("data-id"));
+            }
+        });
+
+        $(".togglePaletteOnly").spectrum({
+
+            showPaletteOnly: true,
+            togglePaletteOnly: true,
+            togglePaletteMoreText: 'more',
+            togglePaletteLessText: 'less',
+            /*color: '#fff',*/
+            color: colorVal,
+            /* color: colorData,*/
+            palette: [
+                /*   ["#fff", "#f3f3f3", "#eee", "#ccc", "#999", "#666", "#444", "#000"],*/
+                ["#000", "#444", "#666", "#999", "#ccc", "#eee", "#f3f3f3", "#fff"],
+                ["#f00", "#f90", "#ff0", "#0f0", "#0ff", "#00f", "#90f", "#f0f"],
+                ["#f4cccc", "#fce5cd", "#fff2cc", "#d9ead3", "#d0e0e3", "#cfe2f3", "#d9d2e9", "#ead1dc"],
+                ["#ea9999", "#f9cb9c", "#ffe599", "#b6d7a8", "#a2c4c9", "#9fc5e8", "#b4a7d6", "#d5a6bd"],
+                ["#e06666", "#f6b26b", "#ffd966", "#93c47d", "#76a5af", "#6fa8dc", "#8e7cc3", "#c27ba0"],
+                ["#c00", "#e69138", "#f1c232", "#6aa84f", "#45818e", "#3d85c6", "#674ea7", "#a64d79"],
+                ["#900", "#b45f06", "# ", "#38761d", "#134f5c", "#0b5394", "#351c75", "#741b47"],
+                ["#600", "#783f04", "#7f6000", "#274e13", "#0c343d", "#073763", "#20124d", "#4c1130"]
+            ],
+            move: function (color) {
+                colorVal = color.toHexString();
+                addColorData.push({
+                    key: $(this).attr('id'),
+                    value: colorVal
+                });
+            }
+        });
+    }
+    function add1(k, v, charttype) {
+        var functiondata = "add1('" + k + "','" + v + "','" + charttype + "')";
+        var randomChars = '0123456789';
+        var result = '';
+        for (var i = 0; i < 20; i++) {
+            result += randomChars.charAt(Math.floor(Math.random() * randomChars.length));
+        }
+        var idd = result;
+        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="Threshold" ondrop=' + functiondata + '  id=' + result + ' />' +
+            '<i style="margin-top: 9px;" class="fa fa-remove ml-2" onclick=" $(this).parent().remove();"></i></div>');
+
+        $(".drag-style2").append(fieldHTML);
+
+        $('#' + result).droppable({
+            hoverClass: 'active',
+            drop: function (event, ui) {
+                this.value += (ui.draggable[0].getAttribute("data-id"));
+            }
+        });
+    }
+    function colorpicker() {
+        $(".togglePaletteOnly").spectrum({
+            showPaletteOnly: true,
+            togglePaletteOnly: true,
+            togglePaletteMoreText: 'more',
+            togglePaletteLessText: 'less',
+            color: '#fff',
+            palette: [
+                ["#000", "#444", "#666", "#999", "#ccc", "#eee", "#f3f3f3", "#fff"],
+                ["#f00", "#f90", "#ff0", "#0f0", "#0ff", "#00f", "#90f", "#f0f"],
+                ["#f4cccc", "#fce5cd", "#fff2cc", "#d9ead3", "#d0e0e3", "#cfe2f3", "#d9d2e9", "#ead1dc"],
+                ["#ea9999", "#f9cb9c", "#ffe599", "#b6d7a8", "#a2c4c9", "#9fc5e8", "#b4a7d6", "#d5a6bd"],
+                ["#e06666", "#f6b26b", "#ffd966", "#93c47d", "#76a5af", "#6fa8dc", "#8e7cc3", "#c27ba0"],
+                ["#c00", "#e69138", "#f1c232", "#6aa84f", "#45818e", "#3d85c6", "#674ea7", "#a64d79"],
+                ["#900", "#b45f06", "# ", "#38761d", "#134f5c", "#0b5394", "#351c75", "#741b47"],
+                ["#600", "#783f04", "#7f6000", "#274e13", "#0c343d", "#073763", "#20124d", "#4c1130"]
+            ]
+        });
+
+        var imagedata1 = $('#container').find('.card-img-top').attr('alt');
+        if (imagedata1 == "label") {
+            $('.sp-replacer').css("width", "50%");
+            $('.picker').css("width", "132px");
+        }
+        else {
+            /* $('.sp-replacer').css("width", "20%");*/
+        }
+
+    }
+    function colorpickers(colorValue, colorId) {
+        if (colorValue == null && colorValue == '') { colorValue = '#fff'; }
+        $(".togglePaletteOnly" + colorId).spectrum({
+            showPaletteOnly: true,
+            togglePaletteOnly: true,
+            togglePaletteMoreText: 'more',
+            togglePaletteLessText: 'less',
+            color: colorValue,
+            palette: [
+                ["#000", "#444", "#666", "#999", "#ccc", "#eee", "#f3f3f3", "#fff"],
+                ["#f00", "#f90", "#ff0", "#0f0", "#0ff", "#00f", "#90f", "#f0f"],
+                ["#f4cccc", "#fce5cd", "#fff2cc", "#d9ead3", "#d0e0e3", "#cfe2f3", "#d9d2e9", "#ead1dc"],
+                ["#ea9999", "#f9cb9c", "#ffe599", "#b6d7a8", "#a2c4c9", "#9fc5e8", "#b4a7d6", "#d5a6bd"],
+                ["#e06666", "#f6b26b", "#ffd966", "#93c47d", "#76a5af", "#6fa8dc", "#8e7cc3", "#c27ba0"],
+                ["#c00", "#e69138", "#f1c232", "#6aa84f", "#45818e", "#3d85c6", "#674ea7", "#a64d79"],
+                ["#900", "#b45f06", "# ", "#38761d", "#134f5c", "#0b5394", "#351c75", "#741b47"],
+                ["#600", "#783f04", "#7f6000", "#274e13", "#0c343d", "#073763", "#20124d", "#4c1130"]
+            ]
+        });
+
+        var imagedata1 = $('#container').find('.card-img-top').attr('alt');
+        if (imagedata1 == "label") {
+            $('.sp-replacer').css("width", "50%");
+            $('.picker').css("width", "132px");
+        }
+        else {
+            /* $('.sp-replacer').css("width", "20%");*/
+        }
+
+    }
+    function colorpickerValue(colorValue) {
+        if (colorValue == null && colorValue == '') { colorValue = '#fff'; }
+        $(".togglePaletteOnly").spectrum({
+            showPaletteOnly: true,
+            togglePaletteOnly: true,
+            togglePaletteMoreText: 'more',
+            togglePaletteLessText: 'less',
+            color: colorValue,
+            palette: [
+                ["#000", "#444", "#666", "#999", "#ccc", "#eee", "#f3f3f3", "#fff"],
+                ["#f00", "#f90", "#ff0", "#0f0", "#0ff", "#00f", "#90f", "#f0f"],
+                ["#f4cccc", "#fce5cd", "#fff2cc", "#d9ead3", "#d0e0e3", "#cfe2f3", "#d9d2e9", "#ead1dc"],
+                ["#ea9999", "#f9cb9c", "#ffe599", "#b6d7a8", "#a2c4c9", "#9fc5e8", "#b4a7d6", "#d5a6bd"],
+                ["#e06666", "#f6b26b", "#ffd966", "#93c47d", "#76a5af", "#6fa8dc", "#8e7cc3", "#c27ba0"],
+                ["#c00", "#e69138", "#f1c232", "#6aa84f", "#45818e", "#3d85c6", "#674ea7", "#a64d79"],
+                ["#900", "#b45f06", "# ", "#38761d", "#134f5c", "#0b5394", "#351c75", "#741b47"],
+                ["#600", "#783f04", "#7f6000", "#274e13", "#0c343d", "#073763", "#20124d", "#4c1130"]
+            ]
+        });
+
+        var imagedata1 = $('#container').find('.card-img-top').attr('alt');
+        if (imagedata1 == "label") {
+            $('.sp-replacer').css("width", "50%");
+            $('.picker').css("width", "132px");
+        }
+        else {
+            /* $('.sp-replacer').css("width", "20%");*/
+        }
+
+    }
+    function getUniqueListBy(arr, key) {
+        return [...new Map(arr.map(item => [item[key], item])).values()]
+    }
+    function getColorValue(addColorData, key_element) {
+        var result = addColorData.filter(function (element) {
+            return element.key == key_element;
+        });
+
+        if (result.length > 0) {
+            var var_val = result[0].value;
+            return var_val;
+        }
+    }
+</script>
+<!-- DEFINING DrawEditChartViewLayout, DrawDynamicGraph, change, createChartColumn and createNewChartColumn FUNCTION -->
+<!-- DEFINING GetChartImageView, GetTableView and GetMappingColumnView FUNCTION -->
+<script>
+    //This function call when we click on the load button and load the appropriate chart.
+    function DrowTheGraph(data, name) {
+        //console.log("DATA:", data);
+        //console.log("NAME:", name);
+        var ActualdictData = [];
+        var threshld = [];
+        var Xaxisvalue = [];
+        var colors1 = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Xaxis';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Xaxisvalue = (result[0].value);
+        }
+        var Hightvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Height';
+        });
+
+        if (name == "line_threshold" || name == "bar_threshold" || name == "spline" || name == "bar" || name == "line" || name == "scatter" || name == "bubble" || name == "stacked_bar" || name == "step_line" || name == "area" || name == "heatmap" || name == "histogram") {
+            var dictData = [];
+            $('.drag-style1 input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                dictData.push(grade);
+            });
+
+          /*  $('.drag-style1 input[type=text]').each(function (i, item) {*/
+            $('.drag-style1 input[name=togglePaletteOnly]').each(function (i, item) {
+                var colorData = $(item).val();
+                if (colorData != null && colorData != '' && colorData != undefined) {
+                    colors1.push(colorData);
+                }
+            });
+
+            for (i = 0; i < result.length; i++) {
+                Hightvalue[i] = (result[i].value);
+                ActualdictData.push({
+                    key: dictData[i],
+                    value: Hightvalue[i]
+                })
+            }
+        }
+        else {
+            if (result.length > 0) {
+                // we have found a corresponding element
+                Hightvalue = (result[0].value);
+            }
+        }
+
+        var Groupvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Group';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Groupvalue = (result[0].value);
+        }
+
+        var Colorvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Color';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Colorvalue = (result[0].value);
+        }
+
+        var Datevalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Date';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Datevalue = (result[0].value);
+        }
+
+        var Highvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'High';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Highvalue = (result[0].value);
+        }
+
+        var Lowvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Low';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Lowvalue = (result[0].value);
+        }
+
+        var Openvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Open';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Openvalue = (result[0].value);
+        }
+
+        var Closevalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Close';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Closevalue = (result[0].value);
+        }
+
+
+        var threshold = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Threshold';
+        });
+
+
+
+        if (name == "line_threshold" || name == "bar_threshold") {
+            var thrhld = []
+            $('.drag-style2 input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                thrhld.push(grade);
+            });
+
+            for (i = 0; i < result.length; i++) {
+                Hightvalue[i] = (result[i].value);
+                threshld.push({
+                    key: thrhld[i],
+                    value: result[i].value
+                })
+            }
+        }
+        else {
+
+            if (result.length > 0) {
+                // we have found a corresponding element
+                threshold = (result[0].value);
+            }
+
+        }
+
+        var xvl = $("#Xaxis").val();
+        var hvl = $("#Height" + name).val();
+        var gvl = $("#Group").val();
+        var cvl = $("#Color").val();
+        var dvl = $("#Date").val();
+        var highvl = $("#High").val();
+        var lowvl = $("#Low").val();
+        var openvl = $("#Open").val();
+        var closevl = $("#Close").val();
+
+        change(name, colors1, ActualdictData, threshld, Xaxisvalue, Hightvalue, Groupvalue, Colorvalue, Datevalue, Highvalue, Lowvalue, Openvalue, Closevalue, xvl, gvl, hvl, colors1, dvl, highvl, lowvl, openvl, closevl);
+    }
+    //This function calls when we firstly load the chart on edit mode
+    function DrawEditChartViewLayout(data, name, jsonData, chart_parameters, defaultColor) {
+        var t = [data];
+        //console.log("t:",t);
+        var xvl;
+        var hvl;
+        var gvl;
+        var cvlOld;
+        var cvl = [];
+        var dvl;
+        var highvl;
+        var lowvl;
+        var openvl;
+        var closevl;
+        var thvl;
+        var actualHeightData = [];
+        var thresholdVal = [];
+        var myObject = eval('(' + jsonData + ')');
+        //console.log("myObject:", myObject);
+        let obj = Object.keys(t[0]);
+
+        let ArrayData = [];
+        for (let i = 0; i < obj.length; i++) {
+            let ArrayItem = obj[i];
+            if (ArrayItem == 'Xaxis') {
+                xvl = t[0][ArrayItem];
+                let data = {
+                    key: ArrayItem,
+                    value: myObject.map((item) => {
+                        return item[xvl];
+                    })
+                }
+                ArrayData.push(data);
+            }
+            else if (ArrayItem == 'Height') {
+                hvl = t[0][ArrayItem].split(",");
+                for (let j = 0; j < hvl.length; j++) {
+                    var dataval = hvl[j];
+                    let data = {
+                        //key: dataval,
+                        key: ArrayItem,
+                        value: myObject.map((item) => {
+                            return item[dataval];
+                        })
+                    }
+                    let data1 = {
+                        key: dataval,
+                        value: myObject.map((item) => {
+                            return item[dataval];
+                        })
+                    }
+                    actualHeightData.push(data1);
+                    ArrayData.push(data);
+                }
+            }
+            else if (ArrayItem == 'Threshold') {
+                thvl = t[0][ArrayItem].split(",");
+                for (let j = 0; j < thvl.length; j++) {
+                    var dataval = thvl[j];
+                    let data = {
+                        key: dataval,
+                        value: myObject.map((item) => {
+                            return item[dataval];
+                        })
+                    }
+                    thresholdVal.push(data);
+                    ArrayData.push(data);
+                }
+            }
+            else if (ArrayItem == 'Group') {
+                gvl = t[0][ArrayItem];
+                let data = {
+                    key: ArrayItem,
+                    value: myObject.map((item) => {
+                        return item[gvl];
+                    })
+                }
+                ArrayData.push(data);
+            }
+            else if (ArrayItem.toLowerCase() == 'color') {
+                //cvlOld = t[0][ArrayItem].split("),");
+                cvlOld = t[0][ArrayItem].split(/,(?![^()]*\))\s*/g);
+                for (let j = 0; j < cvlOld.length; j++) {
+                    var color_dataval = cvlOld[j];
+                    //color_dataval = color_dataval + ")";
+                    //color_dataval = color_dataval.replace("))", ")");
+                    cvl.push(color_dataval);
+                }
+            }
+            else if (ArrayItem == 'Date') {
+                dvl = t[0][ArrayItem];
+                let data = {
+                    key: ArrayItem,
+                    value: myObject.map((item) => {
+                        return item[dvl];
+                    })
+                }
+                ArrayData.push(data);
+            }
+            else if (ArrayItem == 'High') {
+                openvl = t[0][ArrayItem];
+                let data = {
+                    key: ArrayItem,
+                    value: myObject.map((item) => {
+                        return item[openvl];
+                    })
+                }
+                ArrayData.push(data);
+            }
+            else if (ArrayItem == 'Low') {
+                lowvl = t[0][ArrayItem];
+                let data = {
+                    key: ArrayItem,
+                    value: myObject.map((item) => {
+                        return item[lowvl];
+                    })
+                }
+                ArrayData.push(data);
+            }
+            else if (ArrayItem == 'Open') {
+                openvl = t[0][ArrayItem];
+                let data = {
+                    key: ArrayItem,
+                    value: myObject.map((item) => {
+                        return item[openvl];
+                    })
+                }
+                ArrayData.push(data);
+            }
+            else if (ArrayItem == 'Close') {
+                closevl = t[0][ArrayItem];
+                let data = {
+                    key: ArrayItem,
+                    value: myObject.map((item) => {
+                        return item[closevl];
+                    })
+                }
+                ArrayData.push(data);
+            }
+
+            else { }
+        }
+        //console.log("ArrayData:", ArrayData);
+        DrawDynamicGraph(ArrayData, actualHeightData, thresholdVal, name, xvl, gvl, hvl, cvl, dvl, highvl, lowvl, openvl, closevl, defaultColor);
+    }
+    //This function calls after the DrawEditChartViewLayout function
+    function DrawDynamicGraph(array_data, actualHeightData, thresholdVal, name, xval, gval, hval, cval, dval, highval, lowval, openval, closeval, defaultColor) {
+        //console.log("array_data:", array_data);
+        var Xaxisvalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Xaxis';
+        });
+
+        if (result.length > 0) {
+            Xaxisvalue = (result[0].value);
+        }
+
+        var Hightvalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Height';
+        });
+
+        if (result.length > 0) {
+            for (let i = 0; i < result.length; i++) {
+                Hightvalue[i] = (result[i].value);
+                //Hightvalue.push(result[i].value);
+            }
+        }
+
+        var threshold = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Threshold';
+        });
+
+        if (result.length > 0) {
+            for (let i = 0; i < result.length; i++) {
+                threshold.push(result[i].value);
+            }
+        }
+
+        var Groupvalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Group';
+        });
+
+        if (result.length > 0) {
+            Groupvalue = (result[0].value);
+        }
+
+        var Colorvalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Color';
+        });
+
+        if (result.length > 0) {
+            Colorvalue = (result[0].value);
+        }
+
+        var Datevalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Date';
+        });
+
+        if (result.length > 0) {
+            Datevalue = (result[0].value);
+        }
+
+        var Highvalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'High';
+        });
+
+        if (result.length > 0) {
+            Highvalue = (result[0].value);
+        }
+
+        var Lowvalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Low';
+        });
+
+        if (result.length > 0) {
+            Lowvalue = (result[0].value);
+        }
+
+        var Openvalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Open';
+        });
+
+        if (result.length > 0) {
+            Openvalue = (result[0].value);
+        }
+
+        var Closevalue = [];
+        var result = array_data.filter(function (element) {
+            return element.key == 'Close';
+        });
+
+        if (result.length > 0) {
+            Closevalue = (result[0].value);
+        }
+        change(name, defaultColor, actualHeightData, thresholdVal, Xaxisvalue, Hightvalue[0], Groupvalue, Colorvalue, Datevalue, Highvalue, Lowvalue, Openvalue, Closevalue, xval, gval, hval, cval, dval, highval, lowval, openval, closeval);
+    }
+    //This function calls when we creating the chart
+    function change(newType, colors1, ActualdictData, threshold, Xaxisvalue, Hightvalue, Groupvalue, Colorvalue, Datevalue, Highvalue, Lowvalue, Openvalue, Closevalue, xvl, gvl, hvl, cvl, dvl, highvl, lowvl, openvl, closevl) {
+        //console.log("CHANGE ActualdictData:", ActualdictData);
+        //console.log("CHANGE Xaxisvalue:", Xaxisvalue);
+        //console.log("CHANGE Hightvalue:", Hightvalue);
+        //console.log("CHANGE hvl:", hvl);
+        //console.log("CHANGE colors1:", colors1);
+        //console.log("CHANGE cvl:", cvl);
+        $('#myChart').css("height", "334px");
+        //var tempcolors = ["#1b5583", "#41516D", "#4D8FAC", "#695acd", "#2a52be", "#0073cf", "#00a8ff", "#89CFF0", "#008081", "#40e0d0", "#00ffff"];
+        var colorarray = '@ViewBag.DefineColor';
+        var tempcolor = colorarray.split(",");
+        //console.log("CHANGE tempcolor:", tempcolor);
+        var i = -1;
+        colors1 = colors1.map(function (x) { i++; return x.replace('#fff', tempcolor[i]); });
+        cvl = cvl.map(function (x) { ++i; return x.replace('#fff', tempcolor[i]);  });
+        //cvl = cvl.forEach(function (item, i) { if (item == '#fff') cvl[i] = tempcolor[i]; });
+        //console.log("cvl:", cvl);
+        if (cvl == null || cvl.length == 0 || cvl == undefined) {
+            cvl = tempcolor;
+        }
+        if (newType.toLowerCase() == "bubble" || newType.toLowerCase() == "scatter") {
+            var xlabel = [];
+            var label_data = [];
+            if (Hightvalue.length > 0) {
+                var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+
+                if (newType == "bubble") {
+                    for (let i = 0; i < ActualdictData.length; i++) {
+                        var newHeightData = ActualdictData[i].value;
+                        var datal = [];
+                        for (let j = 0; j < Xaxisvalue.length; j++) {
+                            if (i == 0) {
+                                xlabel.push(Xaxisvalue[j]);
+                            }
+                            datal.push({
+                                x: Xaxisvalue[j],
+                                y: newHeightData[j],
+                                r: 6
+                            });
+                        }
+                        label_data.push({
+                            label: ActualdictData[i].key,
+                            data: datal,
+                            backgroundColor: cvl[i],// random_rgba()
+                        });
+                    }
+                }
+                else if (newType == "scatter") {
+                    for (let i = 0; i < ActualdictData.length; i++) {
+                        var datal = [];
+                        var newHeightData = ActualdictData[i].value;
+                        for (let j = 0; j < Xaxisvalue.length; j++) {
+                            if (i == 0) {
+                                xlabel.push(Xaxisvalue[j]);
+                            }
+                            datal.push({
+                                x: Xaxisvalue[j],
+                                y: newHeightData[j]
+                            });
+                        }
+                        label_data.push({
+                            label: ActualdictData[i].key,
+                            data: datal,
+                            backgroundColor: cvl[i]
+                        });
+                    }
+                }
+                //console.log("labeldata_bubble", label_data);
+                var config = {
+                    type: name,
+                    data: {
+                        labels: Xaxisvalue,
+                        //labels: xlabel,
+                        datasets: label_data
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display: true, position: 'top',
+                            labels: {
+                                filter: function (item, data) {
+                                    //alert(item.text);
+                                    if (item.text != xvl) {
+                                        return true;
+                                    }
+                                    else {
+                                        return false;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            xAxes: {
+                                stacked: true
+                            },
+                            yAxes: {
+                                stacked: true
+                            }
+                        }
+
+                    }
+                };
+            }
+        }
+        else if (newType.toLowerCase() == "pie" || newType.toLowerCase() == "doughnut" || newType.toLowerCase() == "polararea") {
+            var hat = [];
+            var leng = Hightvalue.length;
+            hat = Hightvalue;
+            var config = {
+                type: name,
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: [
+                        {
+                            /*backgroundColor: ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"],*/
+                           /* backgroundColor: cvl,*/
+                            backgroundColor: tempcolor,
+                            data: Hightvalue,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            right: "100px",
+                            align: "middle"
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "line" || newType.toLowerCase() == "bar" || newType.toLowerCase() == "area" || newType.toLowerCase() == "spline") {
+            var delayed;
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+            var datasset = [];
+            var o_datasset = [];
+            var o_dataset = null;
+
+            var fl = false;
+            var sl = false;
+            var stked = false;
+            var splin = 0;
+            if (ActualdictData.length > 0) {
+                if (newType == "area".toLowerCase().toString()) {
+                    fl = true;
+                    newType = "line";
+                    sl = false;
+                }
+                else if (newType == "spline".toLowerCase().toString()) {
+                    newType = "line";
+                    splin = 0.6;
+                    fl = false;
+                    sl = false;
+                    stked = false;
+                }
+
+                for (let i = 0; i < ActualdictData.length; i++) {
+                    datasset.push({
+                        label: ActualdictData[i].key,
+                        backgroundColor: cvl[i],
+                        borderColor: cvl[i],
+                        hoverBackgroundColor: cvl[i],
+                        hoverBorderColor: cvl[i],
+                        data: ActualdictData[i].value,
+                        lineTension: splin,
+                        fill: fl,
+                        steppedLine: sl,
+                    });
+                }
+                //console.log("DatasSet_BAR", datasset);
+                var config = {
+                    type: newType,
+                    data: {
+                        labels: Xaxisvalue,
+                        datasets: datasset
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            tooltips: {
+                                enabled: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false
+                            },
+                            y: {
+                                stacked: false
+                            }
+                        }
+                    }
+                };
+            }
+        }
+        else if (newType.toLowerCase() == "line_threshold" || newType.toLowerCase() == "bar_threshold") {
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+            var colors2 = ["red", "orange", "black", "purple"];
+            var datasset = [];
+            var fl = false;
+            var sl = false;
+            var splin = 0;
+
+            if (ActualdictData.length > 0) {
+
+                if (newType == "bar_threshold".toLowerCase().toString()) {
+                    newType = "bar";
+                }
+                else if (newType == "line_threshold".toLowerCase().toString()) {
+                    newType = "line";
+                }
+
+
+                for (let i = 0; i < threshold.length; i++) {
+                    datasset.push({
+                        type: "line",
+                        label: threshold[i].key,
+                        backgroundColor: colors[i],
+                        borderColor: colors2[i],
+                        borderDash: [10, 10],
+                        data: threshold[i].value,
+                        lineTension: splin,
+                        fill: fl,
+                        steppedLine: sl,
+                    });
+                }
+
+                for (let i = 0; i < ActualdictData.length; i++) {
+                    datasset.push({
+                        type: newType,
+                        label: ActualdictData[i].key,
+                        backgroundColor: cvl[i],
+                        borderColor: cvl[i],
+                        data: ActualdictData[i].value,
+                        lineTension: splin,
+                        fill: fl,
+                        steppedLine: sl,
+                    });
+                }
+                //console.log("DatasSet_BAR", datasset);
+
+                var config = {
+                    data: {
+                        type: newType,
+                        labels: Xaxisvalue,
+                        datasets: datasset
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'center'
+                            },
+                            tooltips: {
+                                enabled: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false
+                            },
+                            y: {
+                                stacked: false
+                            }
+                        }
+                    }
+                };
+            }
+        }
+
+        else if (newType.toLowerCase() == "radar") {
+            var radarData = {
+                labels: Xaxisvalue,
+                datasets: [{
+                    label: hvl,
+                    data: Hightvalue,
+                    fill: true,
+                    backgroundColor: "lightblue",
+                    borderColor: "blue"
+                }]
+            };
+            var config = {
+                type: newType,
+                data: radarData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center'
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
+                },
+            };
+        }
+        else if (newType.toLowerCase() == "stacked_bar") {
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+            newType = 'bar';
+            var datasset = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                datasset.push({
+                    label: ActualdictData[i].key,
+                    data: ActualdictData[i].value,
+                    backgroundColor: cvl[i],
+                    borderColor: cvl[i],
+                    hoverBackgroundColor: cvl[i],
+                    hoverBorderColor: cvl[i]
+                });
+            }
+            //console.log("datasset:", datasset);
+
+            var config = {
+                type: newType,
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: datasset
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "step_line") {
+            newType = 'line';
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+            var datasset = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                datasset.push({
+                    label: ActualdictData[i].key,
+                    data: ActualdictData[i].value,
+                    borderColor: cvl[i],
+                    fill: false,
+                    stepped: true
+                });
+            }
+            var config = {
+                type: 'line',
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: datasset,
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false
+                        },
+                        y: {
+                            stacked: false
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        axis: 'x'
+                    }
+                }
+            };
+        }
+
+        else if (newType.toLowerCase() == "treemap") {
+            $('#myChart').css("height", "250px");
+            let arrayData = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                arrayData.push(ActualdictData[i].key);
+            }
+
+            let arr = [];
+            Hightvalue.map((val, index) => {
+                let obj = { [xvl]: Xaxisvalue[index], [hvl]: val, };
+                arr.push(obj);
+            });
+
+            //console.log("ARRAY:", arr);
+
+            var config = {
+                type: newType,
+                data: {
+                    datasets: [{
+                        //label: hvl,
+                        tree: arr,
+                        key: hvl,
+                        groups: [xvl],
+                        spacing: 0.5,
+                        borderWidth: 1.5,
+                        fontColor: "black",
+                        fontSize: 9,
+                        borderColor: "grey",
+                        backgroundColor: tempcolor[0]
+                        //backgroundColor: 'rgba(75, 00, 150, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltips: {
+                            callbacks: {
+                                title: function (item, data) {
+                                    return data.datasets[item[0].datasetIndex].key;
+                                },
+                                label: function (item, data) {
+                                    var dataset = data.datasets[item.datasetIndex];
+                                    var dataItem = dataset.data[item.index];
+                                    return dataItem.g + ': ' + dataItem.v;
+                                }
+                            }
+                        }
+                    },
+
+                }
+            }
+
+        }
+        else if (newType.toLowerCase() == "histogram") {
+            newType = 'bar';  //bar
+            var datasset = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                datasset.push({
+                    label: ActualdictData[i].key,
+                    data: ActualdictData[i].value,
+                    backgroundColor: cvl[i],
+                    borderColor: cvl[i],
+                    borderWidth: 1,
+                    barPercentage: 1.3,
+                    // categoryPercentage: 1
+                });
+            }
+
+            var histoData = {
+                labels: Xaxisvalue,
+                datasets: datasset
+            };
+            var config = {
+                type: newType,
+                data: histoData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center'
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false
+                        },
+                        y: {
+                            stacked: false,
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                                //callback: function (val, index) {
+                                //    return val / 100000;
+                                //}
+                            }
+                        }
+                    }
+                }
+            };
+
+        }
+        else if (newType.toLowerCase() == "candlestick") {
+
+            var dateData = ["2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01", "2020-05-01", "2020-06-01", "2020-07-01", "2020-08-01", "2020-09-01", "2020-10-01", "2020-11-01", "2020-12-01"];
+            let arr = [];
+            dateData.map((val, index) => {
+                let obj = {
+                    x: luxon.DateTime.fromSQL(dateData[index])["ts"],
+                    o: Openvalue[index],
+                    h: Highvalue[index],
+                    l: Lowvalue[index],
+                    c: Closevalue[index]
+                };
+                arr.push(obj);
+            });
+
+            var config = {
+                type: newType,
+                data: {
+                    datasets: [{
+                        label: 'CHRT - Chart.js Corporation',
+                        data: arr
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "gauge") {
+            newType = 'doughnut';
+
+            var randomValue = function (data) {
+                return Math.max.apply(null, data) * Math.random();
+            };
+            var value = randomValue(Hightvalue);
+
+            var GaugeData;
+            if (Xaxisvalue.length != 0) {
+                GaugeData = {
+                    labels: Xaxisvalue,
+                    datasets: [
+                        {
+                            label: hvl,
+                            backgroundColor: ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "orange", "purple", "violet", "blue", "green", "red"],
+                            data: Hightvalue,
+                            needleValue: value,
+                            borderColor: 'Black',
+                            borderWidth: 1,
+                            //cutout: '90%',
+                            circumference: 180,
+                            rotation: 270
+                        }
+                    ]
+                };
+            }
+            //console.log("Gauge Data:", GaugeData);
+
+            var gaugeNeedle = {
+                id: 'gaugeNeedle',
+                afterDatasetDraw(chart, args, options) {
+                    var { ctx, config, data, chartArea: { top, bottom, left, right,
+                        width, height } } = chart;
+                    ctx.save();
+                    //console.log("ctx:",ctx);
+                    var needleValue = data.datasets[0].needleValue;
+                    var dataTotal = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    var angle = Math.PI + (1 / dataTotal * needleValue * Math.PI);
+                    //console.log("angle:",angle);
+                    var cx = width / 2;
+                    var cy = (chart._metasets[0].data[0].y - 10);
+                    //console.log("offsetTop:",ctx.canvas.offsetTop);
+                    //console.log("cx:",cx);
+                    //console.log("cy:",cy);
+
+                    //needle
+                    ctx.translate(cx, cy);
+                    ctx.beginPath();
+                    ctx.rotate(angle);
+                    ctx.moveTo(0, -10);
+                    ctx.lineTo(height - (ctx.canvas.offsetTop - 40), 10);
+                    ctx.lineTo(0, 10);
+                    ctx.fillStyle = '#444';
+                    ctx.fill();
+                    ctx.restore();
+
+                    // needle dot
+                    //ctx.translate(-cx,-cy);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 5, 0, 10);
+                    ctx.fill();
+                    ctx.restore();
+
+                    ctx.font = '20px black';
+                    ctx.fillStyle = '#444';
+                    ctx.fillText(needleValue + '%', cx + 20, cy - 90);
+                    ctx.textAlign = 'center';
+                    ctx.restore();
+                }
+            }
+
+            var config = {
+                type: newType,
+                data: GaugeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function (context) {
+                                    //return context['dataset']['label'] + ": " + context['dataset']['data'][context.dataIndex];
+                                    return context.chart.data.labels[context.dataIndex] + ":" + context['dataset']['data'][context.dataIndex];
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [gaugeNeedle]
+            };
+
+        }
+
+        var ctx = document.getElementById("myChart").getContext("2d");
+        if (myChart) {
+            myChart.destroy();
+        }
+        var temp = jQuery.extend(true, {}, config);
+        temp.type = newType;
+        myChart = new Chart(ctx, temp);
+    }
+
+    //These functions are used for making chart and its parameters
+    function createChartColumn(charttype, result, chart_parameters, defaultColor, parameterColors) {
+        if (parameterColors.length == 0 || parameterColors == undefined)
+        {
+            parameterColors = defaultColor;
+        }
+        $('.chartContainer2').addClass("card p-3");
+        var container = document.getElementById("container_chart");
+        $.each(result, function (k, v) {
+            if (k.toLowerCase() == "xaxis") {
+                if (charttype.toLowerCase() == "line_threshold" || charttype.toLowerCase() == "bar_threshold") {
+                    $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>  <input type="search"' +
+                        'placeholder=' + v + ' value=' + chart_parameters[0].value + ' name=' + charttype + ' placeholder=' + v + ' class="indet form-control mb-3" data_id_name=' + k + ' id=' + k + ' />  </div></div>');
+                }
+                else {
+                    $(container).append('<div class="col-md-6 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>'
+                        + '<input type="search" placeholder=' + v + '  value=' + chart_parameters[0].value + ' name=' + charttype + ' class="indet form-control mb-3" data_id_name=' + k + ' id=' + k + ' /></div></div>');
+                }
+
+                $('#' + k).droppable({
+                    hoverClass: 'active',
+                    drop: function (event, ui) {
+                        this.value = (ui.draggable[0].getAttribute("data-id"));
+                    }
+                });
+            }
+            else {
+                if (charttype.toLowerCase() == "line_threshold" || charttype.toLowerCase() == "bar_threshold") {
+                    if (k.toLowerCase() == "height") {
+                        $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style1">'
+                            + '<label for="validationDefault01" style="margin:0px;">' + k + '</label></div></div>');
+                    }
+                    else {
+                        $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style2">'
+                            + '<label for="validationDefault01" style="margin:0px;">' + k + '</label></div></div>');
+                    }
+                }
+                else {
+                    $(container).append('<div class="col-md-6 mb-4"><div class= "drag-style1">'
+                        + '<label for="validationDefault01" style="margin:0px;">' + k + '</label></div></div>');
+                }
+
+                for (var i = 1; i < chart_parameters.length; i++) {
+                    if (charttype.toLowerCase() == "pie" || charttype.toLowerCase() == "doughnut" || charttype.toLowerCase() == "polararea" || charttype.toLowerCase() == "radar" || charttype.toLowerCase() == "treemap" || charttype.toLowerCase() == "gauge") {
+                        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" value=' + chart_parameters[i].value + ' data_id_name="' + k + '" '
+                            + 'id=' + k + charttype+ ' /></div>');
+
+                        $(".drag-style1").append(fieldHTML);
+                    }
+                    else {
+                        if (k.toLowerCase() == "height") {
+                            if (chart_parameters[i].key.toLowerCase() == "height") {
+                                var fieldHTML = ('<div style = "display:flex"><input type="search" name= ' + charttype + ' value= ' + chart_parameters[i].value + ' '
+                                    + 'class="indet form-control mb-3" placeholder=' + v + ' data_id_name=' + k + ' id=' + k + i + ' />'
+                                    + '<input type = "text" class= "togglePaletteOnly' + i + '" name = "togglePaletteOnly" value="' + parameterColors[i - 1] + '" />'
+                                    + '<i style="margin-top: 9px;" class="fa fa-remove" onclick=" $(this).parent().remove();"></i></div>');
+
+                                $(".drag-style1").append(fieldHTML);
+
+                            }
+                        }
+                        else if (k.toLowerCase() == "threshold") {
+                            if (chart_parameters[i].key.toLowerCase() == "threshold") {
+                                var fieldHTML = ('<div style="display:flex"><input type="search" name=' + charttype + ' value=' + chart_parameters[i].value + ' '
+                                    + 'class="indet form-control mb-3" placeholder=' + v + ' data_id_name=' + k + ' id=' + k + i + ' />'
+                                    + '<i style="margin-top:9px;" class="fa fa-remove ml-2" onclick="$(this).parent().remove();"></i></div>');
+
+                                $(".drag-style2").append(fieldHTML);
+                            }
+                        }
+                        else {
+                            var fieldHTML = ('<div style = "display:flex"><input type="search" name=' + charttype + ' value=' + chart_parameters[i].value + ' '
+                                + 'class="indet form-control mb-3" placeholder=' + v + ' data_id_name=' + k + ' id=' + k + i + ' />'
+                                + '<i style="margin-top:9px;" class="fa fa-remove ml-2" onclick="$(this).parent().remove();"></i></div>');
+
+                            $(".drag-style1").append(fieldHTML);
+                        }
+                    }
+
+                    //colorpickers(defaultColor[i - 1], i);
+                    colorpickers(parameterColors[i - 1], i);
+
+                    if (charttype.toLowerCase() == "pie" || charttype.toLowerCase() == "doughnut" || charttype.toLowerCase() == "polararea" || charttype.toLowerCase() == "radar" || charttype.toLowerCase() == "treemap" || charttype.toLowerCase() == "gauge") {
+                        $('#' + k + charttype).droppable({
+                            hoverClass: 'active',
+                            drop: function (event, ui) {
+                                this.value = (ui.draggable[0].getAttribute("data-id"));
+                            }
+                        });
+                    }
+                    else {
+                        if (k.toLowerCase() == "height") {
+                            $('#' + k + i).droppable({
+                                hoverClass: 'active',
+                                drop: function (event, ui) {
+                                    add(k, v, charttype, i);
+                                    this.value = (ui.draggable[0].getAttribute("data-id"));
+                                }
+                            });
+                        }
+                        else if (k.toLowerCase() == "threshold") {
+                            $('#' + k + i).droppable({
+                                hoverClass: 'active',
+                                drop: function (event, ui) {
+                                    add1(k, v, charttype);
+                                    this.value = (ui.draggable[0].getAttribute("data-id"));
+                                }
+                            });
+                        }
+                        else {
+                            $('#' + k + i).droppable({
+                                hoverClass: 'active',
+                                drop: function (event, ui) {
+                                    this.value = (ui.draggable[0].getAttribute("data-id"));
+                                }
+                            });
+                        }
+                    }
+                }
+
+                /* Code for one extra entry for chart columns*/
+                if (charttype.toLowerCase() == "scatter" || charttype.toLowerCase() == "bubble" || charttype.toLowerCase() == "bar" || charttype.toLowerCase() == "line" || charttype.toLowerCase() == "area" || charttype.toLowerCase() == "step_line" || charttype.toLowerCase() == "stacked_bar" || charttype.toLowerCase() == "spline" || charttype.toLowerCase() == "heatmap" || charttype.toLowerCase() == "histogram") {
+                    if (k.toLowerCase() == "height") {
+                        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" id=' + k + ' />'
+                            + '<input type="text" class="togglePaletteOnly"  name="togglePaletteOnly" value="#fff"/>'
+                            + '<i style="margin-top: 9px;" class="fa fa-remove" onclick="$(this).parent().remove();"></i></div>');
+
+                        $(".drag-style1").append(fieldHTML);
+                    }
+                    else {
+                        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" '
+                            + 'id=' + k + ' /></div>');
+
+                        $(".drag-style1").append(fieldHTML);
+                    }
+                }
+                else if (charttype.toLowerCase() == "line_threshold" || charttype.toLowerCase() == "bar_threshold") {
+                    if (k.toLowerCase() == "height") {
+                        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" id=' + k + ' />'
+                            + '<input type="text" class="togglePaletteOnly"  name="togglePaletteOnly" value="#fff"/>'
+                            + '<i style="margin-top: 9px;" class="fa fa-remove" onclick="$(this).parent().remove();"></i></div>');
+
+                        $(".drag-style1").append(fieldHTML);
+                    }
+                    else if (k.toLowerCase() == "threshold") {
+                        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" id=' + k + ' />'
+                            + '<i style="margin-top: 9px;" class="fa fa-remove" onclick="$(this).parent().remove();"></i>'
+                            + '</div>');
+
+                        $(".drag-style2").append(fieldHTML);
+                    }
+                    else {
+                        var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" '
+                            + 'id=' + k + ' /></div>');
+
+                        $(".drag-style1").append(fieldHTML);
+                    }
+                }
+                else { }
+                colorpicker();
+
+                if (k.toLowerCase() == "height") {
+                    $('#' + k).droppable({
+                        hoverClass: 'active',
+                        drop: function (event, ui) {
+                            add(k, v, charttype, i);
+                            this.value = (ui.draggable[0].getAttribute("data-id"));
+                        }
+                    });
+                }
+                else {
+                    $('#' + k).droppable({
+                        hoverClass: 'active',
+                        drop: function (event, ui) {
+                            add1(k, v, charttype);
+                            this.value = (ui.draggable[0].getAttribute("data-id"));
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    function createNewChartColumn(charttype, result) {
+        $('.chartContainer2').addClass("card p-3");
+        var container = document.getElementById("container_chart");
+        container.innerHTML = "";
+        $.each(result, function (k, v) {
+            var count_height = 0;
+            if (charttype.toLowerCase() == "scatter" || charttype.toLowerCase() == "bubble" || charttype.toLowerCase() == "bar" || charttype.toLowerCase() == "line" || charttype.toLowerCase() == "area" || charttype.toLowerCase() == "step_line" || charttype.toLowerCase() == "stacked_bar" || charttype.toLowerCase() == "spline" || charttype.toLowerCase() == "heatmap" || charttype.toLowerCase() == "histogram") {
+                if (k.toLowerCase() == "height") {
+                    $(container).append('<div class="col-md-6 mb-4"><div class= "drag-style1">'
+                        + '<label for="validationDefault01" style="margin:0px;">' + k + '</label></div></div>');
+
+                    var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" id=' + k + ' />'
+                        + '<input type="text" class="togglePaletteOnly"  name="togglePaletteOnly" value="#fff"/>'
+                        + '<i style="margin-top: 9px;" class="fa fa-remove" onclick="$(this).parent().remove();"></i></div>');
+
+                    $(".drag-style1").append(fieldHTML);
+                }
+                else {
+                    $(container).append('<div class="col-md-6 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>'
+                        + '<input type="search" placeholder=' + v + '  name=' + charttype + ' class="indet form-control mb-3" data_id_name=' + k + ' id=' + k + ' /></div></div>');
+                }
+
+                if (k.toLowerCase() == "height") {
+                    $('#' + k).droppable({
+                        hoverClass: 'active',
+                        drop: function (event, ui) {
+                            add(k, v, charttype, count_height);
+                            this.value = (ui.draggable[0].getAttribute("data-id"));
+                            count_height++;
+                        }
+                    });
+                }
+                else {
+                    $('#' + k).droppable({
+                        hoverClass: 'active',
+                        drop: function (event, ui) {
+                            add1(k, v, charttype);
+                            this.value = (ui.draggable[0].getAttribute("data-id"));
+                        }
+                    });
+                }
+            }
+            else if (charttype.toLowerCase() == "line_threshold" || charttype.toLowerCase() == "bar_threshold") {
+                if (k.toLowerCase() == "height") {
+                    $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style1">'
+                        + '<label for="validationDefault01" style="margin:0px;">' + k + '</label></div></div>');
+
+                    var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" id=' + k + ' />'
+                        + '<input type="text" class="togglePaletteOnly"  name="togglePaletteOnly" value="#fff"/>'
+                        + '<i style="margin-top: 9px;" class="fa fa-remove" onclick="$(this).parent().remove();"></i></div>');
+
+                    $(".drag-style1").append(fieldHTML);
+                }
+                else if (k.toLowerCase() == "threshold") {
+                    $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style2">'
+                        + '<label for="validationDefault01" style="margin:0px;">' + k + '</label></div></div>');
+
+                    var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" '
+                        + 'id=' + k + ' /></div>');
+
+                    $(".drag-style2").append(fieldHTML);
+                }
+                else {
+                    $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>  <input type="search"' +
+                        'placeholder=' + v + ' name=' + charttype + ' placeholder=' + v + ' class="indet form-control mb-3" data_id_name=' + k + ' id=' + k + ' />  </div></div>');
+
+                }
+
+                if (k.toLowerCase() == "height") {
+                    $('#' + k).droppable({
+                        hoverClass: 'active',
+                        drop: function (event, ui) {
+                            add(k, v, charttype, count_height);
+                            this.value = (ui.draggable[0].getAttribute("data-id"));
+                            count_height++;
+                        }
+                    });
+                }
+                else if (k.toLowerCase() == "threshold") {
+                    $('#' + k).droppable({
+                        hoverClass: 'active',
+                        drop: function (event, ui) {
+                            add1(k, v, charttype);
+                            this.value = (ui.draggable[0].getAttribute("data-id"));
+                        }
+                    });
+                }
+                else {
+                    $('#' + k).droppable({
+                        hoverClass: 'active',
+                        drop: function (event, ui) {
+                            this.value = (ui.draggable[0].getAttribute("data-id"));
+                        }
+                    });
+                }
+            }
+            else {
+                if (k.toLowerCase() == "height") {
+                    $(container).append('<div class="col-md-6 mb-4"><div class= "drag-style1">'
+                        + '<label for="validationDefault01" style="margin:0px;">' + k + '</label></div></div>');
+                    var fieldHTML = ('<div style="display:flex"><input type="search" name="' + charttype + '" class="indet form-control mb-3" placeholder="' + v + '" data_id_name="' + k + '" '
+                        + 'id=' + k + charttype + ' /></div>');
+
+                    $(".drag-style1").append(fieldHTML);
+                }
+                else {
+                    $(container).append('<div class="col-md-6 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>'
+                        + '<input type="search" placeholder=' + v + '  name=' + charttype + ' class="indet form-control mb-3" data_id_name=' + k + ' id=' + k + ' /></div></div>');
+                }
+
+                $('#' + k + charttype).droppable({
+                    hoverClass: 'active',
+                    drop: function (event, ui) {
+                        this.value = (ui.draggable[0].getAttribute("data-id"));
+                    }
+                });
+                $('#' + k).droppable({
+                    hoverClass: 'active',
+                    drop: function (event, ui) {
+                        this.value = (ui.draggable[0].getAttribute("data-id"));
+                    }
+                });
+            }
+            colorpicker();
+        });
+    }
+    function getParametersWithData(result, model) {
+        var dictData = [];
+        var dataVal = [];
+        var myObject = eval('(' + model + ')');
+        //console.log("myObject:", myObject);
+        $.each(result, function (k, v) {
+            if (k !== "" && v !== "") {
+                for (i in myObject) {
+                    var storedata = myObject[i][v.value]
+                    dataVal.push(storedata);
+                }
+                dictData.push({
+                    key: v.key,
+                    value: dataVal
+                });
+            }
+        });
+        //console.log("dictData:", dictData);
+        DrowTheGraph(dictData, name);
+    }
+    function GetChartImageView(chartType, imgSource) {
+        var newNote = $("<div class='card p-2'><img class='card-img-top mt-1'  src= " + imgSource + " alt=" + chartType + "></div>");
+        var newDiv = document.getElementById("container");
+        newDiv.innerHTML = "";
+        $(newDiv).append(newNote);
+    }
+    function GetTableView(queryID)
+    {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Content("~/Graph/getdataby_id")',
+            datatype: "html",
+            data: { getQuery_id: queryID },
+            success: function (data) {
+                if (data) {
+                    $('#data_container').empty();
+                    $("#data_container").html(data);
+                }
+            }
+        });
+    }
+    function GetMappingColumnView(queryID)
+    {
+        $.ajax({
+            type: "POST",
+            url: '../Graph/_partialgetEditdataby_id_columns',
+            datatype: "html",
+            data: { query_id: queryID },
+            success: function (data) {
+                if (data) {
+                    $('#left_container').empty()
+                    $("div").find("#left_container").append(data);
+                }
+            }
+        });
+    }
+
+    //These functions are used for making tabular chart and its parameters
+    function createTabularColumn(chartparams, chartData) {
+        $('#labelgraph_container').css('display', 'none');
+        $('.chartContainer2').addClass('card p-3');
+        var tabContainer = document.getElementById("container_chart");
+        $(tabContainer).append('<div id="tabular_column_data"><div id="tabular_data_show" class="indet">'
+            + '<button type="button" id="BtnRemoveRow" class="btn btn-dash mb-1" style="float:right"><i class="fa fa-minus"></i></button></div>'
+            + '<button type = "button" id = "BtnAddRow" class= "btn btn-dash mr-1" style = "float:right" > <i class="fa fa-plus"></i></button >'
+            + '<table id="DynamicRow" class="table mt-3">'
+            + '<tr id="d_row"></tr>'
+            + '</table></div>');
+        $('#container_chart').css('display', 'block');
+        $("#tabular_column_data").droppable({
+            accept: ".card2",
+            hoverClass: 'active',
+            drop: function (event, ui) {
+                var ColumnName = ui.draggable[0].getAttribute("data-id");
+                this.value = (ui.draggable[0].getAttribute("data-id"));
+                tabularArray.push(this.value);
+                //console.log("ADD ARRAY:", tabularArray);
+                var seen = tabularArray.filter((s => v => s.has(v) || !s.add(v))(new Set));
+                if (seen.length != 0) {
+                    alert('Error: you have duplicates values!!!');
+                    this.value = this.value.replace(/,[^,]+$/, "");
+                    tabularArray = tabularArray.slice(0, -1);
+                }
+                else {
+                    createNewTabularColumn(ColumnName, chartData);
+                }
+
+            }
+        });
+        var tempData = [];
+        //for (var i = 0; i < chartData.length; i++) {
+        //    var keyVal = chartData[i].Key;
+        //    console.log("keyVal:", keyVal);
+        //    if (chartparams[keyVal] != undefined)
+        //    {
+        //        tempData.push({
+        //            key: keyVal,
+        //            value: chartparams[keyVal]
+        //        });
+        //    }
+
+        //}
+        $.each(chartparams, function (k, v) {
+            //console.log("keyVal:", k);
+            if (chartparams[k] != undefined) {
+                tempData.push({
+                    key: k,
+                    value: chartparams[k]
+                });
+            }
+        });
+        //console.log("tempData:", tempData);
+        count = chartData.length;
+        var ctmp = '';
+        var subhtml = '';
+        subhtml = subhtml + "<option value=''>--SELECT--</option>";
+        for (j = 0; j < chartData.length; j++) {
+            ctmp = chartData[j];
+            tabularArray.push(ctmp.Key);
+            subhtml = subhtml + "<option value=" + ctmp.Key + "> " + ctmp.Key + "  </option> ";
+        }
+        createExistingTabularColumn(chartparams, chartData, tempData, subhtml);
+    }
+    function createExistingTabularColumn(chart_parameters, data_name, tempData, selectHtml) {
+        var count = 1;
+        var modelData = data_name;
+        //console.log("function createExistingTabularColumn modelData:", modelData);
+        //console.log("function createExistingTabularColumn chart_parameters:", chart_parameters);
+        //console.log("function createExistingTabularColumn tempData:", tempData);
+        //console.log("function createExistingTabularColumn selectHtml:", selectHtml);
+
+        for (var i = 0; i < tempData.length; i++) {
+            var dropData1 = '<td id=' + count + '>'
+                + '<select class="form-control SelectiveCol" name="SelectiveCol" id ="datavalue' + count + '">' + selectHtml + '</select>'
+                + '<input id="getdatapass' + count + '" type="text" class="getdatapass form-control mt-1" placeholder="Enter alias"></td>';
+
+            $("#d_row").append(dropData1);
+            $('#getdatapass' + count).val(tempData[i].value);
+            $('#datavalue' + count).find('option[value="'+tempData[i].key+'"]').attr("selected", true);
+            count++;
+        }
+    }
+    function createNewTabularColumn(data_name, chartData) {
+        var modelData = chartData;
+        count++;
+        //console.log("modelData:", modelData);
+        var ctmp = '';
+        var subhtml = '';
+        for (j = 0; j < modelData.length; j++) {
+            ctmp = modelData[j];
+            if (j == 0)
+                subhtml = subhtml + "<option value=''>--SELECT--</option><option value=" + ctmp.Key + "> " + ctmp.Key + "  </option> ";
+            else
+                subhtml = subhtml + "<option value=" + ctmp.Key + "> " + ctmp.Key + "  </option> ";
+        }
+
+        var dropData1 = '<td id=' + count + '>'
+            + '<select class="form-control SelectiveCol" name="SelectiveCol" id ="datavalue' + count + '">' + subhtml + '</select>'
+            + '<input id="getdatapass' + count + '" type="text" class="getdatapass form-control mt-1" placeholder="Enter alias"></td>';
+
+        $("#d_row").append(dropData1);
+        if (data_name != '') {
+            $('#datavalue' + count).val(data_name);
+            $('#getdatapass' + count).val(data_name);
+        }
+    }
+    function createTabularChart() {
+        var dictData = [];
+        var chartpara = '';
+        $("#myChart").hide();
+        $('#labelgraph_container').hide();
+        $('#tabular_container').show();
+        $("#DynamicRow input.getdatapass").each(function () {
+            var row = $(this).closest('td');
+            var columns = row.find('select.SelectiveCol').val();
+            var columns1 = row.find('input.getdatapass').val();
+            if (columns != '' || columns1 != '') {
+                dictData.push({
+                    key: columns,
+                    value: columns1
+                });
+            }
+            //console.log("dictData:", dictData);
+        })
+        var arr = [];
+        var dta = "a";
+        for (let i = 0; i < dictData.length; i++) {
+            arr.push(dictData[i].key + " as  " + "  " + dictData[i].value)
+            if (i < dictData.length - 1) {
+
+                dta = dictData[i].value;
+                if (dta != "") {
+                    dta = "\"" + dictData[i].value + "\"";
+                }
+                else {
+                    dta = "\"" + dictData[i].key + "\"";
+
+                }
+                chartpara += dictData[i].key + " as " + "" + dta + ","
+            }
+            else {
+
+                dta = dictData[i].key;
+                dtv = dictData[i].value;
+                if (dtv != "") {
+                    dtv = "\"" + dictData[i].value + "\"";
+                }
+                else {
+                    dtv = "\"" + dictData[i].key + "\"";
+
+                }
+                chartpara += dta + "  as  " + "" + dtv;
+            }
+        }
+        //console.log("chartpara:", chartpara);
+
+        $.ajax({
+            type: "POST",
+            /* url: '../Graph/tabular_plot',*/
+            url: '@Url.Content("~/Graph/tabular_plot")',
+            datatype: "html",
+            data: { columnname: chartpara },
+            success: function (data) {
+                if (data) {
+                    //$('#container_chart').hide;
+                    $("#myChart").css('display', 'none');
+                    $("#labelgraph_container").css('display', 'none');
+                    $("#tabular_container").css('display', 'block');
+                    $('#tabular_container').empty();
+                    $("#tabular_container").append('');
+                    $("#tabular_container").append(data);
+                    $("#kpitabularData").DataTable({
+                        "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 6,
+                        language: {
+                            oPaginate: {
+                                sNext: '<i class="fa fa-forward"></i>',
+                                sPrevious: '<i class="fa fa-backward"></i>'
+
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+    function createNewTabularFormat() {
+        $('#labelgraph_container').css('display', 'none');//chartContainer2 mb-3 mt-2 card p-3  //chartContainer2 mb-3 mt-2
+        $('.chartContainer2').addClass('card p-3');
+        var tabContainer = document.getElementById("container_chart");
+        $(tabContainer).append('<div id="tabular_column_data"><div id="tabular_data_show" class="indet">'
+            + '<button type="button" id="BtnRemoveRow" class="btn btn-dash mb-1" style="float:right"><i class="fa fa-minus"></i></button></div>'
+            + '<button type = "button" id = "BtnAddRow" class= "btn btn-dash mr-1" style = "float:right" > <i class="fa fa-plus"></i></button >'
+            + '<table id="DynamicRow" class="table mt-3">'
+            + '<tr id="d_row"></tr>'
+            + '</table></div>');
+        $('#container_chart').css('display', 'block');
+
+        $("#tabular_column_data").droppable({
+            accept: ".card2",
+            hoverClass: 'active',
+            drop: function (event, ui) {
+                var ColumnName = ui.draggable[0].getAttribute("data-id");
+                this.value = (ui.draggable[0].getAttribute("data-id"));
+                tabularArray.push(this.value);
+                //console.log("ADD ARRAY:", tabularArray);
+                var seen = tabularArray.filter((s => v => s.has(v) || !s.add(v))(new Set));
+                if (seen.length != 0) {
+                    alert('Error: you have duplicates values!!!');
+                    this.value = this.value.replace(/,[^,]+$/, "");
+                    tabularArray = tabularArray.slice(0, -1);
+                }
+                else {
+                    var paramModel = $('#KPIKeyValueJson').attr('data-val');
+                    var myObject = eval('(' + paramModel + ')');
+                    //console.log("myObject:", myObject);
+                    createNewTabularColumn(ColumnName, myObject);
+                }
+
+            }
+        });
+        $("#BtnAddRow").click(function () {
+            var column_name = '';
+            var paramModel = $('#KPIKeyValueJson').attr('data-val');
+            var myObject = eval('(' + paramModel + ')');
+            //console.log("myObject:", myObject);
+            createNewTabularColumn(column_name, myObject);
+        });
+        $("#BtnRemoveRow").click(function () {
+            $('#DynamicRow tr td:last').remove();
+            tabularArray = tabularArray.slice(0, -1);
+            //console.log("ARRAY:", tabularArray);
+        });
+    }
+
+    //These functions are used for making label chart and its parameters
+    function createDefaultLabelColumn(charttype, result, chartparams, chartData)
+    {
+        var newParmData = [];
+        var newcolorData = [];
+        var labelCount = 0;
+        $.each(chartparams, function (k, v) {
+            if (k.toLowerCase() == "label")
+            {
+                var vl = v.split(",");
+                labelCount = vl.length;
+            }
+            else if (k.toLowerCase() == "color") {
+                newcolorData.push({
+                    key: k,
+                    value: v
+                });
+            }
+        });
+        //console.log("labelCount:", labelCount);
+        for (var i = 0; i < labelCount; i++)
+        {
+            $.each(chartparams, function (k, v) {
+                if (i == 0) {
+                    if (k.toLowerCase() == 'position')
+                    {
+                        k = 'Color' + k;
+                    }
+                }
+                if (k.toLowerCase() != 'color') {
+                    var hvl = v.split(",");
+                    var dataval = hvl[i];
+                    newParmData.push({
+                        key: k,
+                        value: dataval
+                    });
+                }
+            });
+            if (i == 0) {
+                Array.prototype.push.apply(newParmData, newcolorData);
+            }
+        }
+        //console.log("newParmData:", newParmData);
+        createExistingLabelColumn(charttype, result, chartparams, newParmData, newcolorData);
+        //createNewLabelColumn(charttype, result, null);
+        PlotLabelChart();
+    }
+    function createExistingLabelColumn(charttype, result, chartparams, chartData, colorData) {
+        //console.log("charttype:", charttype);
+        //console.log("result:", result);
+        //console.log("chartparams:", chartparams);
+        //console.log("chartData:", chartData);
+
+        $('.chartContainer2').addClass('card p-3');
+        var container = document.getElementById("container_chart");
+        $(container).append('<div class="col-12 mb-2"><button type="button" id="BtnAddLabelRow" class="btn btn-dash ml-2 float-right"><i class="fa fa-plus"></i></button>'
+            + '<button type="button" id="BtnRemoveLabelRow" class="btn btn-dash ml-2 float-right"><i class="fa fa-minus"></i></button>'
+            + '</div>');
+        for (var i = 0; i < chartData.length; i++)
+        {
+            var firstDropPosition;
+            var labelInputValue = "remove_" + charttype;
+            var secondVal = "newlabel";
+            var k = chartData[i].key;
+            var v = chartData[i].value;
+            if (i == 0) {
+                secondVal = "";
+                if (k.toLowerCase() == 'label') {
+                    labelInputValue = charttype;
+                }
+            }
+            if (i == 1) {
+                secondVal = "";
+            }
+            if (k.toLowerCase() == "color") {
+                $(container).append('<div class="col-md-4 mb-4"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>'
+                    + '<div style="display:flex"><input type="text" class="mb-3 togglePaletteOnly" name="togglePaletteOnly" id=' + k + ' value="' + v + '"/>'
+                    + '<select name="drop_down_position"  style = "width: 140px;height: 25px;" class= "indet form-control mb-3 first_drop_down_position" id = ' + k + ' > '
+                    + '<option>Select</option><option value=ul>Upper Left</option><option value=ur>Upper Right</option><option value=um>Upper Middle</option>'
+                    + '<option value=ml>Middle Left</option><option value=mr>Middle Right</option><option value=mm>Middle Middle</option>'
+                    + '<option value=ll>Lower Left</option><option value=lr>Lower Right</option><option value=lm>Lower Middle</option>'
+                    + '</select></div></div></div>');
+                colorpickerValue(v);
+            }
+            if (k.toLowerCase() == "colorposition")
+            {
+                firstDropPosition = v;
+            }
+            else
+            {
+                if (k.toLowerCase() == "caption") {
+                    if (v == null || v == undefined) { v = ""; }
+                    $(container).append('<div class="col-md-4 mb-4 ' + secondVal + '"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label><input type="search" '
+                        + 'placeholder=string value="' + v + '" name=' + k + ' class="indet form-control mb-3" id=' + k + i + ' data-id="' + k + '" data-val="' + charttype + '" /> </div></div>');
+                }
+                else if (k.toLowerCase() == "label") {
+                    $(container).append('<div class="col-md-4 mb-4 ' + secondVal + '"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">Label</label><div style="display:flex">'
+                        + '<input type="search" value="' + v + '" name=' + labelInputValue + '  class="indet form-control mb-3 labelInputTag" id=' + k + i + ' data-id="' + k + '" />'
+                        + '<div id="SelectDiv' + i + '"></div></div></div></div>');
+                }
+                else if (k.toLowerCase() == "select") {
+                    var newselectDiv = "SelectDiv" + (parseInt(i) - 2);
+                    var selectContainer = document.getElementById(newselectDiv);
+                    $(selectContainer).append('<select name="drop_down_label"  style="width: 87px;" class="indet form-control mb-3 drop_down_label' + i + '" id=' + k + '>'
+                        + '<option>Select</option><option value=Avg>Avg</option><option value=Sum>Sum</option></select>');
+
+                    $('.drop_down_label' + i).find('option[value="' + v + '"]').attr("selected", true);
+                }
+                else if (k.toLowerCase() == "position") {
+                    $(container).append('<div class="col-md-4 mb-4 ' + secondVal + '"><div class= "drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>'
+                        //+ '<div style="display:flex"><input type="text" class="mb-3 togglePaletteOnly" name="togglePaletteOnly" id=' + k + ' />'
+                        + '<select name="drop_down_position" class= "indet form-control mb-3 drop_down_position' + i + '" id = ' + k + i + ' > '
+                        + '<option>Select</option><option value=ul>Upper Left</option><option value=ur>Upper Right</option><option value=um>Upper Middle</option>'
+                        + '<option value=ml>Middle Left</option><option value=mr>Middle Right</option><option value=mm>Middle Middle</option>'
+                        + '<option value=ll>Lower Left</option><option value=lr>Lower Right</option><option value=lm>Lower Middle</option>'
+                        + '</select></div></div>');
+                }
+            }
+            $('.first_drop_down_position').find('option[value="' + firstDropPosition + '"]').attr("selected", true);
+            $('.drop_down_position' + i).find('option[value="' + v + '"]').attr("selected", true);
+
+            $('#' + k + i).droppable({
+                hoverClass: 'active',
+                drop: function (event, ui) {
+                    this.value = (ui.draggable[0].getAttribute("data-id"));
+                }
+            });
+        }
+    }
+    function createNewLabelColumn(charttype, result, flag) {
+        $('.chartContainer2').addClass("card p-3");
+        var container = document.getElementById("container_chart");
+        if (flag == "1") {
+            $(container).append('<div class="col-12 mb-2"><button type="button" id="BtnAddLabelRow" class="btn btn-dash ml-2 float-right"><i class="fa fa-plus"></i></button>'
+                + '<button type="button" id="BtnDeleteLabelRow" class="btn btn-dash ml-2 float-right"><i class="fa fa-minus"></i></button>'
+                + '</div>');
+        }
+        $.each(result, function (k, v) {
+            if (k == "Label") {
+                $(container).append('<div class="col-md-4 mb-4 newlabel"><div class="drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label> <div style="display:flex"><input type="search"'
+                    + 'placeholder=' + v + ' name=remove_' + charttype + '  class="indet form-control mb-3 labelInputTag ' + k + '"  data-id="' + k + '" /><select name="drop_down_label"  style="width: 87px;" class="indet form-control mb-3" id=' + k + '>'
+                    + '<option>Select</option><option value=Avg>Avg</option><option value=Sum>Sum</option></select></div></div></div>');
+            }
+            else if (k == "Color") {
+                $(container).append('<div class="col-md-4 mb-4 newlabel"><div class="drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label>'
+                    //+ '<div style="display:flex"><input type="text" class="mb-3 togglePaletteOnly" name="togglePaletteOnly" id=' + k + ' />'
+                    + '<select name = "drop_down_position" class= "indet form-control mb-3"> '
+                    + '<option>Select</option><option value=ul>Upper Left</option><option value=ur>Upper Right</option><option value=um>Upper Middle</option>'
+                    + '<option value=ml>Middle Left</option><option value=mr>Middle Right</option><option value=mm>Middle Middle</option>'
+                    + '<option value=ll>Lower Left</option><option value=lr>Lower Right</option><option value=lm>Lower Middle</option>'
+                    + '</select></div></div></div>');
+            }
+            else if (k == "Caption") {
+                $(container).append('<div class="col-md-4 mb-4 newlabel"><div class="drag-style"><label for="validationDefault01" style= "margin:0px;">' + k + '</label><input type="search"' +
+                    'placeholder=' + v + ' name=' + k + ' placeholder=' + v + ' class="indet form-control mb-3 ' + k + '" data-id="' + k + '"  data-val="' + charttype + '" /> </div></div>');
+            }
+            else { }
+
+            $('.' + k).droppable({
+                hoverClass: 'active',
+                drop: function (event, ui) {
+                    this.value = (ui.draggable[0].getAttribute("data-id"));
+                }
+            });
+        })
+    }
+    function PlotLabelChart() {
+        var colors;
+        var formData = decodeURIComponent($('form').serialize());
+        formData = formData.split("&remove_");
+        var newData = [];
+        for (let i = 0; i < formData.length; i++) {
+            let obj = {};
+            for (let entry of formData[i].split("&")) {
+                let pair = entry.split("=");
+                if (pair[0].toLowerCase() == 'label') {
+                    if (pair[1] == null || pair[1] == '') {
+                        obj = null
+                        i++;
+                        break;
+                    }
+                    else {
+                        obj[pair[0]] = pair[1];
+                    }
+                }
+                else {
+                    obj[pair[0]] = pair[1];
+                }
+            }
+            newData.push(obj);
+        }
+        $('.drag-style input[name=togglePaletteOnly]').each(function (i, item) {
+            colors = $(item).val();
+        });
+
+        if (colors == "") {
+            //colors = "rgb(255, 235, 205)";
+            colors = "rgb(111, 168, 220)";
+        }
+        newData[0]["togglePaletteOnly"] = colors;
+        console.log("newData:", newData);
+
+        $.ajax({
+            type: "POST",
+            url: '../Graph/_partialLabelChart',
+            data: { jsonInput: JSON.stringify(newData) },
+            success: function (data) {
+                if (data.startsWith("ERROR")) {
+                    var res = data.split(";");
+                    var error = '';
+                    if (res.length > 1) {
+                        error = res[1];
+                    } else {
+                        error = data;
+                    }
+                    alert(error);
+                }
+                else {
+                    $("#myChart").css('display', 'none');
+                    $("#tabular_container").css('display', 'none');
+                    $("#labelgraph_container").css('display', 'block');
+                    $('#labelgraph_container').empty();
+                    $("#labelgraph_container").append(data);
+                }
+            },
+            error: function (error) {
+                alert('Label cannot be null!!!');
+            }
+
+        });
+    }
+</script>
+<!-- CLICK EVENT FOR LOAD AND SUBMIT BUTTON -->
+<script>
+    $('#loadChart_edit').click(function () {
+        var dictEditData = [];
+        var chartpara = "";
+        var imagedata = $('#container').find('.card-img-top').attr('alt');
+        //console.log("imagedata:", imagedata);
+        var model = $('#KPIJsonValue').attr('data-val');
+        //console.log("model:", model);
+        if (imagedata.toLowerCase() == "tabular") {
+            createTabularChart();
+        }
+        else if (imagedata.toLowerCase() == "label")
+        {
+            PlotLabelChart();
+        }
+        else {
+            $('#tabular_container').hide();
+            $('#labelgraph_container').hide();
+            var id, trimid, name;
+            $('.drag-style input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                chartpara += grade;
+                id = $(item).attr("id");
+                name = $(item).attr("name");
+                trimgrade = grade.trim();
+                trimid = id.trim();
+
+                var myObject = eval('(' + model + ')');
+                var grade = [];
+                if (trimgrade !== "" && trimid !== "") {
+                    for (i in myObject) {
+                        storedata = myObject[i][trimgrade]
+                        grade.push(storedata);
+                    }
+                    dictEditData.push({
+                        key: id,
+                        value: grade
+                    });
+                }
+            });
+            $('.drag-style1 input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                chartpara += grade;
+                id = $(item).attr("data_id_name");
+                name = $(item).attr("name");
+                trimgrade = grade.trim();
+                trimid = id.trim();
+                var myObject = eval('(' + model + ')');
+                var grade = [];
+
+                if (trimgrade !== "" && trimid !== "") {
+                    for (i in myObject) {
+                        storedata = myObject[i][trimgrade]
+                        grade.push(storedata);
+                    }
+                    dictEditData.push({
+                        key: id,
+                        value: grade
+                    });
+                }
+
+            });
+            if (imagedata.toLowerCase() == "line_threshold" || imagedata.toLowerCase() == "bar_threshold") {
+                $('.drag-style2 input[type=search]').each(function (i, item) {
+                    var grade = $(item).val();
+                    chartpara += grade;
+                    id = $(item).attr("data_id_name");
+                    name = $(item).attr("name");
+                    trimgrade = grade.trim();
+                    trimid = id.trim();
+                    var myObject = eval('(' + model + ')');
+                    var grade = [];
+
+                    if (trimgrade !== "" && trimid !== "") {
+                        for (i in myObject) {
+                            storedata = myObject[i][trimgrade]
+                            grade.push(storedata);
+                        }
+                        dictEditData.push({
+                            key: id,
+                            value: grade
+                        });
+                    }
+
+                });
+            }
+
+            //console.log("dictEditData:", dictEditData);
+            //console.log("imagedata:", imagedata);
+            DrowTheGraph(dictEditData, imagedata);
+            $("#myChart").show();
+            $("#myChart").css('display', 'block');
+        }
+    });
+    $('.BtnEditSubmitKpi').click(function () {
+        var isAllValid = true;
+        var imagedata = $('#container').find('.card-img-top').attr('alt');
+        var chart_id = $('#myTabInner a.active').attr("data-id");
+        var queryId = $(' #myTabInnerData a.active').find('.databtn').attr("data-id");
+        //console.log("queryId:", queryId);
+        //console.log("chart_id:", chart_id);
+        if ($('#edit_kpi_name').val().trim() == '') {
+            isAllValid = false;
+            $('#edit_kpi_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edit_kpi_name').siblings('span.error').css('visibility', 'hidden');
+        }
+        var dictData = [];
+        var colordata = [];
+        var id, position, selects, colors, trimid, name;
+        var chartpara = "{";
+        var arr = [];
+        arr.push("{")
+        var dta = "a";
+        if (imagedata != "tabular" && imagedata != "label") {
+            $('.drag-style input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                grade = "" + grade + "";
+                //id = $(item).attr("id");
+                id = $(item).attr("data_id_name");
+                trimgrade = grade.trim();
+                trimid = id.trim();
+                dictData.push({
+                    key: id,
+                    value: grade
+                });
+            });
+            if (imagedata == "bar" || imagedata == "line" || imagedata == "line_threshold" || imagedata == "bar_threshold" || imagedata == "stacked_bar" || imagedata == "step_line" || imagedata == "spline" || imagedata == "bubble" || imagedata == "scatter" || imagedata == "area" || imagedata == "heatmap" || imagedata == "histogram") {
+                var gradeData = [];
+                $('.drag-style1 input[type=search]').each(function (i, item) {
+                    var grade = $(item).val();
+                    if (grade != null && grade != '' && grade != undefined) {
+                        gradeData.push(grade);
+                    }
+                });
+                if (gradeData != null && gradeData != '') {
+                    id = "Height";
+                    trimid = id.trim();
+                    dictData.push({
+                        key: id,
+                        value: gradeData.join()
+                    });
+
+                }
+
+                $('.drag-style1 input[type=text]').each(function (i, item) {
+                    var colorval = $(item).val();
+                    if (colorval != null && colorval != '' && colorval != undefined) {
+                        colordata.push(colorval);
+                    }
+                });
+                colordata.pop();
+
+                var colorarray = '@ViewBag.DefineColor';
+                //console.log("colorarray:", colorarray);
+                var tempcolor = colorarray.split(",");
+                var tempI = -1;
+                colordata = colordata.map(function (x) { tempI++; return x.replace('#fff', tempcolor[tempI]); });
+                //console.log("NEW colordata:", colordata);
+
+                if (colordata != null && colordata != '') {
+                    id = "color";
+                    dictData.push({
+                        key: id,
+                        value: colordata.join()
+                    });
+                }
+            }
+            if (imagedata == "line_threshold" || imagedata == "bar_threshold") {
+                var ThresholdData = []
+                $('.drag-style2 input[type=search]').each(function (i, item) {
+                    var grade = $(item).val();
+                    if (grade != null && grade != '' && grade != undefined) {
+                        ThresholdData.push(grade);
+                    }
+                });
+
+                if (ThresholdData != null && ThresholdData != '') {
+                    id = "Threshold";
+                    trimid = id.trim();
+                    dictData.push({
+                        key: id,
+                        value: ThresholdData.join()
+                    });
+                }
+            }
+            if (imagedata.toLowerCase() == "pie" || imagedata.toLowerCase() == "doughnut" || imagedata.toLowerCase() == "polararea" || imagedata.toLowerCase() == "radar" || imagedata.toLowerCase() == "treemap" || imagedata.toLowerCase() == "gauge") {
+                $('.drag-style1 input[type=search]').each(function (i, item) {
+                    var grade = $(item).val();
+                    grade = "" + grade + "";
+                    //id = $(item).attr("id");
+                    id = $(item).attr("data_id_name");
+                    trimgrade = grade.trim();
+                    trimid = id.trim();
+                    dictData.push({
+                        key: id,
+                        value: grade
+                    });
+                });
+            }
+            for (let i = 0; i < dictData.length; i++) {
+                arr.push(dictData[i].key + ":" + dictData[i].value)
+                if (i < dictData.length - 1) {
+                    dta = "\"" + dictData[i].value + "\"";
+                    chartpara += "\"" + dictData[i].key + "\"" + ":" + dta + ","
+                }
+                else {
+                    dta = "\"" + dictData[i].key + "\"";
+
+                    chartpara += dta + ":" + "\"" + dictData[i].value + "\"";
+                }
+            }
+            chartpara += "}";
+            arr.push("}");
+        }
+        else if (imagedata == "label") {
+            var labelData = [];
+
+            $('.drag-style input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                grade = "" + grade + "";
+                id = $(item).attr("name").replace("remove_", "");
+                labelData.push({
+                    [id]: grade
+                });
+            });
+
+            //$('.drag-style input.labelInputTag').each(function (i, item) {
+            //    if ($(item).val() != null && $(item).val() != '') {
+            //        id = "Select";
+            //        selects = $('select[name=drop_down_label]').val();
+            //        labelData.push({
+            //            [id]: selects
+            //        });
+
+            //        id = "Position";
+            //        position = $('select[name=drop_down_position]').val();
+            //        labelData.push({
+            //            [id]: position
+            //        });
+
+            //    }
+            //});
+
+            $('.drag-style select[name=drop_down_label]').each(function (i, item) {//input.labelInputTag
+                if ($(item).val() != null && $(item).val() != '' && $(item).val().toLowerCase() != 'select') {
+                    id = "Select";
+                    position = $(item).val();
+                    labelData.push({
+                        [id]: position
+                    });
+                }
+            });
+
+            $('.drag-style select[name=drop_down_position]').each(function (i, item) {//input.labelInputTag
+                if ($(item).val() != null && $(item).val() != '' && $(item).val().toLowerCase() != 'select') {
+                    id = "Position";
+                    position = $(item).val();
+                    labelData.push({
+                        [id]: position
+                    });
+
+                }
+            });
+
+            $('.drag-style input[name=togglePaletteOnly]').each(function (i, item) {
+                id = $(item).attr("id");
+                colors = $(item).val();
+                labelData.push({
+                    [id]: colors
+                });
+            });
+
+            let endData = {}
+            labelData.forEach(d => {
+                const [dataKey] = Object.keys(d)
+                const relatedValues = labelData.map(d => dataKey in d ? d[dataKey] : null).filter(Boolean)
+                endData[dataKey] = `${[relatedValues]}`
+            })
+
+            chartpara = JSON.stringify(endData);
+            //console.log("chartpara:", chartpara);
+        }
+        else if (imagedata == "tabular") {
+            $("#DynamicRow input.getdatapass").each(function () {
+                var row = $(this).closest('td');
+                var columns = row.find('select.SelectiveCol').val();
+                var columns1 = row.find('input.getdatapass').val();
+                if (columns != '' || columns1 != '') {
+                    dictData.push({
+                        key: columns,
+                        value: columns1
+                    });
+                }
+
+                //console.log("dictData:", dictData);
+            })
+
+            for (let i = 0; i < dictData.length; i++) {
+
+                arr.push(dictData[i].key + " :  " + "  " + dictData[i].value);
+                if (i < dictData.length - 1) {
+
+                    dta = dictData[i].value;
+                    if (dta != "") {
+                        dta = "\"" + dictData[i].value + "\"";
+                    }
+                    else {
+                        dta = "\"" + dictData[i].key + "\"";
+
+                    }
+                    chartpara += "\"" + dictData[i].key + "\"" + " :" + "  " + dta + ",";
+                }
+                else {
+                    dta = "\"" + dictData[i].key + "\"";
+                    dtv = dictData[i].value;
+                    if (dtv != "") {
+                        dtv = "\"" + dictData[i].value + "\"";
+                    }
+                    else {
+                        dtv = "\"" + dictData[i].key + "\"";
+
+                    }
+                    chartpara += dta + ":  " + "  " + dtv;
+                }
+            }
+
+            chartpara += "}";
+
+        }
+
+        //console.log("chartpara", chartpara);
+
+        if (isAllValid) {
+            var newDataVal = {
+                kpi_ID: $("#edit_kpi_id").val(),
+                kpi_name: $("#edit_kpi_name").val().trim(),
+                kpi_description: $('#edit_kpi_description').val().trim(),
+                chart_id: chart_id,
+                kpi_query_ID: queryId,
+                kpi_chart_parameters: chartpara,
+                kpi_user_id: $('#edit_kpi_user_type').val()
+                //system_kpi: $("#dashboardCheck").prop('checked')
+            }
+            console.log("newDataVal", newDataVal);
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Content("~/Graph/UpdateKPI")',
+                data: JSON.stringify(newDataVal),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.startsWith("ERROR")) {
+                        var res = data.split(";");
+                        var error = '';
+                        if (res.length > 1) {
+                            error = res[1];
+                        } else {
+                            error = data;
+                        }
+                        //alert(error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: error
+                        });
+                    }
+                    else {
+
+                            @*alert('Data saved successfully!!!');
+                            $('#myModal').modal('hide');
+                            var dashboard_url = '@Url.Content("~/Dynamic/Index?menu_name=KPI")';
+                            window.location.href = dashboard_url;*@
+
+                        $('#myEditKpiModal').modal('hide');
+                        var kpi_url = '@Url.Content("~/Dynamic/Index?menu_name=KPI")';
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Data updated successfully!!!',
+                            showConfirmButton: true,
+                        }).then(function () {
+                            window.location.href = kpi_url;
+                        });
+                    }
+                },
+                error: function (error) {
+                    //alert('Error');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Something went wrong!'
+                    });
+                }
+            });
+        }
+    });
+</script>

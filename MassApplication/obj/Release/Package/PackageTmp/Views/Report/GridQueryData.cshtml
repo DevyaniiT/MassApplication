@@ -1,0 +1,230 @@
+﻿@using MassApplication.ClassFolder;
+@using Npgsql;
+@using System.Configuration;
+@using System.Data;
+@{
+    ViewBag.Title = ViewBag.ReportName;
+}
+<link rel="stylesheet" href="~/MasterStyles/css/WebPageStyle.css" />
+<style>
+    .dataTables_filter {
+        display: none;
+    }
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mt-3 ">
+                    <div class="card-header data-head">
+                        <div class="row mb-0">
+                            <div class="col-sm-8">
+                                @*<h3 class="card-title pt-2">@ViewBag.Title</h3>*@
+                            </div>
+                            <div class="col-sm-4" style="text-align:right">
+                                @*<input type="button" class="btn btn-primary" value="View Report" onclick="BtnLoad()" style="margin-left:16px;" />*@
+
+                                @*<button type="button" class="btn btn-dash" value="View Report" onclick="BtnLoad()" style="margin-left:16px;">View Report</button>*@
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body table-responsive">
+                        @{ int count = 1;}
+                        @foreach (var item in ViewBag.DataHashValue)
+                        {
+                            string s = ConfigurationManager.AppSettings["SchemaPath"];
+                            if (s == null)
+                            {
+                                s = "public.";
+                            }
+                            MASSODBC.MASSODBC obj = new MASSODBC.MASSODBC();
+                            var tablediv = "reportData" + count;
+                            string query = item.Value.ToString();
+                            DataTable dt = new DataTable();
+                            string conn_sql = Query_Class.sql_getConnId("mass2.", (int)ViewBag.ConnectionId);
+                            dt = Database_Class.OpenQuery(conn_sql);
+                            foreach (DataRow dr in dt.Rows)
+                            {
+                                obj.DatabaseName = dr["db_schemaname"].ToString();
+                                obj.OdbcName = dr["dsn_name"].ToString();
+                                obj.UserId = dr["user_id"].ToString();
+                                obj.Password = dr["password"].ToString();
+                            }
+
+                            dt = obj.OpenTable(query, "query");
+                            ViewBag.DataQuery = dt;
+                            count++;
+
+                            <table id="@tablediv" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        @foreach (System.Data.DataColumn col in ViewBag.DataQuery.Columns)
+                                        {
+                                            <th style="text-transform:uppercase">@col.Caption</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (System.Data.DataRow row in ViewBag.DataQuery.Rows)
+                                    {
+                                        <tr>
+                                            @foreach (var cell in row.ItemArray)
+                                            {
+                                                <td>@cell.ToString()</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+
+                        }
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<script>
+    function BtnLoad() {
+        var url = '@Url.Content("~/Report/ReportPopUp")'
+        window.location.href = url;
+        //window.open(url, '_blank');
+}
+</script>
+<script>
+    $(function () {
+        var tableName = '@ViewBag.Title'
+        $("#reportData1").DataTable({
+            "responsive": true, "lengthChange": true, "autoWidth": false, "pageLength": 10, "scrollY": "380px",
+            "scrollCollapse": true,
+            "initComplete": function (settings, json) {
+                $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+            },
+            dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>rt<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            "order": [[1, 'desc']],
+            deferRender: true,
+            language: {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                },
+                "search": '<i class="fa fa-forward"></i>',
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "lengthMenu": "Rows :  _MENU_",
+            },
+            columnDefs: [
+                { orderable: false, targets: 0 },
+                {
+                    "targets": [1],
+                    "visible": false
+                }
+            ]
+        })
+        $("div.toolbar").html('<div style= "display:flex;"><p><strong> ' + tableName + ' </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="#"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#"><i class="fas fa-edit nav-icon1"></i></a></li> <li class="list-inline-item"><a href="#"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a onclick="BtnLoad()"><i class="fas fa-eye nav-icon1"></i></a></li></ul></div>')
+    });
+</script>
+<script>
+    $(function () {
+        $("#reportData2").DataTable({
+            "responsive": true, "lengthChange": true, "autoWidth": false, "pageLength": 10,
+            dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>rt<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            "order": [[1, 'desc']],
+            deferRender: true,
+            language: {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                },
+                "search": '<i class="fa fa- forward"></i>',
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "lengthMenu": "Rows :  _MENU_",
+
+            },
+            "aoColumnDefs": [
+                {
+                    "aTargets": [0],
+                    "sType": "date" // type of the column
+                    , "mRender": function (d, type, full) {
+                        d = new Date(d);
+                        month = '' + (d.getMonth() + 1),
+                            day = '' + d.getDate(),
+                            year = d.getFullYear();
+
+                        if (month.length < 2)
+                            month = '0' + month;
+                        if (day.length < 2)
+                            day = '0' + day;
+
+                        return [day, month, year].join('-');
+                    }
+                },
+                {
+                    "aTargets": [2],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                },
+                {
+                    "aTargets": [3],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                },
+                {
+                    "aTargets": [4],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                },
+                {
+                    "aTargets": [5],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                },
+                {
+                    "aTargets": [6],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                },
+                {
+                    "aTargets": [7],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                },
+                {
+                    "aTargets": [8],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                },
+                {
+                    "aTargets": [9],
+                    "sType": "double" // type of the column
+                    , "mRender": function (data, type, row) {
+                        return (100 * data).toFixed(2);
+                    }
+                }
+            ]
+        });
+    //$("div.toolbar").html('<div style= "display:flex;"><p><strong> XYZ Demo Report </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="/DashBoard/DashboardList"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a  data-toggle="modal" data-target="#add_user_modal" onclick="BtnAddUser()" href="/DashBoard/DashboardList"> <i class="fas fa-edit nav-icon1"></i></a></li> <li class="list-inline-item"><a href="/DashBoard/DashboardList"><i class="fas fa-trash nav-icon1"></i></a></li> <li class="list-inline-item"><a href="#" onclick="BtnLoad()" ><i class="fas fa-eye nav-icon1"></i></a></li></ul></div>')
+    });
+</script>

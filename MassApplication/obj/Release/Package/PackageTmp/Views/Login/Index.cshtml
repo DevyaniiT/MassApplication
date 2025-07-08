@@ -1,0 +1,53 @@
+﻿
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_LoginLayoutPage.cshtml";
+}
+
+<form action="@Url.Action("GetToken", "Login")" method="post" class="login100-form validate-form">
+    <div class="limiter">
+        <div class="container-login100">
+            <div class="wrap-login100 p-0">
+                <div class="login100-form validate-form wrap-login100" style="border-radius:0px">
+
+                    <div class="login100-form-avatar" style="overflow: visible; margin-bottom:26px;">
+                        <img src="~/Images/main_logo_new.png" alt="logo" />
+                    </div>
+                    <div class="wrap-input100 validate-input" data-validate="Enter username" style="margin-bottom:20px">
+                        <input class="input100" type="text" id="txtEmail" name="username" placeholder="User name">
+                        <span class="focus-input100" data-placeholder=""></span>
+                    </div>
+                    <div class="wrap-input100 validate-input" data-validate="Enter password" style="margin-bottom:20px">
+                        <input class="input100" type="password" id="txtPassword" name="password" placeholder="Password">
+                        <span class="focus-input100" data-placeholder=""></span>
+                    </div>
+
+                    <div class="container-login100-form-btn">
+                        <button class="login100-form-btn" id="btnLogin">
+                            Login
+                        </button>
+                    </div>
+                </div>
+                <div class="row pb-2" style="background: #fff; color: #fff;padding: 5px; border-radius:0px 0px 10px 10px">
+                    <div class="col-md-4">
+                        <div class="login-footer">
+                            <img src="~/Images/mass-logo.png" alt="logo" style="padding-left: 7px; width: 100px" />
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="login-footer-right text-right">
+                            <p class="" style="font-size:12px; color:#666666; padding-top:5px; padding-right:7px; font-weight:500;">Licensed To: Alethe Labs India Pvt Ltd  </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+<script src="~/LoginStyles/js/Login_main.js"></script>
+<script src="~/Scripts/SweetAlert2/sweetalert2.all.min.js"></script>
+

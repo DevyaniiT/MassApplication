@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+<section class="content">
+    <div class="container contain_min">
+        <div class="row mt-2">
+            <div class="col-12 pt-1">
+                <div class="card">
+                    <!-- card-body -->
+                    <div class="card-body table-responsive ">
+                        <table id="DataList" class="table table-bordered table-striped">
+                        </table>
+                    </div>
+                    <!-- card-body -->
+                </div>
+                <!-- card -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- POPUP MODAL FOR EDITING -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="edit_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/MasterStyles/TableStyles/datatables/jquery.mockjax.min.js"></script>
+<script>
+    // FOR DEMONSTRATION ONLY: AJAX emulation
+    $.mockjax({
+        url: '/test/0',
+        responseTime: 1000,
+        response: function (settings) {
+            var json_data = @Html.Raw(Json.Encode(ViewBag.TableData));
+            var arrData = [];
+            for (var i = 0; i < json_data.length; i++) {
+                arrData.push([json_data[i]['pipelinemst_id'],
+                    json_data[i]['pipeline_name'],
+                    json_data[i]['pipeline_shortname'],
+                    json_data[i]['frm_station'],
+                    json_data[i]['t_station'],
+                    json_data[i]['modified_byy'],
+                    json_data[i]['modified_on']
+                ]);
+            }
+            //console.log("Request arrData: ", arrData);
+            this.responseText = {
+                data: [],
+            };
+            for (var i = 0; i < arrData.length; i++) {
+                this.responseText.data.push(arrData[i]);
+            }
+        }
+    });
+</script>
+<!-- DATATABLE INITIALIZING FORMAT -->
+<script>
+    var myTable;
+    var columnsData = [];
+    $(document).ready(function () {
+        columnsData = [
+            { 'title': 'Id' },
+            { 'title': 'Network' },
+            { 'title': 'Short Name' },
+            { 'title': 'From Station' },
+            { 'title': 'To Station' },
+            { 'title': 'Modified By' },
+            { 'title': 'Modified On' },
+            { 'title': 'Action' }
+        ];
+        myTable = $('#DataList').DataTable({
+            ajax: '/test/0',
+            'columns': columnsData,
+            'processing': true,
+            'paging': true,
+            'scrollY': "350px",
+            "scrollCollapse": true,
+            'order': [[1, 'asc']],
+            'dom': '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'deferRender': true,
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                },
+                "search": '',
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "lengthMenu": "Rows :  _MENU_",
+            },
+            'columnDefs': [
+                { 'visible': false, 'targets': [0] },
+                { 'orderable': false, 'targets': [7] },
+                { 'targets': [7], 'className': 'text-center' },
+                {
+                    'targets': [7], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="editPipeline dropdown_icon" title="Edit" onclick="BtnEditPipeline(' + meta.row + ')">'
+                            + '<i class="fas fa-edit" style="margin-left: 10px;color: #248742;"></i>'
+                            + '</a>'
+                            + '<a class="dropdown_icon" data-toggle="tooltip" title="Delete" onclick="BtnDeletePipeline(' + meta.row + ')">'
+                            + '<i class="fa fa-trash" style="margin-left: 10px;color: #dc5252;"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                }
+            ]
+        });
+        $("div.toolbar").html('<div style="display:flex;"><p><strong> Network List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="#"> <i class="fas fa-upload nav-icon1"></i></a></li> <li class="list-inline-item"><a href="#"> <i class="fas fa-clock nav-icon1"></i></a></li><li class="list-inline-item"><a href="#"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#"><i class="fas fa-trash nav-icon1"></i></a></li></ul></div>')
+    });
+</script>
+<!-- SCRIPT FOR EDIT AND DELETE BUTTON -->
+<script>
+    function BtnEditPipeline(rowData) {
+        var table = $('#DataList').DataTable();
+        var form_data = table.rows(rowData).data();
+        var id_column;
+        $.each(form_data, function (key, value, index) {
+            id_column = value[0];
+        });
+        //console.log("id_column:", id_column);
+
+        $.ajax({
+             url: '@Url.Content("~/Pipeline/EditPipelineData?Id=")' + id_column, // The method name + parameter
+             success: function (data) {
+                 $('#edit_modal .modal-title').html('Edit Network');
+                 $('#edit_modal .modal-body').html(data);
+                 $('#edit_modal').modal('show');
+             }
+        });
+    }
+
+    function BtnDeletePipeline(rowData) {
+        var table = $('#DataList').DataTable();
+        var form_data = table.rows(rowData).data();
+        var id_column;
+        $.each(form_data, function (key, value, index) {
+            id_column = value[0];
+        });
+        console.log("id_column:", id_column);
+        var url_data = '@Url.Content("~/Pipeline/DeletePipelineData?Id=")' + id_column
+        window.location.href = url_data;
+        
+    }
+
+</script>
+

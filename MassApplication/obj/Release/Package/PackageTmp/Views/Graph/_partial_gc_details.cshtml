@@ -1,0 +1,135 @@
+﻿@model MassApplication.Models.GC_Class
+@{
+    ViewBag.Title = "GC View";
+}
+
+<link rel="stylesheet" href="~/GraphStyles/css/styles.css?v=1" />
+<link rel="stylesheet" href="~/MasterStyles/DaterangePicker/daterangepicker.css" />
+<script src="~/MasterStyles/DaterangePicker/daterangepicker.js"></script>
+
+<style>
+    .current {
+        display: block;
+    }
+
+    .step {
+        height: 30px;
+        width: 30px;
+        cursor: pointer;
+        margin: 0 2px;
+        color: #fff;
+        background-color: #bbbbbb;
+        border: none;
+        border-radius: 50%;
+        display: inline-block;
+        opacity: 0.8;
+        padding: 5px
+    }
+
+        .step.active {
+            opacity: 1;
+            background-color: #69c769;
+        }
+
+        .step.finish {
+            background-color: #4CAF50;
+        }
+</style>
+<style>
+    .meter-details .tooltip {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px solid #2a5b6c;
+        opacity: 1;
+    }
+
+        .meter-details .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: -55%;
+            right: 111%;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+            .meter-details .tooltip .tooltiptext::after {
+                content: " ";
+                position: absolute;
+                top: 50%;
+                left: 100%; /* To the right of the tooltip */
+                margin-top: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent transparent transparent black;
+            }
+
+        .meter-details .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row" style="box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);">
+            <div class="col-md-10"></div>
+            <div class="col-md-2 pr-3 pt-2 mb-2">
+                <div class="meter-details" style="float:right;">
+                    <button type="button" class="btn bg-info btn-sm daterange" data-toggle="tooltip" title="Date range">
+                        <i class="fa fa-calendar"></i>
+                    </button>
+                    <button type="button" class="btn bg-info btn-sm" data-toggle="tooltip" title="Back" onclick="BtnBackToGC()">
+                        <i class="fa fa-backward"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="GCPortion">
+        @{Html.RenderAction("GCViewerData", "Graph", new { menuName = "gc" });}
+    </div>
+</section>
+
+<script>
+    $('.daterange').daterangepicker({
+        singleDatePicker: true,
+        ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')]
+        },
+        //startDate: moment().subtract(29, 'days'),
+        //endDate: moment()
+        startDate: moment()
+        //startDate: moment().subtract(1, 'days'),
+    }, function (start, end) {
+        /*window.alert('You chose: ' + start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))*/
+        var gcId = @Html.Raw(Model.gc_id);
+        var start_date = start.format('YYYY-MM-DD');
+
+        var active_tab = "gc";
+        var data = 'id=' + gcId + '&start_date=' + start_date + '&tab_name=' + active_tab;
+        console.log("DATA:", data);
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Content("~/Graph/GetGCDynamicData")',
+            data: data,
+            success: function (data) {
+                $("#GCPortion").html(data);
+            }
+        });
+    });
+    function BtnBackToGC() {
+        var gc_url = '@Url.Content("~/Dynamic/Index?menu_name=GC")';
+        window.location.href = gc_url;
+    }
+</script>
+
+
+

@@ -1,0 +1,88 @@
+﻿@model MassApplication.Models.Connection_Class
+
+<div id="connectionEditTab">
+    @Html.HiddenFor(modelItem => Model.connection_id, new { id = "update_conn_id" })
+    <div class="row">
+        <div class="col-sm-3">
+            <label ID="Lbl_dsn"> DSN: </label>
+        </div>
+        <div class="col-sm-9">
+            <input id="update_dsn_name" class="form-control drop_down_daily" type="text" value="@Model.dsn_name" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <label ID="Lbl_username"> User Name: </label>
+        </div>
+        <div class="col-sm-9">
+            <input id="update_user_name" class="form-control drop_down_daily" type="text" value="@Model.user_id" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <label ID="Lbl_pwd"> Password: </label>
+        </div>
+        <div class="col-sm-9">
+            <input id="update_password" class="form-control drop_down_daily" type="password" value="@Model.password" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-3">
+            <label ID="Lbl_db_name"> Database Name: </label>
+        </div>
+        <div class="col-sm-9">
+            <input id="update_db_name" class="form-control drop_down_daily" type="text" value="@Model.db_schema_name" />
+        </div>
+    </div>
+</div>
+<div style="padding:10px 0; text-align:right">
+    <input id="updateConn" type="button" value="Update" class="btn btn-warning" style="padding:10px 20px" />
+    <input type="button" class="BtnCloseUpdateConn btn btn-default" value="Close" style="padding:10px 20px" />
+</div>
+
+<script>
+     $('#updateConn').click(function () {
+     var updateData = {
+            connection_id: $("#update_conn_id").val().trim(),
+            dsn_name: $('#update_dsn_name').val().trim(),
+            user_id: $('#update_user_name').val().trim(),
+            password: $('#update_password').val().trim(),
+            db_schema_name: $('#update_db_name').val().trim()
+        }
+        //alert(updateData);
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/EditConnectionData")',
+            data: JSON.stringify(updateData),
+            contentType: 'application/json',
+            success: function (data) {
+                alert('Updated successfully!!!');
+                $('#editConn_modal').modal('hide');
+                $('#add_modal .modal-body').html(null);
+                $('#add_modal .modal-body').html(data);
+
+                //$(".nav li:eq(0)").removeClass('active');
+                //$(".nav li:eq(2)").addClass('active');
+                //$("#newReportTab").removeClass('active');
+                //$("#newConnectionTab").addClass('active');
+                //$('.tab-pane').addClass('active');
+                //$('.nav li a[href="#newReportTab"]').removeClass('active');
+               // $('.nav li a[href="#newConnectionTab"]').addClass('active');
+               
+            },
+            error: function (error) {
+                alert("Error");
+            }
+        });
+
+
+    });
+</script>
+<script>
+    $('.BtnCloseUpdateConn').click(function () {
+        $('#editConn_modal').modal('hide');
+    });
+</script>
+
+

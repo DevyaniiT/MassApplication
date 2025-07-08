@@ -1,0 +1,88 @@
+﻿@model IEnumerable<MassApplication.Models.Report_Class>
+
+<style>
+        .switch input:checked + .slider {
+            background-color: #28a745;
+        }
+</style>
+
+@foreach (var m in Model)
+{
+ var active_checked = m.is_deleted;
+<tr  class="link" data-id="@m.report_id">
+    <td><input type="checkbox"></td>
+    <td>@m.report_name</td>
+    <td style="word-wrap: break-word;min-width: 160px;max-width: 160px;">@m.report_description</td>
+    @*<td style="text-align:center;">
+            @{
+                if (m.is_deleted == false)
+                {
+                    <span class="status text-success">&bull;</span> @m.report_status
+                }
+                else
+                {
+                    <span class="status text-danger">&bull;</span> @m.report_status
+                }
+            }
+        </td>*@
+    <td style="text-align:center;">
+        <p>
+        @{
+            if (m.is_deleted == false)
+            {
+                @*<input class="active_mode" type="checkbox" checked="checked" data-id="@m.report_id">*@
+
+                <label class="switch mb-0">
+                    <input class="active_mode" type="checkbox" checked="checked" data-id="@m.report_id">
+                    <span class="slider round"></span>
+                </label>
+            }
+            else
+            {
+                @*<input class="active_mode" type="checkbox" data-id="@m.report_id">*@
+
+                <label class="switch">
+                    <input class="active_mode" type="checkbox" data-id="@m.report_id">
+                    <span class="slider round"></span>
+                </label>
+
+            }
+
+            <a onclick="ButtonEdit('Edit Report Data',@m.report_id)" class="dropdown_icon ml-2" data-toggle="tooltip" title="Edit">
+                <i class="fas fa-edit nav-icon1"></i>
+            </a>
+
+
+        }
+
+</p>
+        
+    </td>
+</tr>
+
+}
+<script>
+    function ButtonEdit(title,report_id) {
+        $.ajax({
+         url: '@Url.Content("~/Report/EditReportData?report_id=")' + report_id, // The method name + parameter
+         success: function(data) {
+             $('#edit_modal .modal-body').html(data);
+            $('#edit_modal .modal-title').html(title);
+            $('#edit_modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+        }
+    });
+}
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,429 @@
+﻿@model IEnumerable<MassApplication.Models.Parameter_Class>
+@using Npgsql;
+@using System.Configuration;
+@using System.Data;
+@using System.Text.RegularExpressions;
+@using Newtonsoft.Json;
+
+<style>
+    .error {
+        color: red;
+        display: none;
+    }
+</style>
+
+@using (Html.BeginForm("EmailerData", "Report", FormMethod.Post))
+{
+    <ul class="nav nav-tabs border-bottom-0" id="tabContent">
+        <li class="nav-link active"><a href="#tiggerTab" data-toggle="tab">Schedule Time</a></li>
+        <li class="nav-link"><a href="#scheduleTab" data-toggle="tab">Email</a></li>
+        <li class="nav-link"><a href="#paramTab" data-toggle="tab">Parameters</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div id="tiggerTab" class="tab-pane active mt-5">
+
+            <div class="row mt-5">
+                <div class="col-sm-5">
+                    <input class="radio-reminder" type="radio" name="reminder" value="daily" checked="checked" /> Daily
+                </div>
+                <div class="col-sm-7">
+                    <div class='input-group date' id='datetimepicker1'>
+                        <input class="form-control" type="date" name="reminder_date" placeholder="YYYY-MM-DD" />
+
+                    </div>
+                </div>
+            </div>
+            <div class="row weekly-reminder">
+                <div class="col-sm-5">
+                    <input id="" class="radio-reminder" type="radio" name="reminder" value="weekly" /> Weekly
+                </div>
+
+                <div class="col-ms-7 newWeekSelect" style="display:none;">
+                    <select class="form-control drop_down_daily" name="reminder_week" style="margin-left:7px">
+                        <option value="">SELECT</option>
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="col-sm-7 newMonthSelect" style="display:none;">
+                    <select class="form-control drop_down_daily" name="reminder_month">
+                        <option value="">SELECT</option>
+                        <option value="january">January</option>
+                        <option value="february">February</option>
+                        <option value="march">March</option>
+                        <option value="april">April</option>
+                        <option value="may">May</option>
+                        <option value="june">June</option>
+                        <option value="july">July</option>
+                        <option value="august">August</option>
+                        <option value="september">September</option>
+                        <option value="october">October</option>
+                        <option value="november">November</option>
+                        <option value="december">December</option>
+                    </select>
+                </div>
+                <div class="col-sm-7 newDateSelect" style="display:none;">
+                    <div class='input-group date' id='datetimepicker2'>
+                        <input class="form-control" type="date" name="reminder_todate" placeholder="YYYY-MM-DD" />
+
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <input class="radio-reminder" type="radio" name="reminder" value="monthly" /> Monthly
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12">
+                    <input class="radio-reminder" type="radio" name="reminder" value="custom" /> Custom
+                </div>
+            </div>
+
+        </div>
+        <div id="scheduleTab" class="tab-pane mt-5">
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <label ID="Lbl_to"> To: </label>
+                </div>
+                <div class="col-sm-9">
+                    <input type="email" class="form-control" id="mail_to" name="mail_to" placeholder="Enter email">
+                    @*<input id="mail_to" name="mail_to" class="form-control drop_down_daily" type="email" />*@
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <label ID="Lbl_cc"> CC: </label>
+                </div>
+                <div class="col-sm-9">
+                    <input type="email" class="form-control" id="mail_cc" name="mail_cc" placeholder="Enter cc">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <label ID="Lbl_bcc"> BCC: </label>
+                </div>
+                <div class="col-sm-9">
+                    <input type="email" class="form-control" id="mail_bcc" name="mail_bcc" placeholder="Enter bcc">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <label ID="Lbl_bcc"> Subject: </label>
+                </div>
+                <div class="col-sm-9">
+                    <textarea id="mail_sub" name="mail_sub" class="form-control" placeholder="Enter subject"></textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <label ID="Lbl_bcc"> Body: </label>
+                </div>
+                <div class="col-sm-9">
+                    <textarea id="mail_body" name="mail_body" class="form-control" placeholder="Enter body"></textarea>
+                </div>
+            </div>
+
+        </div>
+        <div id="paramTab" class="tab-pane mt-5">
+            @foreach (var m in Model)      //contains var variables
+            {
+                <div class="row">
+                    <div class="col-sm-5">
+                        <label ID="labelClass"> @m.param_label </label>
+                        @*<label id="labelClass" class="labelClass"> @m.param_label </label>*@
+                    </div>
+                    <div class="col-sm-7">
+
+                        @{
+                            List<SelectListItem> items = new List<SelectListItem>();
+                            string method_val = m.param_method;
+                            string query_val = m.param_query;
+                            string variable_val = m.param_variable.ToLower();
+                            string SwitchCase_type = m.param_type;
+                            string constr = ConfigurationManager.ConnectionStrings["DatabaseServer"].ConnectionString;
+                            string function_script = "";
+                            string region = MassApplication.ClassFolder.Login_Class.region_id;
+                            switch (SwitchCase_type.ToLower())
+                            {
+                                case "dropdown":
+                                    if (method_val.ToLower() == "static")
+                                    {
+                                        DataTable dt = new DataTable();
+                                        dt = (DataTable)JsonConvert.DeserializeObject(query_val, (typeof(DataTable)));
+                                        int s = dt.Rows.Count;
+                                        for (int i = 0; i < s; i++)
+                                        {
+                                            string d1 = dt.Rows[i]["Text"].ToString();
+                                            string d2 = dt.Rows[i]["Value"].ToString();
+                                            items.Add(new SelectListItem { Text = d1, Value = d2 });
+                                        }
+                                        ViewBag.VariableData = items;
+                                        @Html.DropDownList("paramsdata", new SelectList(ViewBag.VariableData, "Text", "Value"), new { @class = "form-control drop_down_daily" })
+                                    }
+                                    else
+                                    {
+                                        if (variable_val.ToLower() == "varpipelinemst_id")
+                                        {
+                                            ViewBag.ActualData = "";
+
+                                            using (NpgsqlConnection con = new NpgsqlConnection(constr))
+                                            {
+                                                string function_str = (query_val);
+                                                string sPattern, Correctval;
+                                                Regex regex = new Regex(@"\[var([a-zA-Z0-9_\.\-]+)\]");
+                                                MatchCollection matchCollection = regex.Matches(query_val);
+                                                foreach (Match match in matchCollection)
+                                                {
+                                                    string longid = match.ToString();
+                                                    string input = region;
+
+                                                    sPattern = match.Value.Replace("[", "\\[");
+                                                    sPattern = sPattern.Replace("]", "\\]");
+
+                                                    Correctval = input;
+                                                    function_str = Regex.Replace(function_str, sPattern, Correctval);
+
+                                                    function_script = function_str;
+                                                }
+                                                using (NpgsqlCommand cmd = new NpgsqlCommand(function_script))
+                                                {
+                                                    cmd.Connection = con;
+                                                    con.Open();
+                                                    using (NpgsqlDataReader sdr = cmd.ExecuteReader())
+                                                    {
+                                                        while (sdr.Read())
+                                                        {
+                                                            items.Add(new SelectListItem
+                                                            {
+                                                                Text = sdr["id"].ToString(),
+                                                                Value = sdr["value"].ToString()
+                                                            });
+                                                        }
+                                                    }
+                                                    con.Close();
+                                                }
+                                            }
+                                            ViewBag.NetworkData = items;
+                                            @Html.DropDownList("NetworkList", new SelectList(ViewBag.NetworkData, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily", id = "NetworkList" })
+                                        }
+                                        else { }
+                                    }
+                                    break;
+                                case "dropdown-multi":
+                                    if (variable_val == "varpipelinemst_id")
+                                    {
+                                        using (NpgsqlConnection con = new NpgsqlConnection(constr))
+                                        {
+                                            string function_str = (query_val);
+                                            string sPattern, Correctval;
+                                            Regex regex = new Regex(@"\[var([a-zA-Z0-9_\.\-]+)\]");
+                                            MatchCollection matchCollection = regex.Matches(query_val);
+                                            foreach (Match match in matchCollection)
+                                            {
+                                                string longid = match.ToString();
+                                                string input = region;
+
+                                                sPattern = match.Value.Replace("[", "\\[");
+                                                sPattern = sPattern.Replace("]", "\\]");
+
+                                                Correctval = input;
+                                                function_str = Regex.Replace(function_str, sPattern, Correctval);
+
+                                                function_script = function_str;
+                                            }
+                                            using (NpgsqlCommand cmd = new NpgsqlCommand(function_script))
+                                            {
+                                                cmd.Connection = con;
+                                                con.Open();
+                                                using (NpgsqlDataReader sdr = cmd.ExecuteReader())
+                                                {
+                                                    while (sdr.Read())
+                                                    {
+                                                        items.Add(new SelectListItem
+                                                        {
+                                                            Text = sdr["id"].ToString(),
+                                                            Value = sdr["value"].ToString()
+                                                        });
+                                                    }
+                                                }
+                                                con.Close();
+                                            }
+                                        }
+
+                                        ViewBag.NetworkDDData = items;
+                                        <div id="network_selection">
+                                            <label>
+                                                @Html.RadioButton("network_selection_daily", "All", false)
+                                                All
+                                            </label>
+                                            <label>
+                                                @Html.RadioButton("network_selection_daily", "Selective_network", true, new { id = "pipeselection" })
+                                                Selective
+                                            </label>
+                                        </div>
+                                        <div id="Selective_network" class="check_container">
+                                            <table id="tblNetworks">
+                                                @for (var i = 0; i < items.Count(); i++)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @Html.CheckBoxFor(it => items[i].Selected, new { @class = "Check_list" })
+
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(it => items[i].Value)
+                                                            @Html.HiddenFor(it => items[i].Value)
+                                                            @Html.HiddenFor(it => items[i].Text)
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    }
+                                    else if (variable_val.ToLower() == "varsection_id")
+                                    {
+                                        MassApplication.ClassFolder.RptParams_Class.query_val = m.param_query;
+                                        <div id="partialSectionDiv">
+                                            @Html.Partial("~/Views/Shared/_partialDropdwnSection.cshtml")
+                                        </div>
+                                    }
+                                    break;
+                                case "datetime":
+                                    <div class='input-group date' id='datetimepicker1'>
+                                        <input class="form-control" type="date" name="paramsdata" placeholder="YYYY-MM-DD" />
+
+                                    </div>
+                                    break;
+                                default:
+                                    <input class="form-control drop_down_daily" type="text" name="paramsdata" />
+                                    break;
+                            }
+
+                        }
+
+
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-7 pt-3">
+            <input type="submit" class="btn btn-dash mr-2" value="Submit" name="btnSubmit" />
+            <input type="button" data-dismiss="modal" class="btn btn-default" style="padding: 8px 20px; background-color: #e1e1e1; color: #000;" value="Close" />
+        </div>
+    </div>
+
+}
+<script>
+     $('.nav li').click(function(e) {
+
+        $('.nav li').removeClass('active');
+
+        var $this = $(this);
+        if (!$this.hasClass('active')) {
+            $this.addClass('active');
+        }
+        //e.preventDefault();
+    });
+</script>
+<script>
+    $(".button").click(function () {
+
+        var net_sel = $("input:radio[name='network_selection_daily']:checked").val();
+        var sec_sel = $("input:radio[name='section_selection_daily']:checked").val();
+        var net_val = $("#NetworkList option:selected").val();
+
+        if (net_sel === "Selective_network") {
+            var checked_checkboxes = $("#tblNetworks input[type=checkbox]:checked");
+            if (checked_checkboxes.length == 0) {
+                alert("Please select network!!!");
+                //$(".error").show();
+                return false;
+            }
+        }
+        else if (sec_sel === "Selective_section") {
+            var checked_checkboxes = $("#tblSections input[type=checkbox]:checked");
+            if (checked_checkboxes.length == 0) {
+                alert("Please select section!!!");
+                //$(".error").show();
+                return false;
+            }
+
+        }
+        else if (net_val == "") {
+            alert("Please select network!!!");
+            ///$(".error").show();
+            return false;
+        }
+
+        $("#email_modal").modal('hide');
+        return true;
+    });
+</script>
+<script>
+    $(".radio-reminder").change(function () {
+        //var radioVal = $(this).val();
+        //alert(radioVal);
+        if ($(this).val() == "daily") {
+            $(".daysText").hide();
+            $(".newWeekSelect").hide();
+            $(".newMonthSelect").hide();
+            $(".newDateSelect").hide();
+        }
+        else if ($(this).val() == "weekly") {
+            $(".daysText").hide();
+            $(".newWeekSelect").show();
+            $(".newMonthSelect").hide();
+            $(".newDateSelect").hide();
+        }
+        else if ($(this).val() == "monthly") {
+            $(".daysText").hide();
+            $(".newWeekSelect").hide();
+            $(".newMonthSelect").show();
+            $(".newDateSelect").hide();
+        }
+        else if ($(this).val() == "custom") {
+            $(".daysText").hide();
+            $(".newWeekSelect").hide();
+            $(".newMonthSelect").hide();
+            $(".newDateSelect").show();
+        }
+        else {
+            $(".daysText").hide();
+            $(".newWeekSelect").hide();
+            $(".newMonthSelect").hide();
+            $(".newDateSelect").hide();
+        }
+    });
+</script>
+<script>
+    $(".btn").click(function () {
+        var day_val = $("#NetworkList option:selected").val();
+        var week_val = $("#NetworkList option:selected").val();
+        var month_val = $("#NetworkList option:selected").val();
+
+        if (net_sel === "Selective_network") {
+            var checked_checkboxes = $("#tblNetworks input[type=checkbox]:checked");
+            if (checked_checkboxes.length == 0) {
+                alert("Please select network!!!");
+                //$(".error").show();
+                return false;
+            }
+        }
+
+        return true;
+    });
+</script>
+
+

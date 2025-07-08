@@ -1,0 +1,419 @@
+﻿
+@{
+    ViewBag.Title = ViewBag.TitleType + " Reconciliation Table Viewer";
+}
+<style>
+    #tableContentTab .nav-link {
+        color: #000;
+        background-color: #e1e1e1;
+        border: 0;
+        margin: 0 4px;
+        padding: 13px 23px;
+        font-size: 13px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+    #tableContentTab .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+        color: #ffffff;
+        background-color: #2a5b6c;
+        border: 0;
+        padding: 13px 23px;
+        margin: 0 4px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-size: 13px;
+        font-weight: 600;
+    }
+</style>
+
+<section class="content">
+    <div class="container contain_min">
+        <div class="row mt-2">
+            <div class="col-12 pt-1">
+                <div class="card">
+                    <div class="card-header border-0" style="text-align: center;">
+                        <h3 class="ml-3">@ViewBag.titlename</h3>
+                    </div>
+                    <!-- card-body -->
+                    <div class="card-body">
+                        <ul class="newnavconn nav nav-tabs border-bottom-0" id="tableContentTab">
+                            <li class="nav-item"><a href="#PurchaseTab" class="nav-link active" data-toggle="tab">Purchase</a></li>
+                            <li class="nav-item"><a href="#SaleTab" class="nav-link" data-toggle="tab">Sales</a></li>
+                            <li class="nav-item"><a href="#ICTab" class="nav-link" data-toggle="tab">IC</a></li>
+                        </ul>
+
+                        <div class="tab-content">
+                            <div class="tab-pane mt-4 active" id="PurchaseTab">
+                                <table id="PurchaseTable" class="table table-bordered table-striped">
+                                    <tfoot>
+                                        <tr id="PurchaseTableFooter">
+                                            <th colspan="3">Total</th>
+                                            <th id="total_purchase"></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="tab-pane mt-4" id="SaleTab">
+                                <table id="SaleTable" class="table table-bordered table-striped">
+                                    <tfoot>
+                                        <tr id="SaleTableFooter">
+                                            <th colspan="3">Total</th>
+                                            <th id="total_sale"></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                            <div class="tab-pane mt-4" id="ICTab">
+                                <table id="ICTable" class="table table-bordered table-striped">
+                                    <tfoot>
+                                        <tr id="ICTableFooter">
+                                            <th colspan="3">Total</th>
+                                            <th id="total_ic"></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    
+<script>
+    $(document).ready(function () {
+        var type = '@ViewBag.TitleType'
+        var unit_value = '@ViewBag.UnitValue';
+        var unit_data = @TempData["UnitFactor"];
+        var json_data = @Html.Raw(Json.Encode(TempData["ReconcileTableData"]));
+
+        var purchase_data = [];
+        var sales_data = [];
+        var ic_data = [];
+        $.each(json_data, function (i, val) {
+            $.each(val, function (key, name) {
+                if (name === "PURCHASE") {
+                    purchase_data.push(json_data[i]);
+                }
+                else if (name === "SALE") {
+                    sales_data.push(json_data[i]);
+                }
+                else if (name === "IC") {
+                    ic_data.push(json_data[i]);
+                }
+                else { }
+            });
+        });
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            $($.fn.dataTable.tables(true)).DataTable()
+                .columns.adjust().fixedColumns().relayout();
+        });
+
+        var column_data = [];
+        if (type.toLowerCase() == 'energy') {
+            column_data = [
+                { 'data': 'pipeline_name', 'title': 'Network' },
+                { 'data': 'station_name', 'title': 'Station Name' },
+                { 'data': 'flow_tag_name', 'title': 'Tag' },
+                { 'data': 'flow_val', 'title': 'Y Flow (' + unit_value + ')' },
+                { 'data': 'gc_gcvavg', 'title': 'Avg GCV (KCal)' },
+                { 'data': 'energy_val', 'title': 'Y Energy (MBG)' },
+            ];
+            createEnergyTable(purchase_data, sales_data, ic_data, unit_data, column_data);
+        }
+        else {
+            column_data = [
+                { 'data': 'pipeline_name', 'title': 'Network' },
+                { 'data': 'station_name', 'title': 'Station Name' },
+                { 'data': 'flow_tag_name', 'title': 'Tag' },
+                { 'data': 'flow_val', 'title': 'Y Flow (' + unit_value + ')' }
+            ];
+            createVolumeTable(purchase_data, sales_data, ic_data, unit_data, column_data);
+        }
+
+    });
+
+    function createVolumeTable(purchaseData, saleData, icData, unitData, ColumnData) {
+
+        $('#PurchaseTable').DataTable({
+            data: purchaseData,
+            columns: ColumnData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[0, 'asc']],
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_'
+            },
+            'columnDefs': [
+                {
+                    'targets': [3],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unitData).toFixed(2);
+                        return formmatedvalue;
+                    }
+                }
+            ],
+            'footerCallback': function (row, data, start, end, display) {
+                console.log(data);
+                var totalAmount = 0;
+                for (var i = 0; i < data.length; i++) {
+                    totalAmount += parseFloat(data[i]["flow_val"]) / unitData;
+                }
+                console.log(totalAmount.toFixed(2));
+                $('#total_purchase').html(totalAmount.toFixed(2));
+            }
+        });
+        $('#SaleTable').DataTable({
+            data: saleData,
+            columns: ColumnData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[0, 'asc']],
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_'
+            },
+            'columnDefs': [
+                {
+                    'targets': [3],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unitData).toFixed(2);
+                        return formmatedvalue;
+                    }
+                }
+            ],
+            'footerCallback': function (row, data, start, end, display) {
+                console.log(data);
+                var totalAmount = 0;
+                for (var i = 0; i < data.length; i++) {
+                    totalAmount += parseFloat(data[i]["flow_val"]) / unitData;
+                }
+                console.log(totalAmount.toFixed(2));
+                $('#total_sale').html(totalAmount.toFixed(2));
+            }
+        });
+        $('#ICTable').DataTable({
+            data: icData,
+            columns: ColumnData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[0, 'asc']],
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_'
+            },
+            'columnDefs': [
+                {
+                    'targets': [3],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unitData).toFixed(2);
+                        return formmatedvalue;
+                    }
+                }
+            ],
+            'footerCallback': function (row, data, start, end, display) {
+                console.log(data);
+                var totalAmount = 0;
+                for (var i = 0; i < data.length; i++) {
+                    totalAmount += parseFloat(data[i]["flow_val"]) / unitData;
+                }
+                console.log(totalAmount.toFixed(2));
+                $('#total_ic').html(totalAmount.toFixed(2));
+            }
+        });
+    }
+    function createEnergyTable(purchaseData, saleData, icData, unitData, ColumnData) {
+       
+        $('#PurchaseTable').DataTable({
+            data: purchaseData,
+            columns: ColumnData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[0, 'asc']],
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_'
+            },
+            'columnDefs': [
+                {
+                    'targets': [3, 5],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unitData).toFixed(2);
+                        return formmatedvalue;
+                    }
+                },
+                {
+                    'targets': [4],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                        return formmatedvalue;
+                    }
+                }
+            ],
+            'footerCallback': function (row, data, start, end, display) {
+                console.log(data);
+                var totalFlow = 0;
+                var totalEnergy = 0;
+                for (var i = 0; i < data.length; i++) {
+                    totalFlow += parseFloat(data[i]["flow_val"]) / unitData;
+                }
+                for (var i = 0; i < data.length; i++) {
+                    totalEnergy += parseFloat(data[i]["energy_val"]) / unitData;
+                }
+                console.log(totalFlow.toFixed(2));
+                console.log(totalEnergy.toFixed(2));
+               
+                $('#total_purchase').html(totalFlow.toFixed(2));
+                $('#PurchaseTableFooter').append("<th id='total_energy_purchase'></th>");
+                $('#total_energy_purchase').html(totalEnergy.toFixed(2));
+            }
+        });
+        $('#SaleTable').DataTable({
+            data: saleData,
+            columns: ColumnData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[0, 'asc']],
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_'
+            },
+            'columnDefs': [
+                {
+                    'targets': [3, 5],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unitData).toFixed(2);
+                        return formmatedvalue;
+                    }
+                },
+                {
+                    'targets': [4],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                        return formmatedvalue;
+                    }
+                }
+            ],
+            'footerCallback': function (row, data, start, end, display) {
+                console.log(data);
+                var totalFlow = 0;
+                var totalEnergy = 0;
+                for (var i = 0; i < data.length; i++) {
+                    totalFlow += parseFloat(data[i]["flow_val"]) / unitData;
+                }
+                for (var i = 0; i < data.length; i++) {
+                    totalEnergy += parseFloat(data[i]["energy_val"]) / unitData;
+                }
+                console.log(totalFlow.toFixed(2));
+                console.log(totalEnergy.toFixed(2));
+                $('#total_sale').html(totalFlow.toFixed(2));
+                $('#SaleTableFooter').append("<th id='total_energy_sale'></th>");
+                $('#total_energy_sale').html(totalEnergy.toFixed(2));
+            }
+        });
+        $('#ICTable').DataTable({
+            data: icData,
+            columns: ColumnData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[0, 'asc']],
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_'
+            },
+            'columnDefs': [
+                {
+                    'targets': [3, 5],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unitData).toFixed(2);
+                        return formmatedvalue;
+                    }
+                },
+                {
+                    'targets': [4],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                        return formmatedvalue;
+                    }
+                }
+            ],
+            'footerCallback': function (row, data, start, end, display) {
+                console.log(data);
+                var totalFlow = 0;
+                var totalEnergy = 0;
+                for (var i = 0; i < data.length; i++) {
+                    totalFlow += parseFloat(data[i]["flow_val"]) / unitData;
+                }
+                for (var i = 0; i < data.length; i++) {
+                    totalEnergy += parseFloat(data[i]["energy_val"]) / unitData;
+                }
+                console.log(totalFlow.toFixed(2));
+                console.log(totalEnergy.toFixed(2));
+                $('#total_ic').html(totalFlow.toFixed(2));
+                $('#ICTableFooter').append("<th id='total_energy_ic'></th>");
+                $('#total_energy_ic').html(totalEnergy.toFixed(2));
+            }
+        });
+    }
+
+</script>
+

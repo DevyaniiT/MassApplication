@@ -1,0 +1,331 @@
+﻿@model MassApplication.Models.UserWise_Class
+
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+</style>
+<link href="~/MasterStyles/css/chips.css" rel="stylesheet" />
+
+<div class="form-horizontal">
+    <div class="master">
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_firstname" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">First name </label>
+                    <div class="col-sm-8">
+                        <input id="first_name" type="text" class="form-control" placeholder="Enter first name ">
+                        <span class="error">First name required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_lastname" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Last name </label>
+                    <div class="col-sm-8">
+                        <input id="last_name" type="text" class="form-control" placeholder="Enter last name ">
+                        <span class="error">Last name required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_email" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Email Id </label>
+                    <div class="col-sm-8">
+                        <input id="user_email" type="text" class="form-control" placeholder="Enter email id">
+                        <span class="error">Email id required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_type" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">User Type: </label>
+                    <div class="col-sm-8">
+                        @Html.DropDownList("userType", new SelectList(ViewBag.UserTypeData, "Value", "Value"), "---SELECT---", new { @class = "form-control" })
+                        <span class="error">User type required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_password" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Password </label>
+                    <div class="col-sm-8">
+                        <input id="user_password" type="password" class="form-control" placeholder="Enter password ">
+                        <span class="error">Password required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_cpassword" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Confirm Password </label>
+                    <div class="col-sm-8">
+                        <input id="user_cpassword" type="password" class="form-control" placeholder="Enter confirm password ">
+                        <span class="error">Correct confirm password required</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_dashboard" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">User Role </label>
+                    <div class="col-sm-8">
+                        @Html.DropDownList("userRole", new SelectList(ViewBag.RoleData, "Text", "Value"), "---SELECT---", new { @class = "form-control" })
+                        <span class="error">User role required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_region" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">User Active </label>
+                    <div class="col-sm-8">
+                        <label class="switch mt-2">
+                            <input class="newuser_active_mode" type="checkbox" checked="checked" name="newuser_active_mode">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="row">
+                    <label ID="Lbl_dashboard" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Default Dashboard </label>
+                    <div class="col-sm-8">
+                        @*@Html.DropDownList("userDashboard", new SelectList(ViewBag.DashboardData, "Text", "Value"), "---SELECT---", new { @class = "form-control" })*@
+                        <select class="form-control" id="userDashboard" name="userDashboard">
+                            <option value="0">---SELECT---</option>
+                        </select>
+                        <span class="error">Default dashboard required</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="row"></div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div id="regiondata" class="col-md-12 mb-4">
+                <label ID="Lbl_region" style="font-weight:500; font-size:14px"> Region: </label>
+                <div id="chips-autocomplete-test" class="chips chips-autocomplete" autocomplete="true"></div>
+                <span class="error">Region required</span>
+            </div>
+        </div>
+    </div>
+    <div style="padding:10px 0; text-align:right">
+        <button type="button" id="submitUserDetail" class="submitUserDetail btn btn-green pl-4 pr-4">Save</button>
+        <button type="button" class="BtnCloseDb btn btn-dash pl-4 pr-4" data-dismiss="modal">Close</button>
+    </div>
+</div>
+
+<script src="~/MasterStyles/js/materialize.min.js"></script>
+<!-- SCRIPT FOR MATERIAL CHIP AUTOCOMPLETE -->
+<script>
+    $(document).ready(function () {
+        $('.chips-autocomplete').chips({
+            autocompleteOptions: {
+                data: {
+                    'MAHARASTRA': null,
+                    'KKBMPL': null,
+                    'KMKRPL': null,
+                    'SOUTH GUJARAT': null,
+                    'HAZIRAA': null,
+                    'VAGHODIA': null,
+                    'JHABUA': null,
+                    'KHERA': null,
+                    'VIJAIPUR': null,
+                    'DIBYAPUR': null,
+                    'KAILARASSS': null,
+                    'API_TEST_NETWORK': null,
+                    'DBPLL': null,
+                    'AGRA': null
+                },
+                limit: Infinity,
+                minLength: 1
+            },
+            placeholder: 'Enter a region',
+            secondaryPlaceholder: '+ Region'
+        });
+    });
+</script>
+<!-- SCRIPT FOR SUBMIT BUTTON -->
+<script>
+    $(document).on('change', 'select#userRole', function () {
+        $("#userDashboard").empty();
+        var roleId = $('select[name=userRole]').val();
+        if (roleId != null && roleId != '') {
+            $.ajax({
+                url: '@Url.Content("~/User/GetDashboardDropdown?id=")' + roleId,
+                type: "get",
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#userDashboard").empty();
+                    $('<option value="0">---SELECT---</option>').appendTo("#userDashboard");
+                    var jsonData = JSON.parse(data);
+                    //console.log('Dashboard jsonData:', jsonData);
+                    $.each(jsonData, function (i, data) {
+                        $('<option>',
+                            {
+                                value: data.dashboard_id,
+                            }).html(data.dashboard_name).appendTo("#userDashboard");
+                    });
+                },
+                error: function () {
+                    alert("Error");
+                }
+            });
+        }
+    });
+    $('#submitUserDetail').click(function () {
+        //alert('hello');
+        var isAllValid = true;
+        if ($('#first_name').val().trim() == '') {
+            $('#first_name').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#first_name').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#last_name').val().trim() == '') {
+            $('#last_name').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#last_name').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#user_email').val().trim() == '') {
+            $('#user_email').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#user_email').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#user_password').val().trim() == '') {
+            $('#user_password').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#user_password').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#user_cpassword').val().trim() == '' || $('#user_cpassword').val() != $('#user_password').val()) {
+            $('#user_cpassword').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#user_cpassword').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#userType').val() == "0" || $('#userType').val() == "") {
+            $('#userType').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#userType').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#userDashboard').val() == "0" || $('#userDashboard').val() == "") {
+            $('#userDashboard').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#userDashboard').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#userRole').val() == "0" || $('#userRole').val() == "") {
+            $('#userRole').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#userRole').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        //if ($('#user_region').val().trim() == '') {
+        //    $('#user_region').siblings('span.error').css('visibility', 'visible');
+        //    isAllValid = false;
+        //}
+        //else {
+        //    $('#user_region').siblings('span.error').css('visibility', 'hidden');
+        //}
+
+
+        //var list = [];
+        //$('.chipdata').each(function () {
+        //    var displayvar = $(this).css('display');
+        //    //chiplist.push(displayvar);
+        //    if (displayvar != 'none') {
+        //        var chartItem = $(this).attr("data-val");
+        //        list.push(chartItem);
+        //    }
+        //});
+        //console.log("chiplist:", list);
+
+        var chipList = [];
+        $('.chip').each(function () {
+            var chartItemss = $(this).text();
+           // chartItemss = chartItemss.substring(0, chartItemss.Length - 1);
+            chartItemss = chartItemss.slice(0, -1);
+            chartItemss = chartItemss.toUpperCase();
+            chipList.push(chartItemss);
+        });
+        console.log("chipList:", chipList);
+
+        if (chipList.length == 0) {
+            console.log(chipList.length);
+            alert("Please add atleast one region!!!");
+            $('#regiondata').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#regiondata').siblings('span.error').css('visibility', 'hidden');
+        }
+
+
+        if (isAllValid) {
+            var data = {
+                first_name: $('#first_name').val().trim(),
+                last_name: $('#last_name').val().trim(),
+                user_email_id: $('#user_email').val().trim(),
+                user_password: $('#user_password').val().trim(),
+                user_confirm_password: $('#user_cpassword').val().trim(),
+                user_type: $('#userType').val(),
+                user_dashboard: $('#userDashboard').val(),
+                user_role_id: $('#userRole').val(),
+                //userwiseregion: list,
+                userwiseregion: chipList,
+                is_active: $('input[name="newuser_active_mode"]').is(':checked')
+
+            }
+            console.log("data:", data);
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Content("~/User/AddNewUserData")',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.startsWith("ERROR")) {
+                        var res = data.split(";");
+                        var error = '';
+                        if (res.length > 1) {
+                            error = res[1];
+                        }
+                        else {
+                            error = data;
+                        }
+                        alert(error);
+                    } else {
+                        alert('Data inserted successfully!!!');
+                        location.reload();
+                    }
+                },
+                error: function (error) {
+                    alert("Error");
+                }
+            });
+        }
+    });
+</script>

@@ -1,0 +1,23 @@
+﻿@using MassApplication.Models.Graph;
+@model ChartParameters
+
+<input type="hidden" id="KPIJsonValue" data-val="@Model.json_tuple" />
+<input type="hidden" id="KPIKeyValueJson" data-val="@Model.chart_selected_keyvalue_params"/>
+<div class="row">
+    <ul id="lstproducts" style="list-style:none; padding:0;">
+        @foreach (var item in Model.keyvalue_tuple)
+        {
+            <li draggable="true" class="list_css card2 draggable" data-id="@item.Key"> @item.Key </li>
+        }
+    </ul>
+</div>
+
+<script>
+    $('.draggable').draggable({
+        containment: ".panel-container",
+        scroll: false,
+        revert: "invalid",
+        stack: ".draggable",
+        helper: 'clone'
+    });
+</script>

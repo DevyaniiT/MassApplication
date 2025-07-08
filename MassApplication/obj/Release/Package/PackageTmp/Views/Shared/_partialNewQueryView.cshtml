@@ -1,0 +1,412 @@
+﻿@model MassApplication.Models.DBQueryClass
+
+<style>
+    /*   .table tr td input {
+        display: block;
+    }*/
+
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    tr.error {
+        background-color: rgba(255,0,0,0.35);
+    }
+
+    textarea {
+        resize: none;
+    }
+
+    #tabContentQuery .nav-link {
+        color: #000;
+        background-color: #e1e1e1;
+        border: 0;
+        margin: 0 4px;
+        padding: 13px 23px;
+        font-size: 13px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+        #tabContentQuery .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+            color: #ffffff;
+            background-color: #2a5b6c;
+            border: 0;
+            padding: 13px 23px;
+            margin: 0 4px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-size: 13px;
+            font-weight: 600;
+        }
+</style>
+
+<div class="form-horizontal">
+
+    <ul class="newnavconn nav nav-tabs border-bottom-0" id="tabContentQuery">
+        <li class="nav-item "><a href="#newQryConnectionTab" class="nav-link active" data-toggle="tab">Connection Details</a></li>
+        <li class="nav-item"><a href="#newQryQueryTab" class="nav-link" data-toggle="tab">Parameters Details</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane mt-4" id="newQryQueryTab">
+            <div id="queryItems" class="details">
+                <table id="queryItemDetails" class="table table-bordered">
+                    <tr>
+                        <th width="25%">Name</th>
+                        <th width="15%">Type</th>
+                        <th width="15%">User Type</th>
+                        <th>Query</th>
+                    </tr>
+                    <tr class="mycontainer" id="mainrow">
+                        <td>
+                            <input type="text" id="QueryName" class="QueryName form-control" name="query_param_label" />
+                            <span class="error">Query name required</span>
+                        </td>
+                        <td>
+                            @Html.DropDownList("param_type", new SelectList(ViewBag.QueryType, "Value", "Text"), "--Select--", new { @class = "type form-control", id = "QueryParameterType" })
+                            <span class="error">Select type</span>
+                        </td>
+                        <td>
+                            @Html.DropDownList("param_usertype", new SelectList(ViewBag.UserRoleType, "Value", "Text"), new { @class = "usertype form-control", id = "QueryUserType" })
+                            <span class="error">Select user type</span>
+                        </td>
+                        <td>
+                            <textarea id="Query_query" class="Query_query" name="Query_param_query" style="width: 100%;"></textarea>
+                            <span class="error">Query required</span>
+                        </td>
+                    </tr>
+                </table>
+                <span id="queryItemError" style="color:red"></span>
+            </div>
+        </div>
+        <div class="tab-pane mt-4 active" id="newQryConnectionTab">
+            <div class="row">
+                <div class="col-sm-8">
+                    @*<h3 class="card-title">Connection List</h3>*@
+                </div>
+                <div class="col-sm-4" style="text-align:right">
+                    <button type="button" class="btn btn-dash mb-3" data-toggle="modal" data-target="#addQryConn_modal"><i class="fa fa-plus"></i> Add New</button>
+                </div>
+            </div>
+            <table id="QueryConnTable" class="table table-bordered" cellspacing="0" rules="all" border="1" style="border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="text-align:center">Select</th>
+                        <th>Connection Name</th>
+                        <th>DSN</th>
+                        <th>User Id</th>
+                        <th>Database Name</th>
+                        <th style="text-align:center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in ViewBag.ConnectionItems)
+                    {
+                        <tr>
+                            <td style="text-align:center;">
+                                <input class="select_mode" type="radio" data-id="@m.connection_id" name="select_mode">
+                                @*<span class="error">Please select the row</span>*@
+                            </td>
+                            <td class="conn_name">@m.connection_name</td>
+                            <td class="dsn_name">@m.dsn_name</td>
+                            <td class="user_id">@m.user_id</td>
+                            <td class="db_name">@m.db_schema_name</td>
+                            <td class="conn_event" style="text-align:center;">
+
+                                <a onclick="BtnEditQueryConn('Edit Connection Data',@m.connection_id)" class="dropdown_icon" data-toggle="modal" data-target="#editConn_modal" title="Edit">
+                                    <i class="fas fa-edit" style="margin-left: 10px;  color: #dc5252;"></i>
+                                </a>
+
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div id="connItems">
+                <span id="connItemError" style="color:red"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="SumError">
+        <span id="summaryError" style="color:red"></span>
+    </div>
+
+    <div style="padding:10px 0; text-align:right">
+        <input id="submitQueryDetail" type="button" value="Create" class="btn btn-dash" style="padding:10px 20px" />
+        <input type="button" value="Close" class="btn btn-default" data-dismiss="modal" style="padding: 10px 20px; background-color: #e1e1e1; color: #000;" />
+    </div>
+
+    <!-- popup modal for adding new connection -->
+    <div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="addQryConn_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Add New Connection</h3>
+                    @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>*@
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <label ID="Lbl_dsn"> DSN: </label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="dsn_name" name="dsn_name" placeholder="Enter dsn">
+                            <span class="error">DSN required</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <label ID="Lbl_username"> User Name: </label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="user_name" name="user_name" placeholder="Enter user name">
+                            <span class="error">User name required</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <label ID="Lbl_pwd"> Password: </label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+                            <span class="error">Password required</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <label ID="Lbl_db_name"> Database Name: </label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="db_name" name="db_name" placeholder="Enter database name">
+                            <span class="error">Database name required</span>
+                        </div>
+                    </div>
+
+                    <div style="padding:10px 0; text-align:right">
+                        <input type="button" class="BtnTestQryConn btn btn-success" value="Test" />
+                        <input type="button" class="BtnSaveQryConn btn btn-dash" value="Save" />
+                        <input type="button" class="BtnCloseQryConn btn btn-danger" value="Close" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- popup modal for edit report -->
+    <div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="editQryConn_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title"></h3>
+                    @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>*@
+                </div>
+                <div class="modal-body">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(function () {
+        $('#QueryConnTable').DataTable({
+            "paging": false,
+            "lengthChange": true,
+            "searching": true,
+            // "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "scrollY": "350px",
+            "scrollCollapse": true,
+            "initComplete": function (settings, json) {
+                $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+            },
+            /* dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>rt<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',*/
+            "order": [[1, 'desc']],
+            deferRender: true,
+            language: {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                },
+                "search": '',
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "lengthMenu": "Rows :  _MENU_",
+            },
+            columnDefs: [
+                { orderable: false, targets: 0 }
+            ]
+        });
+    });
+</script>
+<script>
+    function BtnEditQueryConn(title,conn_id) {
+        $.ajax({
+         url: '@Url.Content("~/DashBoard/EditQueryConnData?conn_id=")' + conn_id, // The method name + parameter
+            success: function (data) {
+                $('#editQryConn_modal .modal-body').html(data);
+                $('#editQryConn_modal .modal-title').html(title);
+                $('#editQryConn_modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+            }
+        });
+    }
+</script>
+<script>
+    $('.BtnTestQryConn').click(function () {
+      var isAllValid = true;
+        if ($('#dsn_name').val().trim() == '') {
+            isAllValid = false;
+            $('#dsn_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#dsn_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#user_name').val().trim() == '') {
+            isAllValid = false;
+            $('#user_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#user_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#password').val().trim() == '') {
+            isAllValid = false;
+            $('#password').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#password').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#db_name').val().trim() == '') {
+            isAllValid = false;
+            $('#db_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#db_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var newDataTest = {
+                dsn_name: $("#dsn_name").val().trim(),
+                user_id: $('#user_name').val().trim(),
+                password: $('#password').val().trim(),
+                db_schema_name: $('#db_name').val().trim()
+            }
+            //alert(newDataTest);
+
+          $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/ConnectionTest")',
+            data: JSON.stringify(newDataTest),
+            contentType: 'application/json',
+            success: function (data) {
+                    alert(data);
+            }
+        });
+     }
+    });
+    $('.BtnSaveQryConn').click(function () {
+     var isAllValid = true;
+        if ($('#dsn_name').val().trim() == '') {
+            isAllValid = false;
+            $('#dsn_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#dsn_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#user_name').val().trim() == '') {
+            isAllValid = false;
+            $('#user_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#user_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#password').val().trim() == '') {
+            isAllValid = false;
+            $('#password').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#password').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#db_name').val().trim() == '') {
+            isAllValid = false;
+            $('#db_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#db_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var newData = {
+                dsn_name: $("#dsn_name").val().trim(),
+                user_id: $('#user_name').val().trim(),
+                password: $('#password').val().trim(),
+                db_schema_name: $('#db_name').val().trim()
+            }
+            //alert(newData);
+
+          $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/DashBoard/ConnectionSave")',
+            data: JSON.stringify(newData),
+            contentType: 'application/json',
+            success: function (data) {
+                  if (data.startsWith("ERROR")) {
+                      var res = data.split(";");
+                      var error = '';
+                      if (res.length > 1) {
+                          error = res[1];
+                      } else {
+                          error = data;
+                      }
+                      alert(error);
+                  } else {
+                      alert('Data inserted successfully!!!');
+                      $('#addQryConn_modal').modal('hide');
+                      $('#add_query_modal .modal-body').html(null);
+                      $('#add_query_modal .modal-body').html(data);
+
+                      $(".nav li:eq(0)").removeClass('active');
+                      $(".nav li:eq(2)").addClass('active');
+                      $("#newQryQueryTab").removeClass('active');
+                      $("#newQryConnectionTab").addClass('active');
+                  }
+            },
+            error: function (error) {
+                alert('Error');
+            }
+        });
+     }
+    });
+    $('.BtnCloseQryConn').click(function () {
+        $('#addQryConn_modal').modal('hide');
+        $('#dsn_name').siblings('span.error').css('visibility', 'hidden');
+        $('#dsn_name').val('');
+        $('#user_name').siblings('span.error').css('visibility', 'hidden');
+        $('#user_name').val('');
+        $('#password').siblings('span.error').css('visibility', 'hidden');
+        $('#password').val('');
+        $('#db_name').siblings('span.error').css('visibility', 'hidden');
+        $('#db_name').val('');
+    });
+</script>
+

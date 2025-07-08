@@ -1,0 +1,230 @@
+﻿@model MassApplication.Models.InputClass
+
+
+<div id="summary">
+    @{
+        //var isfirst = true;
+        var count = 1;
+        foreach (var item in Model.AvailableSummaryPeriod)
+        {
+            <div class="radio-inline" id="durationclass">
+                <label>
+                    @if (count == 2)
+                    {
+                        //isfirst = false;
+                        <input type="radio" name="summaryperiod" value="@item.Value" checked="checked" />@item.Text<br />
+                    }
+                    else
+                    {
+                        <input type="radio" name="summaryperiod" value="@item.Value" />@item.Text<br />
+                    }
+                </label>
+            </div>
+            count++;
+        }
+    }
+</div>
+
+<br />
+
+<div id="Daily">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label3" class="labelClass"> Date </label>
+        </div>
+        <div class="col-sm-9">
+            <div class='input-group date' id='datetimepicker1'>
+                <input class="form-control" type="date" name="TxtDate" placeholder="YYYY-MM-DD" value="@ViewBag.CurrentDate" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Hourly">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label3" class="labelClass"> Date </label>
+        </div>
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-3">
+                    <div class='input-group date' id='datetimepicker4'>
+                        <input class="form-control" type="date" name="TxtDate" placeholder="YYYY-MM-DD" value="@ViewBag.CurrentDate" />
+                    </div>
+                </div>
+                <div class="col-9">
+                    @Html.DropDownList("HourlyHourlistlist", Model.AvailableHour, new { @class = "form-control drop_down_monthly", id = "Hourly_HourList" })
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="Monthly">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label6" class="labelClass"> Select </label>
+        </div>
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-3">
+                    <select id="Monthly_YearList" name="MonthlyYearList" class="form-control drop_down_daily">
+                        @foreach (var item in Model.Years)
+                        {
+                            <option value="@item.ToString()">@item.ToString()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-9">
+                    @Html.DropDownList("MonthlyMonthlist", Model.AvailableMonth, new { @class = "form-control drop_down_monthly", id = "Monthly_MonthList" })
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Quarterly">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label9" class="labelClass"> Select </label>
+        </div>
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-3">
+                    <select id="Quarterly_YearList" name="QuarterlyYearList" class="form-control drop_down_daily">
+                        @*<option value="0">--SELECT--</option>*@
+                        @foreach (var item in Model.Years)
+                        {
+                            <option value="@item.ToString()">@item.ToString()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-9">
+                    <select id="Quarterly_QuarterList" name="QuarterlyMonthList" class="form-control drop_down_quaterly">
+                        <option Value="Q1">Q1(Apr-June)</option>
+                        <option Value="Q2">Q2(July-Sep)</option>
+                        <option Value="Q3">Q3(Oct-Dec)</option>
+                        <option Value="Q4">Q4(Jan-Mar)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Yearly">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label12" class="labelClass"> Select </label>
+        </div>
+        <div class="col-sm-9">
+            <select id="Yearly_YearList" name="YearlyYearList" class="form-control drop_down_yearly">
+                @*<option value="0">--SELECT--</option>*@
+                @foreach (var item in Model.Years)
+                {
+                    <option value="@item.ToString()">@item.ToString()</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+
+<div id="Fortnightly">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label15" class="labelClass"> Select </label>
+        </div>
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-3">
+                    <select id="Fortnightly_YearList" name="FortnightlyYearList" class="form-control drop_down_daily">
+                        @*<option value="0">--SELECT--</option>*@
+                        @foreach (var item in Model.Years)
+                        {
+                            <option value="@item.ToString()">@item.ToString()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-2">
+                    @Html.DropDownList("FortnightlyMonthlist", Model.AvailableMonth, new { @class = "form-control drop_down_monthly", id = "Fortnightly_MonthList" })
+                </div>
+                <div class="col-7">
+                    <select id="Fortnightly_DayList" name="DayList" class="form-control drop_down_monthly">
+                        <option Value="Before">01-15 Days</option>
+                        <option Value="After">16-31 Days</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="HalfYearly">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label18" class="labelClass"> Select </label>
+        </div>
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="col-3">
+                    <select id="HalfYearly_YearList" name="HalfYearlyYearList" class="form-control drop_down_daily">
+                        @*<option value="0">--SELECT--</option>*@
+                        @foreach (var item in Model.Years)
+                        {
+                            <option value="@item.ToString()">@item.ToString()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-9">
+                    <select id="HalfYearly_MonthList" name="HalfYearlyMonthList" class="form-control drop_down_halfyearly">
+                        <option Value="HY1">HY1(Apr-Sep)</option>
+                        <option Value="HY2">HY2(Oct-Mar)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Custom">
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label21" class="labelClass"> From Date </label>
+        </div>
+        <div class="col-sm-9">
+            <div class='input-group date' id='datetimepicker2'>
+                <input class="form-control" type="date" name="FromTxtDate" placeholder="YYYY-MM-DD" />
+            </div>
+        </div>
+    </div>
+    <div class="row ml-3">
+        <div class="col-sm-3">
+            <label ID="Label22" class="labelClass"> To Date </label>
+        </div>
+        <div class="col-sm-9">
+            <div class='input-group date' id='datetimepicker3'>
+                <input class="form-control" type="date" name="ToTxtDate" placeholder="YYYY-MM-DD" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row ml-3">
+    <div class="col-sm-3">
+        <label ID="Label10" class="labelClass"> Unit </label>
+    </div>
+    <div class="col-sm-9">
+        <div class="row">
+            <div class="col-3">
+                @Html.DropDownList("UnitList", new SelectList(ViewBag.UnitData, "Value", "Text"), new { @class = "form-control drop_down_daily" })
+            </div>
+            <div class="col-9">
+                <input id="btnSubmit" type="submit" class="btn btn-dash" style="padding:5px 20px" value="Load" />
+            </div>
+        </div>
+    </div>
+</div>
+
+

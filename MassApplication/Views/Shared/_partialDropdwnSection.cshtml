@@ -1,0 +1,51 @@
+﻿@{
+    List<SelectListItem> items = new List<SelectListItem>();
+    var selectList = new List<SelectListItem>();
+    foreach (var i in ViewBag.ActualData)
+    {
+        selectList.Add(new SelectListItem { Value = i.Value.ToString(), Text = i.Text.ToString() });
+    }
+    items = selectList;
+
+}
+
+<div id="network_selection">
+    <label>
+        @Html.RadioButton("section_selection_daily", "All", true)
+        All
+    </label>
+    <label>
+        @Html.RadioButton("section_selection_daily", "Selective_section", false, new { id = "pipeselection" })
+        Selective
+    </label>
+</div>
+<div id="Selective_section" class="check_container">
+    <table id="tblSections">
+        @for (var i = 0; i < items.Count(); i++)
+        {
+            <tr>
+                <td>
+                    @Html.CheckBoxFor(m => items[i].Selected, new { @class = "Check_list" })
+                </td>
+                <td>
+                    @Html.DisplayFor(m => items[i].Value)
+                    @Html.HiddenFor(m => items[i].Value)
+                    @Html.HiddenFor(m => items[i].Text)
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+

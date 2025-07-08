@@ -1,0 +1,2913 @@
+﻿@using System.Globalization;
+@using System.Linq;
+@{
+    ViewBag.Title = ViewBag.titlename;
+}
+
+<link rel="stylesheet" href="~/MasterStyles/css/WebPageStyle.css" />
+<link href="~/MasterStyles/css/ToggleCss.css" rel="stylesheet" />
+<link rel="stylesheet" href="~/MasterStyles/DaterangePicker/daterangepicker.css" />
+<script src="~/MasterStyles/DaterangePicker/daterangepicker.js"></script>
+
+<style>
+    .disabled {
+        pointer-events: none;
+        cursor: default;
+        opacity: 0.6;
+    }
+    .status {
+        font-size: 30px;
+        margin: -8px 2px 0 0;
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 10px;
+    }
+
+    .modal-content {
+        width: 100%;
+    }
+
+    @@media (min-width: 1200px) {
+        .modal-xlg {
+            width: 90%;
+        }
+    }
+
+    /* The switch - the box around the slider */
+
+
+    /* Hide default HTML checkbox */
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    /* The slider */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 25px;
+        height: 12px;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #2a5b6c;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 11px;
+            width: 11px;
+            left: 0px;
+            bottom: 1px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+    input:checked + .slider {
+        background-color: #28a745;
+        /*background-color: #29b5a8;*/
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+        /*box-shadow: 0 0 1px #29b5a8;*/
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(14px);
+        -ms-transform: translateX(14px);
+        transform: translateX(14px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+    label {
+        display: inline-block;
+        margin-bottom: 0;
+    }
+</style>
+<style>
+    .switch1 {
+        position: relative;
+        display: inline-block;
+        width: 43px;
+        height: 18px;
+    }
+
+        .switch1 input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider1 {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #2a5b6c;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+        .slider1:before {
+            position: absolute;
+            content: "";
+            height: 17px;
+            width: 17px;
+            left: 0px;
+            bottom: 1px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+    input:checked + .slider1 {
+        background-color: #28a745;
+        /*background-color: #29b5a8;*/
+    }
+
+    input:focus + .slider1 {
+        box-shadow: 0 0 1px #2196F3;
+        /*box-shadow: 0 0 1px #29b5a8;*/
+    }
+
+    input:checked + .slider1:before {
+        -webkit-transform: translateX(25px);
+        -ms-transform: translateX(25px);
+        transform: translateX(25px);
+    }
+
+    /* Rounded sliders */
+    .slider1.round1 {
+        border-radius: 34px;
+    }
+
+        .slider1.round1:before {
+            border-radius: 50%;
+        }
+</style>
+<style>
+    #load {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        z-index: 9999;
+        background: url('@Url.Content("~/Images/blueLoader.gif")') no-repeat center center rgba(255,255,255,255);
+    }
+</style>
+<style>
+    #DataList .form-control {
+        background-image: url('@Url.Content("~/Images/loupe.png")');
+        background-repeat: no-repeat;
+        background-color: #fff;
+        background-position: 4px 4px !important;
+        background-size: 14px;
+    }
+
+        #DataList .form-control:focus {
+            background-image: none;
+        }
+
+    #DataList_filter .form-control {
+        background-image: url('@Url.Content("~/Images/loupe.png")');
+        background-repeat: no-repeat;
+        background-color: #fff;
+        background-position: 4px 4px !important;
+        background-size: 14px;
+    }
+
+        #DataList_filter .form-control:focus {
+            background-image: none;
+        }
+
+    .dataTable th {
+        text-transform: capitalize;
+    }
+
+    .table {
+        width: 100% !important;
+    }
+
+    .dataTables_scrollHeadInner {
+        width: 100% !important;
+        padding-right: 0 !important;
+    }
+</style>
+
+<body style="overflow:hidden">
+    <div id="load"></div>
+    <div id="PageContents">
+        <section class="content">
+            <div class="container contain_min">
+                <div class="row mt-2">
+                    <div class="col-12 pt-1">
+                        <div class="card">
+                            <!-- card-body -->
+                            <div class="card-body table-responsive">
+                                <table id="DataList" class="table table-bordered table-striped" data-val="@ViewBag.UrlData">
+                                    <thead>
+                                        @if (ViewBag.UrlData != "diagnosticsummary" && ViewBag.UrlData != "gc" && ViewBag.UrlData != "surveyor")
+                                        {
+                                            <tr>
+                                                <th width="2%" style="border-radius:4px 0px 0px 0px"></th>
+                                                @foreach (System.Data.DataColumn col in ViewBag.DatatableData.Columns)
+                                                {
+                                                    <th>@col.Caption.Replace("_", " ")</th>
+                                                    @*<th>@col.Caption</th>*@
+                                                }
+                                                @if (ViewBag.UrlData == "scheduletask")
+                                                {
+                                                    <th style="text-align:center;">History</th>
+                                                }
+                                                <th width="10%" style="border-radius: 0px 4px 0px 0px; text-align: center;">actions</th>
+                                            </tr>
+                                        }
+                                        @if (ViewBag.UrlData == "diagnosticsummary")
+                                        {
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Deleted</th>
+                                                <th>Consumer</th>
+                                                <th>Meter</th>
+                                                <th>Stream</th>
+                                                <th>Maintenance</th>
+                                                <th>Region</th>
+                                                <th style="text-align:center">Status</th>
+                                                <th style="text-align:center">Calibration</th>
+                                                <th style="text-align:center">Health</th>
+                                                <th style="text-align:center">GHG</th>
+                                                <th style="text-align:center">Make</th>
+                                                <th style="text-align:center">Model</th>
+                                                <th colspan="8" style="text-align:center">Diagnosis</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="13"></th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="Transducer failure">TF</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="Detection Problem">DP</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="Ultrasonic Noise">UN</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="Process Condition Pressure">PP</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="Process Condition Temprature">PT</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="Fouling">F</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="Change in the flow Profile">FP</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot" data-toggle="tooltip" data-placement="top" title="High Velocity">HV</a>
+                                                </th>
+                                            </tr>
+                                        }
+                                        @if (ViewBag.UrlData == "gc")
+                                        {
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Deleted</th>
+                                                <th>GC Name</th>
+                                                <th>Network</th>
+                                                <th>Station Name</th>
+                                                <th>Status</th>
+                                                <th colspan="3" style="text-align:center">Correlation</th>
+                                            </tr>
+                                            <tr>
+                                                <th colspan="6"></th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot ml-4" data-toggle="tooltip" data-placement="top" title="r2c1_c6">C1</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot ml-4" data-toggle="tooltip" data-placement="top" title="r2c126">C2</a>
+                                                </th>
+                                                <th>
+                                                    <a href="javascript:void(0)" class="dot ml-4" data-toggle="tooltip" data-placement="top" title="r2c345">C3</a>
+                                                </th>
+                                            </tr>
+                                        }
+                                        @if (ViewBag.UrlData == "surveyor") { }
+                                    </thead>
+                                    <tbody>
+                                        @if (ViewBag.UrlData != "diagnosticsummary" && ViewBag.UrlData != "gc" && ViewBag.UrlData != "surveyor")
+                                        {
+                                            foreach (System.Data.DataRow row in ViewBag.DatatableData.Rows)
+                                            {
+                                                var id = row.ItemArray[0];
+                                                var is_deleted = row.ItemArray[1];
+                                                <tr class="link" data-id="@id">
+                                                    <td class="pt-3"><input type="checkbox" class="DataTableCheckList" data-val="@id"></td>
+                                                    @foreach (var cell in row.ItemArray)
+                                                    {
+                                                        if (cell.ToString().ToLower() == "active")
+                                                        {
+                                                            <td>
+                                                                <label class="switch mb-0">
+                                                                    <input class="schedule_active_mode" type="checkbox" checked="checked" data-id="@id">
+                                                                    <span class="slider round"></span>
+                                                                </label>
+                                                            </td>
+                                                        }
+                                                        else if (cell.ToString().ToLower() == "inactive")
+                                                        {
+                                                            <td>
+                                                                <label class="switch mb-0">
+                                                                    <input class="schedule_active_mode" type="checkbox" data-id="@id">
+                                                                    <span class="slider round"></span>
+                                                                </label>
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>@cell.ToString().Replace("\"", "")</td>
+                                                        }
+                                                    }
+
+                                                    @if (ViewBag.UrlData == "scheduletask")
+                                                    {
+                                                        <td style="text-align:center;">
+                                                            <p>
+                                                                <a href='@(Url.Content("~/Report/GetJobHistory") + "?id=" + id)' class="dropdown_icon" data-toggle="tooltip" title="History">
+                                                                    <i class="fa fa-history" style="margin-left: 5px;color: black;"></i>
+                                                                </a>
+                                                            </p>
+                                                        </td>
+                                                    }
+
+                                                    @{
+                                                        if (ViewBag.UrlData == "reports")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                <p>
+                                                                    <a class="mr-2" href="#" data-toggle="modal" data-target="#form-modal" onclick="BtnLoadRptData('Report Parameters',@id)">
+                                                                        <i class="fas fa-upload nav-icon1"></i>
+                                                                    </a>
+                                                                    <a href="#" data-toggle="modal" data-target="#email-modal" onclick="BtnEmailLoad('Schedule Parameters',@id)">
+                                                                        <i class="fas fa-clock nav-icon1"></i>
+                                                                    </a>
+                                                                </p>
+                                                            </td>
+                                                        }
+                                                        else if (ViewBag.UrlData == "scheduletask")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                <p>
+                                                                    <a class="dropdown_icon" data-toggle="modal" data-target="#editSchedularModal" title="Edit" onclick="BtnSchedularEdit('Edit Schedular Data',@id)">
+                                                                        <i class="fas fa-edit" style="margin-left: 5px;color: #248742;"></i>
+                                                                    </a>
+                                                                    <a href='@(Url.Content("~/Report/DeleteSchedule") + "?id=" + id + "&is_deleted=" + is_deleted)' class="dropdown_icon" data-toggle="tooltip" title="Delete">
+                                                                        <i class="fa fa-trash" style="margin-left: 5px;color: #dc5252;"></i>
+                                                                    </a>
+                                                                </p>
+                                                            </td>
+                                                            @*<td style="text-align:center;">
+                                                                    <a href='@(Url.Content("~/Report/PauseSchedule") + "?id=" + id + "&is_deleted=" + is_deleted)' class="btn btn-default d-none btn-sm" data-toggle="tooltip" title="Pause"><i class="fa fa-pause"></i></a>
+                                                                    <a href='@(Url.Content("~/Report/DeleteSchedule") + "?id=" + id + "&is_deleted=" + is_deleted)' class="btn btn-default btn-sm" data-toggle="tooltip" title="Delete"><i class="fa fa-trash"></i></a>
+                                                                </td>*@
+                                                        }
+                                                        else if (ViewBag.UrlData == "managereport")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                <p>
+                                                                    @{
+                                                                        if (is_deleted.ToString().Contains('0') == true)
+                                                                        {
+                                                                            <label class="switch">
+                                                                                <input class="report_active_mode" type="checkbox" checked="checked" data-id="@id">
+                                                                                <span class="slider round"></span>
+                                                                            </label>
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <label class="switch">
+                                                                                <input class="report_active_mode" type="checkbox" data-id="@id">
+                                                                                <span class="slider round"></span>
+                                                                            </label>
+
+                                                                        }
+
+                                                                        <a onclick="ButtonEdit('Edit Report Data',@id)" class="dropdown_icon ml-2" data-toggle="tooltip" title="Edit">
+                                                                            <i class="fas fa-edit nav-icon1"></i>
+                                                                        </a>
+
+                                                                    }
+
+                                                                </p>
+                                                            </td>
+                                                        }
+                                                        else if (ViewBag.UrlData == "user")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                <a class="dropdown_icon" data-toggle="modal" data-target="#edit_user_modal" title="Edit" onclick="BtnUserEdit('Edit User Data',@id)">
+                                                                    <i class="fas fa-edit" style="margin-left: 10px;color: #248742;"></i>
+                                                                </a>
+                                                                <a href='@(Url.Content("~/User/DeleteUser") + "?id=" + id + "&is_deleted=" + is_deleted)' class="dropdown_icon" data-toggle="tooltip" title="Delete">
+                                                                    <i class="fa fa-trash" style="margin-left: 10px;color: #dc5252;"></i>
+                                                                </a>
+                                                            </td>
+                                                        }
+                                                        else if (ViewBag.UrlData == "role")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                <a class="dropdown_icon" data-toggle="tooltip" title="Edit" onclick="BtnRoleEdit('Edit Role Data',@id)">
+                                                                    <i class="fas fa-edit" style="margin-left: 10px;color: #298a46"></i>
+                                                                </a>
+                                                                <a href='@(Url.Content("~/User/DeleteRole") + "?id=" + id + "&is_deleted=" + is_deleted)' class="dropdown_icon" data-toggle="tooltip" title="Delete">
+                                                                    <i class="fa fa-trash" style="margin-left: 10px;color: #dc5252;"></i>
+                                                                </a>
+                                                            </td>
+                                                        }
+                                                        else if (ViewBag.UrlData == "dashboard")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                @if (is_deleted.ToString().Contains('0') == true)
+                                                                {
+                                                                    <p>
+                                                                        <label class="switch mb-0">
+                                                                            <input class="dashboard_active_mode" type="checkbox" checked="checked" data-id="@id">
+                                                                            <span class="slider round"></span>
+                                                                        </label>
+
+                                                                        <a href='@(Url.Content("~/DashBoard/ShowGraphLayout") + "?id=" + id)' class="btn btn-default btn-sm mr-2 ml-2" style="font-size: 8px; padding: 2px 5px 1px 5px; " data-toggle="tooltip" title="Preview" target="_blank"><i class="fa fa-eye"></i></a>
+
+                                                                        <a onclick="BtnDashboardEdit(@id)" class="dropdown_icon" data-toggle="tooltip" title="Edit">
+                                                                            <i class="fas fa-edit nav-icon1"></i>
+                                                                        </a>
+                                                                    </p>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <label class="switch mb-0">
+                                                                        <input class="dashboard_active_mode" type="checkbox" data-id="@id">
+                                                                        <span class="slider round"></span>
+                                                                    </label>
+
+                                                                }
+                                                            </td>
+                                                        }
+                                                        else if (ViewBag.UrlData == "kpi")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                <p>
+                                                                    @if (is_deleted.ToString().Contains('0') == true)
+                                                                    {
+                                                                        <label class="switch mb-0">
+                                                                            <input class="kpi_active_mode" type="checkbox" checked="checked" data-id="@id">
+                                                                            <span class="slider round"></span>
+                                                                        </label>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <label class="switch mb-0">
+                                                                            <input class="kpi_active_mode" type="checkbox" data-id="@id">
+                                                                            <span class="slider round"></span>
+                                                                        </label>
+                                                                    }
+                                                                    <a onclick="BtnKPIEdit('Edit KPI Data',@id)" class="dropdown_icon" data-toggle="tooltip" title="Edit">
+                                                                        <i class="fas fa-edit" style="margin-left: 10px;color: #248742;"></i>
+                                                                    </a>
+                                                                </p>
+                                                            </td>
+                                                        }
+                                                        else if (ViewBag.UrlData == "query")
+                                                        {
+                                                            <td style="text-align:center;">
+                                                                <p>
+                                                                    <a class="dropdown_icon" data-toggle="modal" data-target="#edit_query_modal" title="Edit" onclick="BtnQueryEdit('Edit Query Data',@id)">
+                                                                        <i class="fas fa-edit" style="margin-left: 10px;color: #248742;"></i>
+                                                                    </a>
+                                                                    <a href='@(Url.Content("~/DashBoard/DeleteQuery") + "?id=" + id + "&is_deleted=" + is_deleted)' class="dropdown_icon" data-toggle="tooltip" title="Delete">
+                                                                        <i class="fa fa-trash" style="margin-left: 10px;color: #dc5252;"></i>
+                                                                    </a>
+                                                                </p>
+                                                            </td>
+                                                        }
+                                                        else { }
+                                                    }
+
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- card-body -->
+                        </div>
+                        <!-- card -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+<script src="~/Scripts/SweetAlert2/sweetalert2.all.min.js"></script>
+<script src="~/MasterStyles/TableStyles/datatables/jquery.mockjax.min.js"></script>
+
+<!-- popup modal for report parameters -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="form-modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width: 540px; width:540px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for Schedular parameters -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="email_modal">
+    <div class="modal-dialog " role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for edit Schedular parameters -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="editSchedularModal">
+    <div class="modal-dialog " role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for adding new report -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="add_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for edit report -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="edit_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px;width:900px">
+        <div class="modal-content" style="width:990px;">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for adding new user -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="add_user_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for edit existing user -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="edit_user_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for adding new role -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="add_role_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Role</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for edit existing role -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="edit_role_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px;width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for adding new query -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="add_query_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- popup modal for edit existing query -->
+<div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="edit_query_modal">
+    <div class="modal-dialog modal-xl" role="document" style="max-width:900px; width:900px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title"></h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NETWORK SELECTION EVENT -->
+<script>
+    $(document).on('click', 'input[name="network_selection_daily"]:radio', function () {
+        var sel = $(this).val();
+        if (sel === "All") {
+            $("#Selective_network").hide();
+            $(".error").hide();
+        }
+        else {
+            $("#Selective_network").show();
+            $(".error").hide();
+        }
+    });
+    $(document).on('click', 'input[name="section_selection_daily"]:radio', function () {
+        var sel = $(this).val();
+        if (sel === "All") {
+            $("#Selective_section").hide();
+            $(".error").hide();
+        }
+        else {
+            $("#Selective_section").show();
+            $(".error").hide();
+        }
+    });
+    $(document).on('change', '#NetworkList', function () {
+        $.ajax(
+            {
+                url: '@Url.Content("~/Base/GetDropDwnData?PipelineId=")' + $("#NetworkList option:selected").val(),
+                type: 'GET',
+                data: "",
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    $("#partialSectionDiv").html(data);
+                },
+                error: function () {
+                    alert("error");
+                }
+            });
+    });
+</script>
+<!-- SCRIPT FOR PLOT CHART -->
+<script>
+    function draw_chart(diagnosticData) {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Graph/_partial_diagnostic_details1")',
+            data: JSON.stringify(diagnosticData),
+            contentType: 'application/json',
+            success: function (data) {
+                var nextpageurl = '@Url.Content("~/Graph/_partial_diagnostic_details")'
+                window.location.href = nextpageurl;
+                /* window.location.href = "/Graph/_partial_diagnostic_details";*/
+            }
+        });
+    }
+    function draw_gc_chart(gcData) {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Graph/_partial_gc_details1")',
+            data: JSON.stringify(gcData),
+            //data: gcData,
+            contentType: 'application/json',
+            success: function (data) {
+                //console.log("data:", data);
+                //$('#GCDynamicPortion').html(data);
+                var nextpageurl = '@Url.Content("~/Graph/_partial_gc_details")'
+                window.location.href = nextpageurl;
+            }
+        });
+    }
+</script>
+<!-- DOUBLE CLICK EVENT -->
+<script>
+    $(document).on("dblclick", "#DataList tr", function () {
+        var id = $(this).attr("data-id");
+        var table_data_val = $("#DataList").attr('data-val');
+        if (table_data_val == 'diagnosticsummary') {
+            var myTable = $('#DataList').DataTable();
+            var form_data = myTable.rows(this).data();
+
+            var id_column, abbrevation_name, consumer_name_column, meter_type_column, stream_no_column, maintenance_name_column, pipeline_name_column;
+            var diagnostic_meter_type, diagnostic_make;
+            $.each(form_data, function (key, value, index) {
+                abbrevation_name = "fd";
+                id_column = value[0];
+                consumer_name_column = value[2];
+                meter_type_column = value[3];
+                stream_no_column = value[4];
+                maintenance_name_column = value[5];
+                pipeline_name_column = value[6];
+                diagnostic_meter_type = value[3];
+                diagnostic_make = value[11];
+            });
+
+            if (diagnostic_meter_type.toLowerCase() == 'usm' && (diagnostic_make.toLowerCase().startsWith("elster") || diagnostic_make.toLowerCase().startsWith("elester"))) {
+                var data = 'id=' + id_column + '&consumer_name=' + consumer_name_column + '&meter_type=' + meter_type_column + '&stream_no=' + stream_no_column + '&maintenance_name=' + maintenance_name_column + '&pipeline_name=' + pipeline_name_column + '&abbrevation_name=' + abbrevation_name ;
+                console.log("data:", data);
+                var url = '@Url.Content("~/Graph/DiagnosticChartViewerData?")' + data;
+                window.location.href = url;
+            }
+            else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Not supported!"
+                })
+            }
+        }
+        else if (table_data_val == 'gc') {
+            var myTable = $('#DataList').DataTable();
+            var form_data = myTable.rows(this).data();
+            var id_column, abbrevation_name, gc_name_column, gc_network_column,  gc_station_column;
+            $.each(form_data, function (key, value, index) {
+                abbrevation_name = "gc";
+                id_column = value["gc_id"];
+                gc_name_column = value["gc_name"];
+                gc_network_column = value["pipeline_name"];
+                gc_station_column = value["station_name"];
+            });
+            var data_date = "";
+            data_date = $('.daterangeGCInput').data('daterangepicker').startDate.format('YYYY-MM-DD');
+            console.log("data_date:", data_date);
+            var data = 'id=' + id_column + '&gc_name=' + gc_name_column + '&gc_network=' + gc_network_column + '&gc_station=' + gc_station_column + '&data_date=' + data_date + '&abbrevation_name=' + abbrevation_name ;
+            //console.log("data:", data);
+            var url = '@Url.Content("~/Graph/GCChartViewerData?")' + data;
+            window.location.href = url;
+        }
+        else if (table_data_val == 'reports') {
+                $.ajax({
+                     url: '@Url.Content("~/Report/InputSqlData?report_id=")' + id, // The method name + parameter
+                     success: function(data) {
+                       $('#form-modal .modal-body').html(data);
+                         $('#form-modal .modal-title').html('Report Parameters');
+                       $('#form-modal').modal('show');
+                       $('.date').datetimepicker({
+                           defaultDate: moment().subtract(1, 'days'),
+                           format: 'YYYY-MM-DD'
+                       });
+                     }
+                });
+            }
+        else if (table_data_val == 'managereport') {
+               $.ajax({
+                  url: '@Url.Content("~/Report/EditReportData?report_id=")' + id,
+                  success: function(data) {
+                    $('#edit_modal .modal-body').html(data);
+                    $('#edit_modal .modal-title').html('Edit Report Data');
+                    $('#edit_modal').modal('show');
+                    $('.date').datetimepicker({
+                      defaultDate: moment().subtract(1, 'days'),
+                      format: 'YYYY-MM-DD'
+                    });
+                  }
+               });
+            }
+        else if (table_data_val == 'user') {
+            $.ajax({
+                 url: '@Url.Content("~/User/EditUserData?userwiseId=")' + id,
+                   success: function (data) {
+                     $('#edit_user_modal .modal-body').html(data);
+                     $('#edit_user_modal .modal-title').html('Edit User Data');
+                     $('#edit_user_modal').modal('show');
+                     //$('#edit_user_modal').openModal();
+                     //$('#edit_user_modal').modal({ show: true });
+                   }
+            });
+        }
+        else if (table_data_val == 'role') {
+                 $.ajax({
+                   url: '@Url.Content("~/User/EditRoleData?rolewiseId=")' + id,
+                   success: function(data) {
+                       $('#edit_role_modal .modal-body').html(data);
+                       $('#edit_role_modal .modal-title').html('Edit Role Data');
+                       $('#edit_role_modal').modal('show');
+                   }
+               });
+            }
+        else if (table_data_val == 'dashboard') {
+                  var url = '@Url.Content("~/Dashboard/EditDashboardData?dashboard_id=")' + id;
+                  window.location.href = url;
+            }
+        else if (table_data_val == 'kpi') {
+                 @*var url = '@Url.Content("~/Graph/EditKpiViewData?report_id=")' + id;
+                 window.location.href = url;*@
+            }
+        else if (table_data_val == 'surveyor')
+        {
+            var url = '@Url.Content("~/Dashboard/ShowGraphLayout?id=11")';
+            window.location.href = url;
+        }
+        else if (table_data_val == 'scheduletask') {
+            $.ajax({
+                url: '@Url.Content("~/Report/EditSchedularData?id=")' + id,
+                success: function (data) {
+                    $('#editSchedularModal .modal-body').html('');
+                    $('#editSchedularModal .modal-body').html(data);
+                    $('#editSchedularModal .modal-title').html('Edit Schedular Data');
+                    $('#editSchedularModal').modal('show');
+                }
+            });
+         }
+        else { }
+    });
+</script>
+
+<!-- SCRIPT FOR DATATABLE CHECK BOX CLICK EVENT -->
+<script>
+    $(document).on('click', '.reportTable_active_mode', function () {
+        var checked_value = "";
+        if ($(this).is(':checked')) {
+            checked_value = "0";
+        }
+        else {
+            checked_value = "1";
+        }
+        var id_collector = [];
+        $('.DataTableCheckList').each(function (i, item) {
+            var itemVal = $(item).attr("data-val");
+            id_collector.push(itemVal);
+        });
+        let rdata = id_collector.toString();
+        var data = 'report_id=' + rdata + '&IsActiveState=' + checked_value;
+        console.log("DATA:", data);
+        //UpdateReportStatus(data);
+    });
+</script>
+<!-- SCRIPT FOR BtnLoadRptData AND BtnEmailLoad FUNCTIONS -->
+<script>
+    function BtnLoadRptData(title,report_id) {
+        $.ajax({
+         url: '@Url.Content("~/Report/InputSqlData?report_id=")' + report_id, // The method name + parameter
+            success: function (data) {
+             $('#form-modal .modal-body').html('');
+             $('#form-modal .modal-body').html(data);
+             $('#form-modal .modal-title').html(title);
+             $('#form-modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+            // $('.date').datetimepicker({
+            //   defaultDate: moment().subtract(1, 'days'),
+            //   format: 'YYYY-MM-DD'
+            //});
+        }
+    });
+    }
+    function BtnEmailLoad(title,report_id) {
+        $.ajax({
+         url: '@Url.Content("~/Report/EmailerInputData?report_id=")' + report_id, // The method name + parameter
+         success: function(data) {
+             $('#email_modal .modal-body').html('');
+             $('#email_modal .modal-body').html(data);
+            $('#email_modal .modal-title').html(title);
+            $('#email_modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+            //$('.date').datetimepicker({
+            //   defaultDate: moment().subtract(1, 'days'),
+            //   format: 'YYYY-MM-DD'
+            //});
+        }
+    });
+    }
+    function BtnSchedularEdit(title, id) {
+        $.ajax({
+            url: '@Url.Content("~/Report/EditSchedularData?id=")' + id,
+            success: function (data) {
+                $('#editSchedularModal .modal-body').html('');
+                $('#editSchedularModal .modal-body').html(data);
+                $('#editSchedularModal .modal-title').html(title);
+                $('#editSchedularModal').modal('show');
+            }
+        });
+    }
+    $(document).on('click', '.schedule_active_mode', function () {
+        var rdata = $(this).attr("data-id");
+        //console.log(rdata);
+
+        var checked_value = "";
+        if ($(this).is(':checked')) {
+            //alert('Checked');
+            checked_value = "0";
+        }
+        else {
+            //alert('Unchecked');
+            checked_value = "1";
+        }
+
+        var data = 'schedular_id=' + rdata + '&IsActiveState=' + checked_value;
+        //console.log(data);
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/UpdateSchedulerData")',
+            data: data,
+            success: function (data) {
+                //alert("Status updated successfully!!!");
+                //location.reload();
+                swal.fire("Operation success!", "Status updated successfully!", "success").then(function () {
+                    location.reload();
+                });
+            }
+        });
+    });
+</script>
+<!-- DEFINE ADD OPERATIONS OF MANAGE REPORT TAB -->
+<!-- SCRIPT FOR BtnAdd AND ButtonEdit FUNCTIONS -->
+<!-- CLICK EVENT FOR BtnCloseConn, report_active_mode, uploadFile, add, qryAdd, remove, qryRemove AND submitDetail BUTTONS-->
+<script>
+    function ButtonEdit(title, report_id) {
+        $.ajax({
+            url: '@Url.Content("~/Report/EditReportData?report_id=")' + report_id, // The method name + parameter
+            success: function (data) {
+                $('#edit_modal .modal-body').html('');
+                $('#edit_modal .modal-body').html(data);
+                $('#edit_modal .modal-title').html(title);
+                $('#edit_modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+            }
+        });
+    }
+    function BtnAdd() {
+        $.ajax({
+            url: '@Url.Content("~/Report/AddNewRpt")', // The method name + parameter
+            success: function (data) {
+                $('#add_modal .modal-body').html('');
+                $('#add_modal .modal-body').html(data);
+                $('#add_modal .modal-title').html('Add New Report');
+                $('#add_modal').modal('show');
+            }
+        });
+    }
+    $(document).on('click', '.BtnCloseConn', function () {
+        $('#addConn_modal').modal('hide');
+        $('#dsn_name').siblings('span.error').css('visibility', 'hidden');
+        $('#dsn_name').val('');
+        $('#user_name').siblings('span.error').css('visibility', 'hidden');
+        $('#user_name').val('');
+        $('#password').siblings('span.error').css('visibility', 'hidden');
+        $('#password').val('');
+        $('#db_name').siblings('span.error').css('visibility', 'hidden');
+        $('#db_name').val('');
+    });
+    $(document).on('click', '.report_active_mode', function () {
+        var rdata = $(this).attr("data-id"); // reading the id of the checkbox through data-id
+        var checked_value = "";
+        if ($(this).is(':checked')) {
+            checked_value = "0";
+        }
+        else {
+            checked_value = "1";
+        }
+        var data = 'report_id=' + rdata + '&IsActiveState=' + checked_value;
+        UpdateReportStatus(data);
+    });
+    //Function for change the status of manage report section
+    function UpdateReportStatus(Reportdata) {
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/UpdateRptData")',
+            data: Reportdata,
+            success: function (data) {
+                //alert("Status updated successfully!!!");
+                //location.reload();
+                swal.fire("Operation success!", "Status updated successfully!", "success").then(function () {
+                    location.reload();
+                });
+            }
+        });
+    }
+    //uploadFile button click event
+    $(document).on('click', '#uploadFile', function () {
+        //validation and upload file
+        var isAllValid = true;
+
+        if ($('#report_file').val().trim() == '') {
+            isAllValid = false;
+            $('#report_file').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#report_file').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        var model = new FormData();
+        model.append("File", $('#report_file')[0].files[0]);
+        model.append("Name", "Name");
+        if (isAllValid) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Content("~/Report/UploadFileData")',
+                data: model,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    if (data == 'Exists') {
+                        if (confirm("Do you want to override the file?")) {
+                            $.get('@Url.Content("~/Report/submitdata?confirm_value=yes")');
+                            alert('File Uploaded Successfully!!!');
+                        }
+                        else {
+                            $.get('@Url.Content("~/Report/submitdata?confirm_value=no")');
+                            //alert('File Uploaded Successfully!!!');
+                        }
+                    }
+                    else {
+                        alert(data);
+                    }
+                }
+            });
+        }
+
+    });
+    //Add button click event(param)
+    $(document).on('click', '#add', function () {
+        //$('#add').click(function () {
+        //validation and add items
+        var isAllValid = true;
+        if ($('#parameterType').val() == "0") {
+            isAllValid = false;
+            $('#parameterType').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#parameterType').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#parameterMethod').val() == "0") {
+            isAllValid = false;
+            $('#parameterMethod').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#parameterMethod').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#labelName').val().trim() == '') {
+            isAllValid = false;
+            $('#labelName').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#labelName').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#varValue').val().trim() == '') {
+            isAllValid = false;
+            $('#varValue').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#varValue').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#query').val().trim() == '') {
+            isAllValid = false;
+            $('#query').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#query').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var $newRow = $('#mainrow').clone().removeAttr('id');
+            $('.type', $newRow).val($('#parameterType').val());
+            $('.method', $newRow).val($('#parameterMethod').val());
+
+            //Replace add button with remove button
+            $('#add', $newRow).addClass('remove').removeClass('fa fa-plus').addClass('fa fa-trash');
+
+            //remove id attribute from new clone row
+            $('#parameterType,#parameterMethod,#labelName,#varValue,#query,#add', $newRow).removeAttr('id');
+            $('span.error', $newRow).remove();
+            //append clone row
+            $('#orderdetailsItems').append($newRow);
+
+            //clear select data
+            $('#parameterType,#parameterMethod').val('0');
+            $('#labelName,#varValue,#query').val('');
+            $('#orderItemError').empty();
+        }
+
+    });
+    //qryAdd button click event(query)
+    $(document).on('click', '#qryAdd', function () {
+        //$('#qryAdd').click(function () {
+        //validation and add items
+        var isAllValid = true;
+        if ($('#qryType').val() == "0") {
+            isAllValid = false;
+            $('#qryType').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#qryType').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#qryParameter').val().trim() == '') {
+            isAllValid = false;
+            $('#qryParameter').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#qryParameter').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#qryQuery').val().trim() == '') {
+            isAllValid = false;
+            $('#qryQuery').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#qryQuery').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var $newRowQry = $('#query_mainrow').clone().removeAttr('id');
+            $('.querytype', $newRowQry).val($('#qryType').val());
+
+            //Replace add button with remove button
+            //$('#qryAdd', $newRowQry).addClass('qryRemove').val('Remove').removeClass('btn-success').addClass('btn-danger');
+            $('#qryAdd', $newRowQry).addClass('qryRemove').removeClass('fa fa-plus').addClass('fa fa-trash');
+
+            //remove id attribute from new clone row
+            $('#qryType,#qryParameter,#qryQuery,#qryAdd', $newRowQry).removeAttr('id');
+            $('span.error', $newRowQry).remove();
+            //append clone row
+            $('#querydetailsItems').append($newRowQry);
+
+            //clear select data
+            $('#qryType').val('0');
+            $('#qryParameter,#qryQuery').val('');
+            $('#queryItemError').empty();
+        }
+
+    });
+    //remove button click event(param)
+    $(document).on('click', '#orderdetailsItems .remove', function () {
+        //console.log('Done',this)
+        $(this).parents('tr').remove();
+    });
+    //remove button click event(query)
+    $(document).on('click', '#querydetailsItems .qryRemove', function () {
+        $(this).parents('tr').remove();
+    });
+    //submit button click event
+    $(document).on('click', '#submitDetail', function () {
+    //$('#submitDetail').click(function () {
+        var isAllValid = true;
+        var summaryCount = 0;
+        //validate all items
+        $('#orderItemError').text('');
+        $('#queryItemError').text('');
+        var list = [];
+        var query_list = [];
+        var errorItemCount = 0;
+        var errorItemCountQuery = 0;
+
+        $('#orderdetailsItems tbody tr').each(function (index, ele) {
+            if ($('select.type', this).val() == "0" ||
+                $('select.method', this).val() == "0" ||
+                $('.labelName', this).val() == '' ||
+                $('.varValue', this).val() == '' ||
+                $('textarea.query', this).val() == ''){
+                //errorItemCount++;
+                //summaryCount++;
+                //$(this).addClass('error');
+            }
+            else {
+                var orderItem = {
+                    param_type: $('select.type', this).val(),
+                    param_method: $('select.method', this).val(),
+                    param_label: $('.labelName', this).val(),
+                    param_variable: $('.varValue', this).val(),
+                    param_query: $('textarea.query', this).val()
+                }
+                list.push(orderItem);
+            }
+       })
+
+        list = list.slice(2);
+        //console.log("list:", list);
+
+        //if (errorItemCount > 0) {
+        //    $('#orderItemError').text(errorItemCount + " invalid entry in list.");
+        //    isAllValid = false;
+        //}
+        //if (list.length == 0) {
+        //    $('#orderItemError').text('At least 1 item required.');
+        //    isAllValid = false;
+        //    errorItemCount++;
+        //    summaryCount++;
+        //}
+
+        $('#querydetailsItems tbody tr').each(function (index, ele) {
+            if ($('select.querytype', this).val() == "0" ||
+             $('.qryParameter', this).val() == '' ||
+             $('textarea.qryQuery', this).val() == '') {
+                errorItemCountQuery++;
+                summaryCount++;
+             $(this).addClass('error');
+            }
+            else {
+                var qry_orderItem = {
+                    type: $('select.querytype', this).val(),
+                    parameterData: $('.qryParameter', this).val(),
+                    query_qrydata: $('textarea.qryQuery', this).val()
+                }
+                query_list.push(qry_orderItem);
+            }
+        })
+        query_list = query_list.slice(1);
+        //console.log("query_list:", query_list);
+
+        if (errorItemCountQuery > 0) {
+            $('#queryItemError').text(errorItemCountQuery + " invalid entry in list.");
+            isAllValid = false;
+        }
+        if (query_list.length == 0) {
+            $('#queryItemError').text('At least 1 item required.');
+            isAllValid = false;
+            summaryCount++;
+            errorItemCountQuery++;
+        }
+
+        var countChecked = 0;
+        if (!$('#connTable tbody tr').find('input[type="radio"]').is(":checked")) {
+            countChecked = 1;
+            summaryCount++;
+        } else { }
+        if (countChecked > 0) {
+            $('#connItemError').text('Select at least 1 item.');
+            isAllValid = false;
+        }
+        else
+        {
+            $('#connItemError').text('');
+        }
+
+        if ($('#report_name').val().trim() == '') {
+            $('#report_name').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+            summaryCount++;
+        }
+        else {
+            $('#report_name').siblings('span.error').css('visibility', 'hidden');
+        }
+        if ($('#report_file').val().trim == '') {
+            isAllValid = false;
+             summaryCount++;
+            $('#report_file').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#report_file').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (summaryCount > 0) {
+            $('#summaryError').text(summaryCount + " fields are mandatory");
+            //$('#summaryError').append(errorItemCount + " fields are mandatory");
+            isAllValid = false;
+        }
+
+        if (isAllValid) {
+            var data = {
+                report_name: $('#report_name').val().trim(),
+                report_description: $('#report_description').val(),
+                report_user_id: $('#report_user_type').val(),
+                report_file: $('#report_file').val().replace(/.*(\/|\\)/, ''),
+                //$("#radioDiv input[type='radio']:checked");
+                conn_id: $('#connTable tbody td input[name="select_mode"]:checked').attr("data-id"),
+                param_data: list,
+                query_data: query_list
+                //conn_data: conn_list
+                //connData: conndata
+            }
+            //console.log("data:", data);
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Content("~/Report/NewRptData")',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                 success: function (data) {
+                  if (data.startsWith("ERROR")) {
+                      var res = data.split(";");
+                      var error = '';
+                      if (res.length > 1) {
+                          error = res[1];
+                      }
+                      else {
+                          error = data;
+                      }
+                      alert(error);
+                  }
+                  else {
+                      alert('Data inserted successfully!!!');
+                        //here we will clear the form
+                        list = [];
+                        query_list = [];
+                        $('#report_name,#report_description,#report_file').val('');
+                        $('#orderdetailsItems').empty();
+                        $('#querydetailsItems').empty();
+                        location.reload();
+                  }
+                 },
+                 error: function () {
+                    alert("Error");
+                }
+            });
+        }
+
+    });
+</script>
+<!-- DEFINE EDIT OPERATIONS OF MANAGE REPORT TAB -->
+<!-- CLICK EVENT FOR uploadFileEditmode AND submitEditDetail BUTTONS-->
+<script>
+     $(document).on('click', '#uploadFileEditmode', function () {
+    //$('#uploadFileEditmode').click(function () {
+        var file_data = $('#report_file_data').val().replace(/.*(\/|\\)/, '');
+        //alert(file_data);
+        $('#edit_report_file').val(file_data);
+
+        var model = new FormData();
+        model.append("File", $('#report_file_data')[0].files[0]);
+        model.append("Name", "Name");
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/UploadFileData")',
+            data: model,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                if (data == 'Exists') {
+                    if (confirm("Do you want to override the file?")) {
+                        $.get('@Url.Content("~/Report/submitdata?confirm_value=yes")');
+                        alert('File Uploaded Successfully!!!');
+                    }
+                    else {
+                        $.get('@Url.Content("~/Report/submitdata?confirm_value=no")');
+                        //alert('No File Uploaded!!!');
+                    }
+                }
+                else {
+                    alert(data);
+                }
+            }
+        });
+
+    });
+     $(document).on('click', '#submitEditDetail', function () {
+    //$('#submitEditDetail').click(function () {
+        var param_list = [];
+        $('#editreportItems tbody tr').each(function (index, ele) {
+            var param_rptItem = {
+                //param_id: $('.param_id', this).text(),
+                param_type: $('select.edit_paramQry_type_select', this).val(),
+                param_method: $('select.edit_paramQry_method_select', this).val(),
+                param_label: $('.edit_labelTxt', this).text(),
+                param_variable: $('.edit_variable', this).text(),
+                param_query: $('textarea.edit_param_query', this).val()
+            }
+            param_list.push(param_rptItem);
+        })
+
+        var query_list = [];
+        $('#editquerytabledata tbody tr').each(function (index, ele) {
+            var qry_rptItem = {
+                //queryId: $('.qry_id', this).text(),
+                type: $('select.edit_qry_type_select', this).val(),
+                parameterData: $('.edit_qry_parameter', this).text(),
+                query_qrydata: $('textarea.edit_report_query', this).val()
+            }
+            query_list.push(qry_rptItem);
+        })
+
+        //var conndata = {
+        //       connection_id: $('#connect_id').val().trim(),
+        //       dsn_name: $('#conn_dsn_name').val().trim(),
+        //       user_id: $('#conn_user_name').val().trim(),
+        //       password: $('#conn_password').val().trim(),
+        //       db_schema_name: $('#conn_db_name').val().trim()
+        //   }
+
+        var editData = {
+            report_id: $('#edit_rpt_id').val(),
+            report_name: $('#edit_report_name').val(),
+            report_description: $('#edit_report_description').val(),
+            report_query: $('#edit_report_query').val(),
+            report_file: $('#edit_report_file').val().replace(/.*(\/|\\)/, ''),
+            report_user_id: $('#edit_reportUserType').val(),
+            conn_id: $('#editconnectionTable tbody td input[name="select_Connnection"]:checked').attr("data-id"),
+            param_data: param_list,
+            query_data: query_list
+            //connData: conndata
+        }
+        //alert(editData);
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/EditRptData")',
+            data: JSON.stringify(editData),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.startsWith("ERROR")) {
+                    var res = data.split(";");
+                    var error = '';
+                    if (res.length > 1) {
+                        error = res[1];
+                    } else {
+                        error = data;
+                    }
+                    alert(error);
+                }
+                else {
+                    alert('Data updated successfully!!!');
+                    //$('#edit_modal').modal('hide');
+                    param_list = [];
+                    query_list = [];
+                    location.reload();
+                }
+            },
+            error: function (error) {
+                alert("Error");
+            }
+
+        });
+
+    });
+</script>
+<!-- DEFINE EDIT OPERATIONS OF MANAGE REPORT TAB -->
+<!-- CLICK EVENT FOR add_new_query, deleteQuerydata, add_param_query AND deleteParamQuerydata BUTTONS-->
+<script>
+    //Append table with add row form on add new button click
+    $(document).on('click', '.add_new_query', function () {
+        //var actions = $("#querytabledata td:last-child").html();
+        var actions = '<a class="deleteQuerydata" title="Delete" data-toggle="tooltip"><i class="fa fa-trash"></i></a>';
+        var row = '<tr>' +
+            //'<td class="qry_id col-md-2" contenteditable="false"></td>' +
+            '<td class="qry_type col-md-3">' +
+            '<select class="edit_qry_type_select form-control">' +
+            '<option value="0">Select</option>' +
+            '<option value="function">Function</option>' +
+            '<option value="procedure">Procedure</option>' +
+            '<option value="quUrlry">Query</option>' +
+            '</select></td>' +
+            '<td class="edit_qry_parameter col-md-3" contenteditable="true"></td>' +
+            '<td class="script col-md-7"><textarea class="edit_report_query" style="height: 120px;width: 468px;"></textarea></td>' +
+            '<td style="text-align:center">' + actions + '</td>' +
+            '</tr>';
+        $("#editquerytabledata").append(row);
+    });
+    // Delete row on delete button click
+    $(document).on('click', '#editquerytabledata .deleteQuerydata', function () {
+        //$(this).parents('tr').remove();
+        if ($(this).parents('table').find('tr').length > 2) {
+            $(this).closest('tr').remove();
+        }
+        else {
+            alert('Report must have at least one query');
+        }
+    });
+    //Append table with add row form on add new button click
+    $(document).on('click', '.add_param_query', function () {
+        var actions = '<a class="deleteParamQuerydata" title="Delete" data-toggle="tooltip"><i class="fa fa-trash"></i></a>';
+        var row = '<tr>' +
+            '<td class="edit_labelTxt pt-3-half" contenteditable="true"></td>' +
+            '<td class="edit_variable pt-3-half" contenteditable="true"></td>' +
+            '<td class="type pt-3-half">' +
+            '<select class="edit_paramQry_type_select form-control">' +
+            '<option value="0">Select</option>' +
+            '<option value="Dropdown">Dropdown</option>' +
+            '<option value="Dropdown-multi">Dropdown-multi</option>' +
+            '<option value="Datetime">Datetime</option>' +
+            '</select></td>' +
+            '<td class="method pt-3-half">' +
+            '<select class="edit_paramQry_method_select form-control">' +
+            '<option value="0">Select</option>' +
+            '<option value="Static">Static</option>' +
+            '<option value="Dynamic">Dynamic</option>' +
+            '</select></td>' +
+            '<td class="query pt-3-half"><textarea class="edit_param_query" style="height: 120px;width: 468px;"></textarea></td>' +
+            '<td style="text-align:center">' + actions + '</td>' +
+            '</tr>';
+        $("#editreportItems").append(row);
+    });
+    // Delete row on delete button click
+    $(document).on('click', '#editreportItems .deleteParamQuerydata', function () {
+        $(this).parents('tr').remove();
+    });
+</script>
+<!-- DEFINE OPERATIONS OF USER TAB -->
+<!-- SCRIPT FOR BtnAddUser AND BtnUserEdit FUNCTIONS -->
+<!-- CLICK EVENT FOR user_active_mode BUTTONS-->
+<script>
+    function BtnAddUser() {
+       $.ajax({
+         url: '@Url.Content("~/User/AddNewUser")', // The method name + parameter
+         success: function(data) {
+             $('#add_user_modal .modal-body').html('');
+             $('#add_user_modal .modal-body').html(data);
+             $('#add_user_modal .modal-title').html('Add New User');
+             $('#add_user_modal').modal('show');
+         }
+    });
+
+    }
+    function BtnUserEdit(title, user_id) {
+        $.ajax({
+            url: '@Url.Content("~/User/EditUserData?userwiseId=")' + user_id, // The method name + parameter
+            success: function (data) {
+               $('#edit_user_modal .modal-body').html('');
+               $('#edit_user_modal .modal-body').html(data);
+               $('#edit_user_modal .modal-title').html(title);
+               $('#edit_user_modal').modal('show');
+            }
+        });
+    }
+    $(document).on('click', '.user_active_mode', function () {
+        var rdata = $(this).attr("data-id"); // reading the id of the checkbox through data-id
+        // alert(rdata);
+
+        var checked_value = "";
+        if ($(this).is(':checked')) {
+            //alert("Checked");
+            checked_value = "1";
+        }
+        else {
+            // alert("Unchecked");
+            checked_value = "0";
+        }
+
+        var data = 'userwiseId=' + rdata + '&IsActiveState=' + checked_value;
+        //alert(data);
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/User/UpdateUserData")',
+            data: data,
+            success: function (data) {
+                alert("Status updated successfully!!!");
+                location.reload();
+            }
+        });
+    });
+</script>
+<!-- DEFINE OPERATIONS OF ROLE TAB -->
+<!-- SCRIPT FOR BtnAddRole AND BtnRoleEdit FUNCTIONS -->
+<script>
+    function BtnAddRole() {
+    $.ajax({
+         url: '@Url.Content("~/User/AddNewRole")', // The method name + parameter
+         success: function(data) {
+             $('#add_role_modal .modal-body').html('');
+             $('#add_role_modal .modal-body').html(data);
+             $('#add_role_modal .modal-title').html('Add New Role');
+             $('#add_role_modal').modal('show');
+         }
+    });
+    }
+    function BtnRoleEdit(title, role_id) {
+        $.ajax({
+            url: '@Url.Content("~/User/EditRoleData?rolewiseId=")' + role_id, // The method name + parameter
+            success: function(data) {
+               $('#edit_role_modal .modal-body').html('');
+               $('#edit_role_modal .modal-body').html(data);
+               $('#edit_role_modal .modal-title').html(title);
+               $('#edit_role_modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+            }
+        });
+    }
+</script>
+<!-- DEFINE OPERATIONS OF DASHBOARD TAB -->
+<!-- SCRIPT FOR BtnDashboardEdit FUNCTIONS -->
+<!-- CLICK EVENT FOR dashboard_active_mode BUTTONS-->
+<script>
+    function BtnDashboardEdit(db_id) {
+         @*var url = '@Url.Content("~/Dashboard/EditDashboardData?dashboard_id=")' + db_id;*@
+         var url = '@Url.Content("~/Dashboard/EditDashboardDemo?dashboard_id=")' + db_id;
+         window.location.href = url;
+    }
+    $(document).on('click', '.dashboard_active_mode', function () {
+        var rdata = $(this).attr("data-id"); // reading the id of the checkbox through data-id
+        var checked_value = "";
+        if ($(this).is(':checked')) {
+            //alert("Checked");
+            checked_value = "0";
+        }
+        else {
+            // alert("Unchecked");
+            checked_value = "1";
+        }
+
+        var data = 'dashboard_id=' + rdata + '&IsActiveState=' + checked_value;
+        //alert(data);
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Dashboard/UpdateDashboardData")',
+            data: data,
+            success: function (data) {
+                alert("Status updated successfully!!!");
+                location.reload();
+            }
+        });
+    });
+</script>
+<!-- DEFINE OPERATIONS OF KPI TAB -->
+<!-- SCRIPT FOR BtnKPIEdit FUNCTIONS -->
+<!-- CLICK EVENT FOR kpi_active_mode BUTTONS-->
+<script>
+    function BtnKPIEdit(title, kpi_id) {
+
+        var url = '@Url.Content("~/Graph/EditChartView?kpi_id=")' + kpi_id;
+         window.location.href = url;
+        //window.open(url);
+        @*$.ajax({
+         url: '@Url.Content("~/Graph/EditKpiViewData?report_id=")' + report_id, // The method name + parameter
+         success: function(data) {
+             $('#edit_modal .modal-body').html(data);
+            $('#edit_modal .modal-title').html(title);
+            $('#edit_modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+        }*@
+    //});
+}
+    $(document).on('click', '.kpi_active_mode', function () {
+        var rdata = $(this).attr("data-id"); // reading the id of the checkbox through data-id
+        // alert(rdata);
+
+        var checked_value = "";
+        if ($(this).is(':checked')) {
+            //alert("Checked");
+            checked_value = "0";
+        }
+        else {
+            // alert("Unchecked");
+            checked_value = "1";
+        }
+
+        var data = 'report_id=' + rdata + '&IsActiveState=' + checked_value;
+        //alert(data);
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Graph/UpdateRptData")',
+            data: data,
+            success: function (data) {
+                alert("Status updated successfully!!!");
+                location.reload();
+            }
+        });
+    });
+</script>
+<!-- DEFINE ADD AND EDIT OPERATIONS OF QUERY TAB -->
+<!-- SCRIPT FOR BtnAddQuery AND BtnQueryEdit FUNCTIONS -->
+<!-- CLICK EVENT FOR submitQueryDetail AND submitEditQueryDetail BUTTONS-->
+<script>
+    function BtnQueryEdit(title, query_id) {
+        $.ajax({
+            url: '@Url.Content("~/Dashboard/EditQueryData?queryId=")' + query_id, // The method name + parameter
+            success: function (data) {
+                $('#edit_query_modal .modal-body').html('');
+                $('#edit_query_modal .modal-body').html(data);
+                $('#edit_query_modal .modal-title').html(title);
+                $('#edit_query_modal').modal('show');
+            }
+        });
+    }
+    function BtnAddQuery() {
+       $.ajax({
+         url: '@Url.Content("~/Dashboard/AddNewQuery")', // The method name + parameter
+         success: function(data) {
+             $('#add_query_modal .modal-body').html(data);
+             $('#add_query_modal .modal-title').html('Add New Query');
+             $('#add_query_modal').modal('show');
+         }
+    });
+
+    }
+    //add mode submit button click event
+    $(document).on('click', '#submitQueryDetail', function () {
+        var isAllValid = true;
+        var summaryCount = 0;
+        //validate all items
+        $('#queryItemError').text('');
+        var queryListData = {};
+
+        $('#queryItemDetails tbody tr').each(function (index, ele) {
+            if ($('select.type', this).val() == '' ||
+                $('.QueryName', this).val() == '' ||
+                $('select.usertype', this).val() == '' ||
+                $('textarea.Query_query', this).val() == '') {
+                isAllValid = false;
+                summaryCount++;
+                $('#queryItemError').text('At least 1 item required.');
+            }
+            else { }
+            var QueryItem = {
+                query_type: $('select.type', this).val(),
+                query_name: $('.QueryName', this).val(),
+                query_user_id: $('select.usertype', this).val(),
+                query_qrydata: $('textarea.Query_query', this).val(),
+                con_id: $('#QueryConnTable tbody td input[name="select_mode"]:checked').attr("data-id")
+            }
+            queryListData = QueryItem
+        });
+        //console.log("queryListData", queryListData);
+
+        var countChecked = 0;
+        if (!$('#QueryConnTable tbody tr').find('input[type="radio"]').is(":checked")) {
+            countChecked = 1;
+            summaryCount++;
+        } else { }
+        if (countChecked > 0) {
+            $('#connItemError').text('Select at least 1 item.');
+            isAllValid = false;
+        }
+        else
+        {
+            $('#connItemError').text('');
+        }
+
+        if (summaryCount > 0) {
+            $('#summaryError').text(summaryCount + " fields are mandatory");
+            isAllValid = false;
+        }
+
+        if (isAllValid) {
+            var data = queryListData;
+            //console.log("data:", data);
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Content("~/Dashboard/NewQueryData")',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.startsWith("ERROR")) {
+                        var res = data.split(";");
+                        var error = '';
+                        if (res.length > 1) {
+                            error = res[1];
+                        }
+                        else {
+                            error = data;
+                        }
+                        alert(error);
+                    }
+                    else {
+                        alert('Data inserted successfully!!!');
+                        //here we will clear the form
+                        queryListData = {};
+                        //$('#queryItemDetails').empty();
+                        location.reload();
+                    }
+                },
+                error: function () {
+                    alert("Error");
+                }
+            });
+        }
+    });
+    //edit mode submit button click event
+    $(document).on('click', '#submitEditQueryDetail', function () {
+      var editQuery_list = {};
+        $('#EditQueryTable tbody tr').each(function (index, ele) {
+          var queryItem = {
+              queryId: $('#edit_query_id').val(),
+              query_type: $('select.edit_queryType', this).val(),
+              query_user_id: $('select.edit_queryUserType', this).val(),
+              query_name: $('.Edit_Query_qryname', this).text().trim(),
+              query_qrydata: $('textarea.Edit_Query_query', this).val(),
+              con_id: $('#editQryConnectionTable tbody td input[name="select_Connnection"]:checked').attr("data-id")
+          }
+            editQuery_list = queryItem;
+      });
+        //console.log("editQuery_list:", editQuery_list);
+
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Dashboard/EditQryData")',
+            data: JSON.stringify(editQuery_list),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.startsWith("ERROR")) {
+                    var res = data.split(";");
+                    var error = '';
+                    if (res.length > 1) {
+                        error = res[1];
+                    } else {
+                        error = data;
+                    }
+                    alert(error);
+                }
+                else {
+                    alert('Data updated successfully!!!');
+                    editQuery_list = {};
+                    location.reload();
+                }
+            },
+            error: function (error) {
+                alert("Error");
+            }
+        });
+
+    });
+</script>
+
+<!-- DATATABLE INITIALIZING FORMAT -->
+<script>
+    var table;
+    var tableData;
+    $(function () {
+        var data_name = $("#DataList").attr('data-val');
+        data_name = data_name.toLowerCase();
+        if (data_name == 'diagnosticsummary') {
+            // FOR DEMONSTRATION ONLY: AJAX emulation
+            $.mockjax({
+              url: '/test/0',
+              responseTime: 1000,
+              response: function (settings) {
+                 var json_data = JSON.parse(@Html.Raw(Json.Encode(ViewBag.jsonData)));
+                 var arrData = [];
+
+                 for (var i = 0; i < json_data.length; i++) {
+                    arrData.push([json_data[i]['mmst_id'],
+                        json_data[i]['is_deleted'],
+                        json_data[i]['consumer'],
+                        json_data[i]['meter_type'],
+                        json_data[i]['stream_no'],
+                        json_data[i]['maintenance'],
+                        json_data[i]['region'],
+                        json_data[i]['status'],
+                        json_data[i]['calibration'],
+                        json_data[i]['health'],
+                        json_data[i]['ghg'],
+                        json_data[i]['make'],
+                        json_data[i]['model'],
+                        json_data[i]['transducer_failure'],
+                        json_data[i]['detection_problem'],
+                       json_data[i]['ultrasonic_noise'],
+                       json_data[i]['process_pressure'],
+                       json_data[i]['process_temprature'],
+                       json_data[i]['fouling'],
+                       json_data[i]['flow_profile'],
+                       json_data[i]['high_velocity']]
+                    );
+                 }
+                 this.responseText = {
+                      data: [],
+                 };
+                for (var i = 0; i < arrData.length; i++) {
+                   this.responseText.data.push(arrData[i]);
+                }
+              }
+            });
+
+            table = $('#DataList').DataTable({
+                ajax: '/test/0',
+                'processing': true,
+                'columnDefs': [{ 'visible': false, 'targets': [0, 1, 11, 12] },
+                { 'targets': [7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20], 'className': 'text-center' },
+                {
+                    'targets': [7],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Status">S</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Status">S</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [8],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Calibration">C</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Calibration">C</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [9],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Health">H</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Health">H</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [10],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Ghg">G</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Ghg">G</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [13],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Transducer Failure">TF</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Transducer Failure">TF</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [14],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Detection Problem">DP</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Detection Problem">DP</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [15],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Ultrasonic Noise">UN</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Ultrasonic Noise">UN</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [16],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Process Pressure">PP</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Process Pressure">PP</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [17],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Process Temprature">PT</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Process Temprature">PT</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [18],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Fouling">F</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Fouling">F</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [19],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Flow Profile">FP</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Flow Profile">FP</a>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    'targets': [20],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="High Velocity">HV</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="High Velocity">HV</a>';
+                        }
+                        return data;
+                    }
+                }
+                ],
+                'paging': false,
+                'scrollY': "350px",
+                "scrollCollapse": true,
+                "order": [[2, 'asc']],
+                'dom': '<"row toolbarinner mb-1 pb-1"<"col-sm-8"<"toolbar">><"col-sm-2 customDropDown"><"col-sm-2"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                'language': {
+                    'loadingRecords': '&nbsp;',
+                    'processing': 'Loading...'
+                }
+            });
+
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> Diagnostic List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item">'
+                + '<div class="toggle-select-act mg-t-30"><div class="nk-toggle-switch" data-ts-color="green">'
+                + '<label for= "ts4" class= "ts-label"></label>'
+                + '<input id="ts4" type="checkbox" hidden="hidden" class="diagnostic_mode" checked="checked">'
+                + '<label for="ts4" class="ts-helper"></label></div></div>'
+                + '</li></ul></div>');
+
+            $('<div class="row">' +
+                '<p class="mt-1" style="float:right;"> Reload Time: </p>' +
+                '<div class="col-sm-8">' +
+                '<select class="form-control form-control-sm durationDropDown" name="durationDropDown">' +
+                '<option value="0">SELECT</option>' +
+                '<option value="5">5 Seconds</option>' +
+                '<option value="10">10 Seconds</option>' +
+                '<option value="15">15 Seconds</option>' +
+                '<option value="20">20 Seconds</option>' +
+                '<option value="25">25 Seconds</option>' +
+                '</select></div></div>').appendTo("#DataList_wrapper .customDropDown");
+
+        }
+        else if (data_name == 'gc') {
+            var d = new Date();
+            //d.setDate(d.getDate() - 1);
+            d.setDate(d.getDate());
+            console.log("D:", d);
+            createGCTable(data_name, @Html.Raw(Json.Encode(ViewBag.jsonData)), d);
+        }
+        else if (data_name == 'reports') {
+            $('#DataList').DataTable({
+                "paging": true,
+                "processing": true,
+                "lengthChange": true,
+                "searching": true,
+                // "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "scrollY": "350px",
+                "scrollCollapse": true,
+                "initComplete": function (settings, json) {
+                    $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+                },
+                dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_",
+                },
+                 columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                     { orderable: false, targets: [0, 5] }
+                 ]
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> Report List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-upload nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"> <i class="fas fa-clock nav-icon1"></i></a></li></ul></div>')
+        }
+        else if (data_name == 'scheduletask') {
+            $('#DataList').DataTable({
+                "paging": true,
+                "processing": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "scrollY": "350px",
+                //"scrollX": true,
+                "scrollCollapse": true,
+                "initComplete": function (settings, json) {
+                    $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+                },
+                dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_",
+                },
+                columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                    { orderable: false, targets: [0, 12, 13, 14] },
+                    {
+                        targets: [7, 8, 9],
+                        render: function (data, type, row) {
+                            var newData =  data.length > 10 ? data.substr(0, 10) + '…' : data;
+                            return '<span data-toggle="tooltip" title="' + data + '">' + newData + '</span>';
+                        }
+                    }
+                ]
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> Schedule Task </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href= "#" class="disabled"><label class="switch"><input class= "active_mode" type="checkbox" checked="checked"><span class="slider round"></span></label></a></li></ul></div>');
+        }
+        else if (data_name == 'managereport') {
+            $("#DataList").DataTable({
+                "responsive": true, "processing": true, "lengthChange": true, "autoWidth": false, "pageLength": 10, "scrollY": "350px",
+                "scrollCollapse": true,
+                "initComplete": function (settings, json) {
+                    $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+                },
+                dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9 pt-1"<"toolbar">><"col-sm-3 mb-2"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_",
+
+                },
+                columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                    { orderable: false, targets: [0, 5] }
+                ]
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> Report List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a data-toggle="modal" data-target="#add_modal" onclick="BtnAdd()"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><label class="switch"><input class="reportTable_active_mode" type="checkbox" checked="checked"><span class="slider round"></span></label></a></li></ul></div>')
+        }
+        else if (data_name == 'user') {
+            $("#DataList").DataTable({
+                "responsive": true, "processing": true, "lengthChange": true, "autoWidth": false, "pageLength": 10, "scrollY": "380px",
+                "scrollCollapse": true,
+                "initComplete": function (settings, json) {
+                    $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+                },
+                dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_",
+
+                },
+                columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                    { orderable: false, targets: [0, 7] }
+                ]
+
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> User List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a data-toggle="modal" data-target="#add_user_modal" onclick="BtnAddUser()"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><label class="switch"><input class= "active_mode" type="checkbox" checked="checked"><span class="slider round"></span></label></a></li></ul></div>')
+        }
+        else if (data_name == 'role') {
+            $("#DataList").DataTable({
+                "responsive": true, "processing": true, "lengthChange": true, "autoWidth": false, "pageLength": 10, "scrollY": "380px",
+                "scrollCollapse": true,
+                dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_",
+
+                },
+                columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                    { orderable: false, targets: [0, 5] }
+                ]
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> Role List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a data-toggle="modal" data-target="#add_role_modal" onclick="BtnAddRole()"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><label class="switch"><input class="active_mode" type="checkbox" checked="checked"><span class="slider round"></span></label></a></li></ul></div>')
+        }
+        else if (data_name == 'dashboard') {
+            $("#DataList").DataTable({
+                "paging": true,
+                "processing": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "scrollY": "350px",
+                "scrollCollapse": true,
+                "initComplete": function (settings, json) {
+                    $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+                },
+                dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_"
+                },
+                columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                    { orderable: false, targets: [0, 5] }
+                ]
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> Dashboard List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="@Url.Content("~/Dashboard/StickyIndex")"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a href= "#" class="disabled"><label class="switch"><input class= "active_mode" type="checkbox" checked="checked"><span class="slider round"></span></label></a></li></ul></div>')
+        }
+        else if (data_name == 'kpi') {
+            $('#DataList').DataTable({
+                "paging": true,
+                "processing": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "scrollY": "350px",
+                "scrollCollapse": true,
+                "initComplete": function (settings, json) {
+                    $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+                },
+                dom: '<"row toolbarinner mb-2 pb-1 mr-0 ml-0"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_",
+
+                },
+                columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                    { orderable: false, targets: [0, 6] }
+                ]
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> KPI List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a href="@Url.Content("~/Graph/ChartView")"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><label class="switch"><input class= "active_mode" type="checkbox" checked="checked"><span class="slider round"></span></label></a></li></ul></div>')
+        }
+        else if (data_name == 'query') {
+            $("#DataList").DataTable({
+                "paging": true,
+                "processing": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "responsive": true,
+                "scrollY": "350px",
+                "scrollCollapse": true,
+                "initComplete": function (settings, json) {
+                    $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+                },
+                dom: '<"row toolbarinner mb-2 pb-1 mr-0 ml-0"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                //dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+                "order": [[1, 'desc']],
+                deferRender: true,
+                language: {
+                    oPaginate: {
+                        sNext: '<i class="fa fa-forward"></i>',
+                        sPrevious: '<i class="fa fa-backward"></i>'
+
+                    },
+                    "search": '',
+                    "info": "Showing page _PAGE_ of _PAGES_",
+                    "lengthMenu": "Rows :  _MENU_",
+
+                },
+                columnDefs: [
+                    { 'visible': false, 'targets': [1, 2] }, //hide the second & third column
+                    { orderable: false, targets: [0, 6] }
+                ]
+
+            });
+            $("div.toolbar").html('<div style="display:flex;"><p><strong> Query List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"><a data-toggle="modal" data-target="#add_query_modal" onclick="BtnAddQuery()"><i class="fas fa-plus nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-edit nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><i class="fas fa-trash nav-icon1"></i></a></li><li class="list-inline-item"><a href="#" class="disabled"><label class="switch"><input class= "active_mode" type="checkbox" checked="checked"><span class="slider round"></span></label></a></li></ul></div>')
+        }
+        else if (data_name == 'surveyor') {
+            var d = new Date();
+            d.setDate(d.getDate());
+            createSurveyTable(data_name, @Html.Raw(Json.Encode(ViewBag.jsonData)), d);
+        }
+        else { }
+    });
+
+    function createGCTable(reportname, data, dateData) {
+        var columnsGCData = [
+            { 'data': 'gc_id', 'title': 'Id' },
+            { 'data': 'is_deleted', 'title': 'Is Deleted' },
+            { 'data': 'gc_name', 'title': 'GC NAME' },
+            { 'data': 'pipeline_name', 'title': 'Pipeline Name' },
+            { 'data': 'station_name', 'title': 'Station Name' },
+            { 'data': 'status', 'title': 'Status' },
+            { 'data': 'r2c1_c6', 'title': '<a href="javascript: void (0)" class="dot" data-toggle="tooltip" data-placement="top" title="r2c1_c6" style="margin-left:20px;">C1</a>', 'className': 'text-center' },
+            { 'data': 'r2c126', 'title': '<a href="javascript: void (0)" class="dot" data-toggle="tooltip" data-placement="top" title="r2c126" style="margin-left:20px;">C2</a>', 'className': 'text-center' },
+            { 'data': 'r2c345', 'title': '<a href="javascript: void (0)" class="dot" data-toggle="tooltip" data-placement="top" title="r2c345" style="margin-left:20px;">C3</a>', 'className': 'text-center' },
+        ];
+        var GCArrayData = JSON.parse(data);
+        table = $('#DataList').DataTable({
+            data: GCArrayData,
+            columns: columnsGCData,
+            'destroy': true,
+            'processing': true,
+            'columnDefs': [
+                { 'visible': false, 'targets': [0, 1] },
+                { 'targets': [5, 6, 7, 8], 'className': 'text-center' },
+                {
+                    'targets': [5],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title=' + data +'>S</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title=' + data +'>S</a>';
+                        }
+                        return data;
+                    }
+                },
+            ],
+            'paging': false,
+            'scrollY': "350px",
+            "scrollCollapse": true,
+            "order": [[2, 'asc']],
+            'dom': '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'language': {
+                'loadingRecords': '&nbsp;',
+                'processing': 'Loading...'
+            }
+        });
+        $("div.toolbar").html('<div style="display:flex;"><p><strong> GC List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item">'
+            + '<button type="button" class="btn bg-info btn-sm daterangeGCInput ml-3" data-toggle="tooltip" title = "Date range"> '
+            + '<i class= "fa fa-calendar"></i>'
+            + '</button></li>'
+            + '<li class="list-inline-item"><div class="toggle-select-act mg-t-30"><div class="nk-toggle-switch" data-ts-color="green">'
+            + '<label for= "ts4" class= "ts-label"></label>'
+            + '<input id="ts4" type="checkbox" hidden="hidden" class="gc_mode" checked="checked">'
+            + '<label for="ts4" class="ts-helper"></label></div></div>'
+            + '</li></ul></div>');
+
+        //$('<div class="float-right">' +
+        //    '<button type="button" class="btn bg-info btn-sm daterangeGCInput" data-toggle="tooltip" title="Date range">' +
+        //    '<i class= "fa fa-calendar"></i>' +
+        //    '</button></div>').appendTo("#DataList_wrapper .datepickerFormat");
+
+        $('.daterangeGCInput').daterangepicker({
+            singleDatePicker: true,
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')]
+            },
+            startDate: dateData,
+            //startDate: moment().subtract(1, 'days'),
+            //endDate: moment()
+        }, function (start, end) {
+            //window.alert('You chose: ' + start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+            var start_date = start.format('YYYY-MM-DD');
+            var data = 'first_date=' + start_date + '&tab_name=' + reportname;
+            console.log("DATA:", data);
+
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Content("~/Dynamic/GetDynamicData")',
+                data: data,
+                success: function (data) {
+                    createGCTable(reportname, data, start);
+                }
+            });
+
+        });
+    }
+    function createDiagnosticTable(reportname, data, dateData) {
+        var columnsDiagnosticData = [{ "data": "mmst_id", "title": "ID" },
+        { "data": "is_deleted", "title": "Deleted" },
+        { "data": "consumer", "title": "Consumer" },
+        { "data": "meter_type", "title": "Meter" },
+        { "data": "stream_no", "title": "Stream" },
+        { "data": "maintenance", "title": "Maintenance" },
+        { "data": "region", "title": "Region" },
+        { "data": "status", "title": "Status" },
+        { "data": "calibration", "title": "Calibration" },
+        { "data": "health", "title": "Health" },
+        { "data": "ghg", "title": "GHG" },
+        { "data": "make", "title": "Make" },
+        { "data": "model", "title": "Model" },
+        { "data": "transducer_failure", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='Transducer failure'>TF</a>" },
+        { "data": "detection_problem", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='Detection Problem'>DP</a>" },
+        { "data": "ultrasonic_noise", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='Ultrasonic Noise'>UN</a>" },
+        { "data": "process_pressure", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='Process Pressure'>PP</a>" },
+        { "data": "process_temprature", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='Process Temprature'>PT</a>" },
+        { "data": "fouling", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='Fouling'>F</a>" },
+        { "data": "flow_profile", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='Flow Profile'>FP</a>" },
+        { "data": "high_velocity", "title": "<a href='javascript: void (0)' class='dot' data-toggle='tooltip' data-placement='top' title='High Velocity'>HV</a>" }];
+        var DiagnosticArrayData = JSON.parse(data);
+        table = $('#DataList').DataTable({
+            data: DiagnosticArrayData,
+            columns: columnsDiagnosticData,
+            'destroy': true,
+            'processing': true,
+            'columnDefs': [{ 'visible': false, 'targets': [0, 1, 11, 12] },
+            { 'targets': [7, 8, 9, 10, 13, 14, 15, 16, 17, 18, 19, 20], 'className': 'text-center' },
+            {
+                'targets': [7],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Status">S</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Status">S</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [8],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Calibration">C</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Calibration">C</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [9],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Health">H</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Health">H</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [10],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Ghg">G</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Ghg">G</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [13],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Transducer Failure">TF</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Transducer Failure">TF</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [14],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Detection Problem">DP</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Detection Problem">DP</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [15],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Ultrasonic Noise">UN</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Ultrasonic Noise">UN</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [16],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Process Pressure">PP</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Process Pressure">PP</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [17],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Process Temprature">PT</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Process Temprature">PT</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [18],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Fouling">F</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Fouling">F</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [19],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="Flow Profile">FP</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="Flow Profile">FP</a>';
+                    }
+                    return data;
+                }
+            },
+            {
+                'targets': [20],
+                'type': 'string',
+                'render': function (data, type, full, meta) {
+                    if (data === 0 || data === null) {
+                        data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title="High Velocity">HV</a>';
+                    }
+                    else {
+                        data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title="High Velocity">HV</a>';
+                    }
+                    return data;
+                }
+            }
+            ],
+            'paging': false,
+            'scrollY': "350px",
+            "scrollCollapse": true,
+            "order": [[2, 'asc']],
+            'dom': '<"row toolbarinner mb-1 pb-1"<"col-sm-7"<"toolbar">><"col-sm-2 customDropDown"><"col-sm-1 datepickerFormat"><"col-sm-2"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'language': {
+                'loadingRecords': '&nbsp;',
+                'processing': 'Loading...'
+            }
+        });
+
+        $("div.toolbar").html('<div style="display:flex;"><p><strong> Diagnostic List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item">'
+            + '<div class="toggle-select-act mg-t-30"><div class="nk-toggle-switch" data-ts-color="green">'
+            + '<label for= "ts4" class= "ts-label"></label>'
+            + '<input id="ts4" type="checkbox" hidden="hidden" class="diagnostic_mode" checked="checked">'
+            + '<label for="ts4" class="ts-helper"></label></div></div>'
+            + '</li></ul></div>');
+
+        $('<div class="row">' +
+            '<p class="mt-1" style="float:right;"> Reload Time: </p>' +
+            '<div class="col-sm-8">' +
+            '<select class="form-control form-control-sm durationDropDown" name="durationDropDown">' +
+            '<option value="0">SELECT</option>' +
+            '<option value="5">5 Seconds</option>' +
+            '<option value="10">10 Seconds</option>' +
+            '<option value="15">15 Seconds</option>' +
+            '<option value="20">20 Seconds</option>' +
+            '<option value="25">25 Seconds</option>' +
+            '</select></div></div>').appendTo("#DataList_wrapper .customDropDown");
+
+        $('<div class="float-right">' +
+            '<button type="button" class="btn bg-info btn-sm daterangeInput" data-toggle="tooltip" title="Date range">' +
+            '<i class= "fa fa-calendar"></i>' +
+            '</button></div>').appendTo("#DataList_wrapper .datepickerFormat");
+
+        $('.daterangeInput').daterangepicker({
+            singleDatePicker: true,
+            //showDropdowns: true,
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')]
+            },
+            startDate: dateData,
+            //startDate: moment().subtract(1, 'days'),
+            //endDate: moment()
+        }, function (start, end) {
+            //window.alert('You chose: ' + start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+            var start_date = start.format('YYYY-MM-DD');
+            var data = 'first_date=' + start_date + '&tab_name=' + reportname;
+            console.log("DATA:", data);
+
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Content("~/Dynamic/GetDynamicData")',
+                data: data,
+                success: function (data) {
+                    createGCTable(data, start);
+                }
+            });
+
+        });
+    }
+    function createSurveyTable(reportname, data, data_date) {
+        var columnsSurveyData = [
+            { 'data': 'id', 'title': 'Sr. No.' },
+            { 'data': 'survey_name', 'title': 'Survey Name' },
+            { 'data': 'date', 'title': 'Date' },
+            { 'data': 'user_name', 'title': 'User Name' },
+            { 'data': 'client_name', 'title': 'Client Name' },
+            { 'data': 'survey_status', 'title': 'Status' },
+            { 'data': 'client_department', 'title': 'Department' }
+        ];
+        var SurveyArrayData = JSON.parse(data);
+        table = $('#DataList').DataTable({
+            data: SurveyArrayData,
+            columns: columnsSurveyData,
+            'destroy': true,
+            'processing': true,
+            'columnDefs': [
+                { 'visible': false, 'targets': [0] },
+                { 'targets': [5], 'className': 'text-center' },
+                {
+                    'targets': [5],
+                    'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        if (data === 0 || data === null) {
+                            data = '<a href="javascript:void(0)" class="dotColor mr-4" data-toggle="tooltip" data-placement="top" title=' + data +'>S</a>';
+                        }
+                        else {
+                            data = '<a href="javascript:void(0)" class="dotColorGreen mr-4" data-toggle="tooltip" data-placement="top" title=' + data +'>S</a>';
+                        }
+                        return data;
+                    }
+                },
+            ],
+            'paging': false,
+            'scrollY': "350px",
+            "scrollCollapse": true,
+            "order": [[1, 'asc']],
+            'dom': '<"row toolbarinner mb-2 pb-1 mr-0 ml-0"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            //'dom': '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'language': {
+                'loadingRecords': '&nbsp;',
+                'processing': 'Loading...'
+            }
+        });
+        $("div.toolbar").html('<div style="display:flex;"><p><strong> Surveyor List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item"></li></ul></div>');
+        //$("div.toolbar").html('<div style="display:flex;"><p><strong> Surveyor List </strong></p><ul class="mb-0 list-inline ml-3"><li class="list-inline-item">'
+        //    + '<button type="button" class="btn bg-info btn-sm daterangeSurveyorInput ml-3" data-toggle="tooltip" title = "Date range"> '
+        //    + '<i class= "fa fa-calendar"></i>'
+        //    + '</button></li></ul></div>');
+
+        @*$('.daterangeSurveyorInput').daterangepicker({
+            singleDatePicker: true,
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')]
+            },
+            startDate: data_date,
+        }, function (start, end) {
+            //window.alert('You chose: ' + start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+            var start_date = start.format('YYYY-MM-DD');
+            var data = 'first_date=' + start_date + '&tab_name=' + reportname;
+            console.log("DATA:", data);
+
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Content("~/Dynamic/GetDynamicData")',
+                data: data,
+                success: function (data) {
+                    createSurveyTable(reportname, data, start);
+                }
+            });
+
+        });*@
+    }
+</script>
+<!-- SCRIPT FOR DIAGNOSTIC SLIDER -->
+<script>
+    $(document).on('click', '.diagnostic_mode', function () {
+        var column = table.columns([0, 1, 11, 12]);
+        column.visible(false);
+        var column1 = table.columns([13, 14, 15, 16, 17, 18, 19, 20]);
+        if ($(this).is(':checked')) {
+            column1.visible(true);
+        }
+        else {
+            column1.visible(false);
+        }
+    });
+    $(document).on('click', '.gc_mode', function () {
+        var column = table.columns([0, 1]);
+        column.visible(false);
+        var column1 = table.columns([6, 7, 8]);
+        if ($(this).is(':checked')) {
+            column1.visible(true);
+        }
+        else {
+            column1.visible(false);
+        }
+    });
+    $(document).on('click', '.surveyor_mode', function () {
+        var column = table.columns([0, 1]);
+        column.visible(false);
+        var column1 = table.columns([5, 6, 7]);
+        if ($(this).is(':checked')) {
+            column1.visible(true);
+        }
+        else {
+            column1.visible(false);
+        }
+    });
+</script>
+<!-- LOADER SCRIPT -->
+<script>
+    $(document).on('readystatechange', function () {
+        var state = document.readyState;
+        if (state == 'interactive') {
+            document.getElementById('PageContents').style.visibility = "hidden";
+        }
+        else if (state == 'complete') {
+            setTimeout(function () {
+                document.getElementById('interactive');
+                document.getElementById('load').style.visibility = "hidden";
+                document.getElementById('PageContents').style.visibility = "visible";
+            }, 100);
+        }
+    });
+</script>
+<!-- SCRIPT FOR RELOAD DROPDOWN EVENT -->
+<script>
+    var load_time_data;
+    var timer;
+    $(document).on('change', 'select.durationDropDown', function () {
+        clearInterval(timer);
+        var reload_duration = $('select[name=durationDropDown]').val();
+        if (reload_duration != '' && reload_duration != 0) {
+            reload_duration = parseInt(reload_duration) * 1000;
+            load_time_data = reload_duration;
+            timer = setInterval(reloadDatatable, load_time_data);
+        }
+    });
+    function reloadDatatable() {
+        table.ajax.reload();
+    };
+</script> 

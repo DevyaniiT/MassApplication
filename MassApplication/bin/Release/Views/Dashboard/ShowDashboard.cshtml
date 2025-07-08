@@ -1,0 +1,481 @@
+﻿@model MassApplication.Models.Dashboard_class
+
+@{
+    ViewBag.Title = "Show Dashboard";
+}
+
+<link rel="stylesheet" href="~/GraphStyles/GridStack/dist/gridstack.min.css" />
+<style>
+    .card {
+        background: #f4f6f9;
+    }
+
+    .dark-mode .content-wrapper {
+        background: #454d55 !important;
+    }
+
+    .main-menu-bar {
+        position: -webkit-sticky; /* Safari */
+        position: sticky;
+        top: 0;
+        z-index: 2
+    }
+</style>
+<style>
+    .small-boxx .headerText {
+        font-size: 25px;
+        font-weight: 600;
+    }
+
+    .icon {
+        margin-right: 10px;
+    }
+
+    .small-boxx .icon {
+        color: rgba(0, 0, 0, 0.15);
+        z-index: 0;
+    }
+
+        .small-boxx .icon > i {
+            font-size: 90px;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            transition: -webkit-transform 0.3s linear;
+            transition: transform 0.3s linear;
+            transition: transform 0.3s linear, -webkit-transform 0.3s linear;
+        }
+
+            .small-boxx .icon > i.fa, .small-boxx .icon > i.fas, .small-boxx .icon > i.far, .small-boxx .icon > i.fab, .small-boxx .icon > i.fal, .small-boxx .icon > i.fad, .small-boxx .icon > i.ion {
+                font-size: 70px;
+                top: 20px;
+            }
+
+        .small-boxx .icon svg {
+            font-size: 70px;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            transition: -webkit-transform 0.3s linear;
+            transition: transform 0.3s linear;
+            transition: transform 0.3s linear, -webkit-transform 0.3s linear;
+        }
+
+    .small-boxx:hover {
+        text-decoration: none;
+    }
+
+        .small-boxx:hover .icon > i, .small-boxx:hover .icon > i.fa, .small-boxx:hover .icon > i.fas, .small-boxx:hover .icon > i.far, .small-boxx:hover .icon > i.fab, .small-boxx:hover .icon > i.fal, .small-boxx:hover .icon > i.fad, .small-boxx:hover .icon > i.ion {
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }
+
+        .small-boxx:hover .icon > svg {
+            -webkit-transform: scale(1.1);
+            transform: scale(1.1);
+        }
+
+    @@media (max-width: 767.98px) {
+        .small-boxx {
+            text-align: center;
+        }
+
+            .small-boxx .icon {
+                display: none;
+            }
+
+            .small-boxx p {
+                font-size: 12px;
+            }
+    }
+</style>
+
+@*<section class="content">
+        <div class="container">
+            <div id="main-container" class="row" style="align-content:center;  width:90%">
+            </div>
+        </div>
+    </section>*@
+
+<section class="content">
+    <div class="container-fluid mt-3 mb-3">
+        <div class="main-container">
+            <div id="grid" class="grid-stack grid-stack-12"></div>
+        </div>
+    </div>
+</section>
+
+@*<script src="~/MasterStyles/js/DashboardScript.js"></script>
+<script src="~/Scripts/Chart-js/chart.js"></script>*@
+
+<script src="~/GraphStyles/GridStack/dist/jquery.min.js"></script>
+<script src="~/Scripts/jquery-ui.js"></script>
+<script src="~/GraphStyles/GridStack/dist/lodash.min.js"></script>
+<script src="~/GraphStyles/GridStack/dist/gridstack.min.js"></script>
+<script src="~/Scripts/Chart-js/chart.js"></script>
+<script src="~/MasterStyles/js/JS_Dashboard.js"></script>
+
+<script>
+    var kpiProperty = '';
+     //same heading property
+    var cardColor = '#f4f6f9';
+    var headingText = '';
+    var headingColor = '#000';
+    var headingFontName = '@ViewBag.FontName';
+    var headingFontSize = '@ViewBag.FontSize';
+    var headingBold = 'normal';
+    var headingItalic = 'normal';
+    var headingUnderline = 'normal';
+    var headingAlign = 'left';
+    var IconShow = Boolean(false);
+
+    //for pie chart legend property
+    var legendColor = '#000';
+    var legendFontSize = '10';
+    var legendFontName = '@ViewBag.FontName';
+    var legendAlign = 'center';
+    var legendPosition = 'left';
+    var legendStyle = 'normal';
+
+    //for bar chart legend property
+    var legendShow = Boolean(true);
+    var AxisShow = Boolean(true);
+    var gridLinesShow = Boolean(true);
+    var y_showtitle = Boolean(false);
+    var x_showtitle = Boolean(false);
+    var xAxisFontSize = '10';
+    var yAxisFontSize = '10';
+    var y_titlename = '';
+    var x_titlename = '';
+    var y_color = '#000';
+    var x_color = '#000';
+    var y_fontfamily = '@ViewBag.FontName';
+    var x_fontfamily = '@ViewBag.FontName';
+    var y_fontsize = '10';
+    var x_fontsize = '10';
+    var y_fontstyle = 'normal';
+    var x_fontstyle = 'normal';
+    var y_align = 'center';
+    var x_align = 'center';
+    var y_label_color = '#000';
+    var x_label_color = '#000';
+    var y_label_fontfamily = '@ViewBag.FontName';
+    var x_label_fontfamily = '@ViewBag.FontName';
+    var y_label_fontsize = '10';
+    var x_label_fontsize = '10';
+    var y_label_fontstyle = 'normal';
+    var x_label_fontstyle = 'normal';
+    var y_label_align = 'center';
+    var x_label_align = 'center';
+
+     //for table heading property
+    var TableHeaderColor = '#fff';
+    var TableHeaderFontColor = '#000';
+    var TableHeaderFontName = '@ViewBag.FontName';
+    var TableHeaderFontSize = '10';
+    var TableHeaderBold = 'normal';
+    var TableHeaderItalic = 'normal';
+    var TableHeaderUnderline = 'normal';
+    var TableHeaderAlign = 'left';
+    var showHeader = Boolean(true);
+    var showHeaderBorderShadow = Boolean(false);
+    var TableCellFontColor = '#000';
+    var TableCellFontName = '@ViewBag.FontName';
+    var TableCellFontSize = '10';
+    var TableCellBold = 'normal';
+    var TableCellItalic = 'normal';
+    var TableCellUnderline = 'normal';
+    var TableCellAlign = 'left';
+    var TableCellBorderColor = '#ccc';
+    var OddCellColor = '';
+    var EvenCellColor = '';
+    var ShowPagination = Boolean(true);
+    var showLayoutBorderShadow = Boolean(false);
+    var showWrapText = Boolean(false);
+    var showCompactNumber = Boolean(false);
+
+    function MyGrid(id) {
+        var width = 0;
+        var height = 0;
+        var cols = 12;
+        //var rows = 12;
+        var rows = 24;
+        var vmargin = 20;
+
+        var lastHeight = 0;
+
+        var gridObj = 0;
+
+        var options = {
+            width: cols,
+            height: rows,
+            float: false,
+            animate: true,
+            disableResize: true,
+            disableDrag: true,
+            cellHeight: 'auto',
+            cellHeightUnit: 'px',
+            removable: '',
+            removeTimeout: 100,
+            verticalMargin: vmargin,
+            acceptWidgets: '.grid-stack-item',
+            resizable: { handles: 'e, se, s, sw, w' },
+            alwaysShowResizeHandle: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        };
+
+        function init() {
+            $(id).gridstack(options);
+
+            gridObj = $(id).data('gridstack');
+
+            gridObj._updateHeightsOnResize = function () { resize(); };
+
+            gridObj.onResizeHandler();
+        }
+
+        function resize() {
+            width = $(id).parent().width();
+            height = $(id).parent().height() - ((rows - 1) * vmargin);
+
+            if (0 >= height) {
+                setTimeout(gridObj.onResizeHandler, 1000);
+                return;
+            }
+
+            if (lastHeight == height)
+                return;
+
+            lastHeight = height;
+            //console.log("height",height);
+            // gridObj.cellHeight(parseInt(height / rows) + 'px');
+
+        }
+
+        function addTile(tmpl_tile, x, y, w, h) {
+            x = x ? x : 0;
+            y = y ? y : 0;
+            w = w ? w : 4;
+            h = h ? h : 2;
+
+            //var tile = $($(tmpl_tile).text());
+            //gridObj.addWidget(tmpl_tile, x, y, w, h, true);
+            gridObj.addWidget(tmpl_tile, x, y, w, h);
+
+            return tmpl_tile;
+        }
+
+        function removeTile(h) {
+            gridObj.removeWidget($(h).closest('.grid-stack-item'));
+        }
+
+        function save() {
+            return $.makeArray($(id + ' > .grid-stack-item:visible')).map(function (v) {
+                var n = $(v).data('_gridstack_node');
+                return n ? { x: n.x, y: n.y, width: n.width, height: n.height } : null;
+            });
+        }
+
+        function load(data, tmpl_tile) {
+            gridObj.removeAll();
+            $.each(data, function (k, v) { addTile(tmpl_tile, v.x, v.y, v.width, v.height); });
+        }
+
+        function clear() {
+            gridObj.removeAll();
+        }
+
+        init();
+
+        this.resize = resize;
+        this.addTile = addTile;
+        this.removeTile = removeTile;
+        this.save = save;
+        this.load = load;
+        this.clear = clear;
+    }
+    var myGrid = 0;
+
+    $(document).ready(function () {
+        var chart;
+        var chartId = 1;
+        var darkmode = '@Html.Raw(Model.dashboard_position)';
+        if (darkmode.toLowerCase() == 'true') {
+            $('body').addClass('dark-mode')
+        } else {
+            //$('body').removeClass('dark-mode')
+        }
+        myGrid = new MyGrid('#grid', 'tile_');
+        var kpiList = @Html.Raw(Json.Encode(Model.kpiList));
+        for (var i = 0; i < kpiList.length; i++)
+        {
+            var jsonData = kpiList[i].json_tuple;
+            var chartName = kpiList[i].kpi_name;
+            var dataval = kpiList[i].chart_params;
+            var chartType = kpiList[i].chart_type;
+            var chart_caption = kpiList[i].chart_caption;
+            var chart_color = kpiList[i].chart_color;
+            var QueryId = kpiList[i].kpi_query_id;
+
+            var chart_position = kpiList[i].chart_position;
+            var chart_pos = eval('(' + chart_position + ')');
+            var width_chart = chart_pos["chart_width"];
+            //width_chart = parseInt(width_chart) * 1.32;
+            width_chart = parseInt(width_chart) * 1.25;
+            var height_chart = chart_pos["chart_height"];
+            height_chart = parseInt(height_chart) * 1.2;
+            var top_chart = chart_pos["chart_top"];
+            var left_chart = chart_pos["chart_left"];
+            var right_chart = chart_pos["chart_right"];
+            var bottom_chart = chart_pos["chart_bottom"];
+
+            var kpi_x = chart_pos["kpi_x"];
+            var kpi_y = chart_pos["kpi_y"];
+            var kpi_width = chart_pos["kpi_width"];
+            var kpi_height = chart_pos["kpi_height"];
+
+
+            var tval = eval('(' + dataval + ')');
+            headingText = chartName;
+            var newNote = "";
+            var kpi_pro = '';
+            var kpi_property = kpiList[i].kpi_property;
+
+            if (kpi_property != null && kpi_property != '') {
+                kpi_pro = JSON.parse(kpi_property);
+                kpiProperty = kpi_pro;
+                //console.log("kpi_pro:", kpi_pro);
+                checkCardValue(kpi_pro["cardColor"], kpi_pro["headingText"], kpi_pro["headingColor"], kpi_pro["headingFontName"], kpi_pro["headingFontSize"], kpi_pro["headingBold"], kpi_pro["headingItalic"], kpi_pro["headingUnderline"], kpi_pro["headingAlign"], kpi_pro["IconShow"]);
+
+                if (chartType.toLowerCase() != 'tabular') {
+                    checkChartValue(kpi_pro["legendColor"], kpi_pro["legendFontSize"], kpi_pro["legendFontName"], kpi_pro["legendAlign"], kpi_pro["legendPosition"], kpi_pro["legendStyle"], kpi_pro["legendShow"], kpi_pro["xAxisFontSize"], kpi_pro["yAxisFontSize"], kpi_pro["AxisShow"], kpi_pro["gridLinesShow"], kpi_pro["y_showtitle"], kpi_pro["y_titlename"], kpi_pro["x_showtitle"], kpi_pro["x_titlename"], kpi_pro["y_color"], kpi_pro["y_fontfamily"], kpi_pro["y_fontsize"], kpi_pro["y_fontstyle"], kpi_pro["y_align"], kpi_pro["x_color"], kpi_pro["x_fontfamily"], kpi_pro["x_fontsize"], kpi_pro["x_fontstyle"], kpi_pro["x_align"], kpi_pro["y_label_color"], kpi_pro["x_label_color"], kpi_pro["y_label_fontfamily"], kpi_pro["x_label_fontfamily"], kpi_pro["y_label_fontsize"], kpi_pro["x_label_fontsize"], kpi_pro["y_label_fontstyle"], kpi_pro["x_label_fontstyle"], kpi_pro["y_label_align"], kpi_pro["x_label_align"]);
+                }
+            }
+            else {
+                reinitializeVariable();
+            }
+
+            if (chartType.toLowerCase() == 'tabular') {
+                //newNote = $("<div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chartId + "' style='overflow:auto'>"
+                //    //+ "<div class= 'card-header border-0'><h2 class='card-title'>" + chartName + "</h2></div>"
+                //    + "<div class= 'card-header border-0'><h2 class='mr-2 card-title w-100' id='mainHeader" + chartId + "'>" + headingText + "</h2></div>"
+                //    + "<div class='card-body chartCard" + chartId + "'>"
+                //    + "<table id='myChart" + chartId + "' class='chartCanvas'></table>"
+                //    + "</div></div>");
+
+                newNote = $("<div><div class='grid-stack-item-content tile card plainCard" + chartId + "' id='sticky" + chartId + "' style='overflow:auto'>"
+                    + "<div class= 'card-header border-0'><h2 class='mr-2 card-title w-100' id='mainHeader" + chartId + "'>" + headingText + "</h2></div>"
+                    + "<div class='card-body chartCard" + chartId + "'>"
+                    + "<table id='myChart" + chartId + "' class='chartCanvas'></table>"
+                    + "</div></div></div>");
+
+                //$("#main-container").append(newNote);
+                myGrid.addTile(newNote, kpi_x, kpi_y, kpi_width, kpi_height);
+                if (IconShow == true) {
+                    var titlename = $('#mainHeader' + chartId).text();
+                    $('#mainHeader' + chartId).text('');
+                    var btn = document.createElement("i");
+                    btn.setAttribute("class", "fa fa-th mr-1");
+                    $('#mainHeader' + chartId).append(btn);
+                    $('#mainHeader' + chartId).append(titlename);
+                    $('#mainHeader' + chartId).find('i').css("display", "");
+                }
+                DrawTheTable(tval, dataval, QueryId, chartType, chartId, kpi_pro["TableHeaderColor"], kpi_pro["TableHeaderFontColor"], kpi_pro["TableHeaderFontName"], kpi_pro["TableHeaderFontSize"], kpi_pro["TableHeaderBold"], kpi_pro["TableHeaderItalic"], kpi_pro["TableHeaderUnderline"], kpi_pro["TableHeaderAlign"], kpi_pro["showHeader"], kpi_pro["showHeaderBorderShadow"], kpi_pro["TableCellFontColor"], kpi_pro["TableCellFontName"], kpi_pro["TableCellFontSize"], kpi_pro["TableCellBold"], kpi_pro["TableCellItalic"], kpi_pro["TableCellUnderline"], kpi_pro["TableCellAlign"], kpi_pro["TableCellBorderColor"], kpi_pro["OddCellColor"], kpi_pro["EvenCellColor"], kpi_pro["ShowPagination"], kpi_pro["showLayoutBorderShadow"], kpi_pro["showWrapText"], kpi_pro["showCompactNumber"]);
+            }
+            else if (chartType.toLowerCase() == 'label') {
+
+                //newNote = $("<div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chartId + "'>"
+                //    + "<div class='card-body small-boxx chartCard" + chartId + "' id='myChart" + chartId + "'>"
+                //    + "</div></div>");
+
+                newNote = $("<div><div class='grid-stack-item-content tile card plainCard" + chartId + "' id='sticky" + chartId + "'>"
+                    + "<div class='card-body small-boxx chartCard" + chartId + "' id='myChart" + chartId + "'>"
+                    + "</div></div></div>");
+
+                //$("#main-container").append(newNote);
+                myGrid.addTile(newNote, kpi_x, kpi_y, kpi_width, kpi_height);
+                DrawTheLabel(tval, dataval, QueryId, chartType, chartId, chart_caption, chart_color);
+
+            }
+            else {
+                //newNote = $("<div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chartId + "'>"
+                //    //+ "<div class= 'card-header border-0'><h2 class='card-title'>" + headingText + "</h2></div>"
+                //    + "<div class= 'card-header border-0'><h2 class='mr-2 card-title w-100' id='mainHeader" + chartId + "'>" + headingText + "</h2></div>"
+                //    + "<div class='card-body small-boxx chartCard" + chartId + "'>"
+                //    + "<canvas id='myChart" + chartId + "' class='chartCanvas'></canvas>"
+                //    + "</div></div>");
+
+                newNote = $("<div><div class='grid-stack-item-content tile card plainCard" + chartId + "' id='sticky" + chartId + "' style='overflow:auto'>"
+                    + "<div class= 'card-header border-0'><h2 class='mr-2 card-title w-100' id='mainHeader" + chartId + "'>" + headingText + "</h2></div>"
+                    + "<div class='card-body chartCard" + chartId + "'>"
+                    + "<canvas id='myChart" + chartId + "' class='chartCanvas'></canvas>"
+                    + "</div></div></div>");
+
+                //$("#main-container").append(newNote);
+                myGrid.addTile(newNote, kpi_x, kpi_y, kpi_width, kpi_height);
+                if (IconShow == true) {
+                    var titlename = $('#mainHeader' + chartId).text();
+                    $('#mainHeader' + chartId).text('');
+                    var btn = document.createElement("i");
+                    btn.setAttribute("class", "fa fa-th mr-1");
+                    $('#mainHeader' + chartId).append(btn);
+                    $('#mainHeader' + chartId).append(titlename);
+                    $('#mainHeader' + chartId).find('i').css("display", "");
+                }
+                DrawTheGraph(tval, chartType, jsonData, chartId);
+            }
+
+            //$('#sticky' + chartId).css("width", width_chart);
+            //$('#sticky' + chartId).css("height", height_chart);
+            //$('#sticky'+ chartId).css("top", top_chart);
+            //$('#sticky' + chartId).css("left", left_chart);
+            //$('#main-container').css("position", "absolute");
+
+            $('#sticky' + chartId).css("background", cardColor);
+            $('#mainHeader' + chartId).css("color", headingColor);
+            $('#mainHeader' + chartId).css("text-align", headingAlign);
+            $('#mainHeader' + chartId).css("font-family", headingFontName);
+            $('#mainHeader' + chartId).css("font-size", parseInt(headingFontSize));
+            $('#mainHeader' + chartId).css("font-weight", headingBold);
+            $('#mainHeader' + chartId).css("font-style", headingItalic);
+            $('#mainHeader' + chartId).css("text-decoration", headingUnderline);
+            chartId++;
+        }
+    });
+</script>
+<script>
+    function DrawTheTable(tval, data, qid, chartType, chartId, tableheadercolor, tableheaderfontcolor, tableheaderfontname, tableheaderfontsize, tableheaderbold, tableheaderitalic, tableheaderunderline, tableheaderalign, showheader, showheaderbordershadow, tablecellfontcolor, tablecellfontname, tablecellfontsize, tablecellbold, tablecellitalic, tablecellunderline, tablecellalign, tablecellbordercolor, oddcellcolor, evencellcolor, showpagination, showlayoutbordershadow, showwraptext, showcompactnumber) {
+        $.ajax({
+                type: "POST",
+                //contentType: false,
+                url: '@Url.Content("~/DashBoard/KpiTabularData?QueryId=")' + qid + "&chartparams=" + data,
+                success: function (modelval) {
+                    var mainTab = "myChart" + chartId;
+                    //checkTabularValue(tableheadercolor, tableheaderfontcolor, tableheaderfontname, tableheaderfontsize, tableheaderbold, tableheaderitalic, tableheaderunderline, tableheaderalign, showheader, showheaderbordershadow, tablecellfontcolor, tablecellfontname, tablecellfontsize, tablecellbold, tablecellitalic, tablecellunderline, tablecellalign, tablecellbordercolor, oddcellcolor, evencellcolor, showpagination, showlayoutbordershadow, showwraptext, showcompactnumber);
+                    createdynamictable(modelval, mainTab, chartId, tableheadercolor, tableheaderfontcolor, tableheaderfontname, tableheaderfontsize, tableheaderbold, tableheaderitalic, tableheaderunderline, tableheaderalign, showheader, showheaderbordershadow, tablecellfontcolor, tablecellfontname, tablecellfontsize, tablecellbold, tablecellitalic, tablecellunderline, tablecellalign, tablecellbordercolor, oddcellcolor, evencellcolor, showpagination, showlayoutbordershadow, showwraptext, showcompactnumber);
+                }
+            });
+    };
+    function DrawTheLabel(tval, data, qId, chartType, chartId, chart_caption, chart_color) {
+        data = data.replace("#", "");
+           $.ajax({
+                type: "POST",
+               url: '@Url.Content("~/DashBoard/KpiLabelData?QueryId=")' + qId + "&chartparams=" + data,
+                success: function (modelval) {
+                    var modelData = modelval.Success;
+                    var modelColor = modelval.Message;
+                    var modelCaption = modelval.DataVal;
+                    var modelPosition = modelval.DataVal1;
+                    var mainTab = "myChart" + chartId;
+                    if (modelPosition == null || modelPosition == "") {
+                        createdynamiclabel(modelData, mainTab, modelCaption, modelColor, chartId);
+                    }
+                    else {
+                        createdynamicMultilabel(modelData, mainTab, modelCaption, modelPosition, modelColor, chartId);
+                    }
+                }
+            });
+    };
+</script>
+
+
+

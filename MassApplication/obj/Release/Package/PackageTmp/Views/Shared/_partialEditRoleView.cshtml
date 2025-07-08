@@ -1,0 +1,579 @@
+﻿@model MassApplication.Models.RoleWise_Class
+
+<style>
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    #tabContentRole .nav-link {
+        color: #000;
+        background-color: #e1e1e1;
+        border: 0;
+        margin: 0 4px;
+        padding: 13px 23px;
+        font-size: 13px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+        #tabContentRole .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+            color: #ffffff;
+            background-color: #343a40;
+            border: 0;
+            padding: 13px 23px;
+            margin: 0 4px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-size: 13px;
+            font-weight: 600;
+        }
+</style>
+<style>
+    .btn-dash {
+        background: #343a40;
+        color: #fff;
+        font-size: 14px;
+        border-radius: 5px;
+    }
+
+        .btn-dash:hover {
+            color: #fff;
+        }
+
+    .btn-green {
+        background: #28a745;
+        color: #fff;
+        font-size: 14px;
+        border-radius: 5px;
+    }
+
+        .btn-green:hover {
+            color: #fff;
+        }
+</style>
+
+<div class="master">
+
+    @Html.HiddenFor(model => model.role_id, new { id = "edit_role_id" })
+
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="Lbl_editrolename" class="col-sm-4 col-form-label" style="font-weight:500; font-size:14px">Role name </label>
+                <div class="col-sm-8">
+                    <input id="edit_role_name" type="text" class="form-control" placeholder="Enter role name" value="@Model.role_name" />
+                    <span class="error">Role name required</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="row">
+                <label ID="Lbl_lastdes" class=" col-sm-4  col-form-label" style="font-weight:500; font-size:14px">Role Description</label>
+                <div class="col-sm-8">
+                    <textarea id="edit_role_description" class="form-control" placeholder="Enter description" rows="1">@Model.role_description</textarea>
+                    @*<input type="text" class="form-control" id="inputPassword" placeholder=" Ente role Description">*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="newnavconn nav nav-tabs border-bottom-0 mb-2" id="tabContentRole">
+        <li class="nav-item"><a href="#newEditMenuTab" class="nav-link active" data-toggle="tab">Menu Details</a></li>
+        <li class="nav-item"><a href="#newEditReportTab" class="nav-link" data-toggle="tab">Report Details</a></li>
+        <li class="nav-item "><a href="#newEditDashboardTab" class="nav-link" data-toggle="tab">Dashboard Details</a></li>
+        <li class="nav-item "><a href="#newEditKPITab" class="nav-link" data-toggle="tab">KPI Details</a></li>
+        <li class="nav-item "><a href="#newEditQueryTab" class="nav-link" data-toggle="tab">Query Details</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane active" id="newEditMenuTab">
+            <table id="edit_menuLayout" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th width="1%">ID</th>
+                        <th width="40%">NAME</th>
+                        <th width="15%" style="text-align:center">VIEW</th>
+                        <th width="15%" style="text-align:center">ADD</th>
+                        <th width="15%" style="text-align:center">UPDATE</th>
+                        <th width="15%" style="text-align:center">DELETE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in Model.menu_map_data)
+                    {
+                    <tr>
+                        @Html.Hidden("menu_id", i.menu_id.ToString(), new { id = "edit_menu_id" })
+                        <td>@i.menu_id</td>
+                        @{
+                            var fontStyle = "normal";
+                            if (i.menu_parent_id == "0")
+                            {
+                                fontStyle = "bold";
+                            }
+                            <td style="font-weight:@fontStyle">@i.menu_name</td>
+                        }
+                        <td style="text-align:center;">
+                            @{
+                                if (i.role_menu_read == true)
+                                {
+                                    <label class="switch mt-2">
+                                        <input class="edit_menu_view_mode" type="checkbox" checked="checked" data-id="@i.menu_id" name="edit_menu_view_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label class="switch">
+                                        <input class="edit_menu_view_mode" type="checkbox" data-id="@i.menu_id" name="edit_menu_view_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                            }
+                        </td>
+                        <td style="text-align:center;">
+                            @{
+                                if (i.role_menu_create == true)
+                                {
+                                    <label class="switch mt-2">
+                                        <input class="edit_menu_create_mode" type="checkbox" checked="checked" data-id="@i.menu_id" name="edit_menu_create_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label class="switch">
+                                        <input class="edit_menu_create_mode" type="checkbox" data-id="@i.menu_id" name="edit_menu_create_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                            }
+                        </td>
+                        <td style="text-align:center;">
+                            @{
+                                if (i.role_menu_update == true)
+                                {
+                                    <label class="switch mt-2">
+                                        <input class="edit_menu_update_mode" type="checkbox" checked="checked" data-id="@i.menu_id" name="edit_menu_update_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label class="switch">
+                                        <input class="edit_menu_update_mode" type="checkbox" data-id="@i.menu_id" name="edit_menu_update_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                            }
+                        </td>
+                        <td style="text-align:center;">
+                            @{
+                                if (i.role_menu_delete == true)
+                                {
+                                    <label class="switch mt-2">
+                                        <input class="edit_menu_delete_mode" type="checkbox" checked="checked" data-id="@i.menu_id" name="edit_menu_delete_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                                else
+                                {
+                                    <label class="switch">
+                                        <input class="edit_menu_delete_mode" type="checkbox" data-id="@i.menu_id" name="edit_menu_delete_mode">
+                                        <span class="slider round"></span>
+                                    </label>
+                                }
+                            }
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane" id="newEditReportTab">
+            <table id="edit_rptLayout" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th width="1%">ID</th>
+                        <th width="40%">NAME</th>
+                        <th width="20%">TYPE</th>
+                        <th width="20%">CREATED BY</th>
+                        <th width="15%" style="text-align:center">VIEW</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in Model.report_map_data)
+                    {
+                        <tr>
+                            @Html.Hidden("report_id", i.report_id.ToString(), new { id = "edit_report_id" })
+
+                            @*<td>@i.report_id</td>*@
+                            <td>@i.report_id</td>
+                            <td>@i.report_name</td>
+                            <td>@i.report_user_type</td>
+                            <td>@i.report_created_by</td>
+                            <td style="text-align:center;">
+                                @{
+                                    if (i.role_report_read == true)
+                                    {
+                                        <label class="switch mt-2">
+                                            <input class="edit_report_view_mode" type="checkbox" checked="checked" data-id="@i.report_id" name="edit_report_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label class="switch">
+                                            <input class="edit_report_view_mode" type="checkbox" data-id="@i.report_id" name="edit_report_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane" id="newEditDashboardTab">
+            <table id="edit_dbLayout" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th width="1%">ID</th>
+                        <th width="40%">NAME</th>
+                        <th width="20%">TYPE</th>
+                        <th width="20%">CREATED BY</th>
+                        <th width="15%" style="text-align:center">VIEW</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.dashboard_map_data)
+                    {
+                        <tr>
+                            @Html.Hidden("dashboard_id", m.dashboard_id.ToString(), new { id = "edit_dashboard_id" })
+
+                            <td>@m.dashboard_id</td>
+                            <td>@m.dashboard_name</td>
+                            <td>@m.dashboard_user_type</td>
+                            <td>@m.dashboard_created_by</td>
+                            <td style="text-align:center;">
+                                @{
+                                    if (m.role_dashboard_read == true)
+                                    {
+                                        <label class="switch mt-2">
+                                            <input class="edit_dashboard_view_mode" type="checkbox" checked="checked" data-id="@m.dashboard_id" name="edit_dashboard_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label class="switch">
+                                            <input class="edit_dashboard_view_mode" type="checkbox" data-id="@m.dashboard_id" name="edit_dashboard_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane" id="newEditKPITab">
+            <table id="edit_kpiLayout" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th width="1%">ID</th>
+                        <th width="40%">NAME</th>
+                        <th width="20%">TYPE</th>
+                        <th width="20%">CREATED BY</th>
+                        <th width="15%" style="text-align:center">VIEW</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.kpi_map_data)
+                    {
+                        <tr>
+                            @Html.Hidden("kpi_id", m.kpi_id.ToString(), new { id = "edit_kpi_id" })
+
+                            <td>@m.kpi_id</td>
+                            <td>@m.kpi_name</td>
+                            <td>@m.kpi_user_type</td>
+                            <td>@m.kpi_created_by</td>
+                            <td style="text-align:center;">
+                                @{
+                                    if (m.role_kpi_read == true)
+                                    {
+                                        <label class="switch mt-2">
+                                            <input class="edit_kpi_view_mode" type="checkbox" checked="checked" data-id="@m.kpi_id" name="edit_kpi_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label class="switch">
+                                            <input class="edit_kpi_view_mode" type="checkbox" data-id="@m.kpi_id" name="edit_kpi_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane" id="newEditQueryTab">
+            <table id="edit_queryLayout" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th width="1%">ID</th>
+                        <th width="40%">NAME</th>
+                        <th width="20%">TYPE</th>
+                        <th width="20%">CREATED BY</th>
+                        <th width="15%" style="text-align:center">VIEW</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.query_map_data)
+                    {
+                        <tr>
+                            @Html.Hidden("query_id", m.query_id.ToString(), new { id = "edit_query_id" })
+
+                            <td>@m.query_id</td>
+                            <td>@m.query_name</td>
+                            <td>@m.query_user_type</td>
+                            <td>@m.query_created_by</td>
+                            <td style="text-align:center;">
+                                @{
+                                    if (m.role_query_read == true)
+                                    {
+                                        <label class="switch mt-2">
+                                            <input class="edit_query_view_mode" type="checkbox" checked="checked" data-id="@m.query_id" name="edit_query_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                    else
+                                    {
+                                        <label class="switch">
+                                            <input class="edit_query_view_mode" type="checkbox" data-id="@m.query_id" name="edit_query_view_mode">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div style="padding:10px 0; text-align:right">
+    <button type="button" id="EditSubmitRoleDetail" class="btn btn-green pl-4 pr-4">Update</button>
+    <button type="button" class="btn btn-dash pl-4 pr-4" data-dismiss="modal">Close</button>
+</div>
+
+<!-- DATATABLE INITIALIZING FORMAT -->
+<script>
+    $(function () {
+        $("#edit_rptLayout").DataTable({
+            'responsive': true,
+            'info': false,
+            'lengthChange': true,
+            'autoWidth': false,
+            'pageLength': 10,
+            'paging': false,
+            'scrollY': "300px",
+            'scrollCollapse': true,
+            dom: '<"float-left"><"float-right"f>rt<"row"<"col-sm-2"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'columnDefs': [{ 'visible': false, 'targets': [0] }]
+        });
+        $("#edit_dbLayout").DataTable({
+            'responsive': true,
+            'info': false,
+            'lengthChange': true,
+            'autoWidth': false,
+            'pageLength': 10,
+            'paging': false,
+            'scrollY': "300px",
+            'scrollCollapse': true,
+            dom: '<"float-left"><"float-right"f>rt<"row"<"col-sm-2"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'columnDefs': [{ 'visible': false, 'targets': [0] }]
+        });
+        $("#edit_menuLayout").DataTable({
+            'responsive': true,
+            'info': false,
+            'lengthChange': true,
+            'autoWidth': false,
+            'pageLength': 10,
+            'paging': false,
+            'scrollY': "300px",
+            'scrollCollapse': true,
+            dom: '<"float-left"><"float-right"f>rt<"row"<"col-sm-2"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'columnDefs': [{ 'visible': false, 'targets': [0] }]
+            //language: {
+            //    oPaginate: {
+            //        sNext: '<i class="fa fa-forward"></i>',
+            //        sPrevious: '<i class="fa fa-backward"></i>'
+
+            //    },
+            //    "info": "Showing page _PAGE_ of _PAGES_",
+            //    "lengthMenu": "Rows :  _MENU_",
+            //}
+        });
+        $("#edit_kpiLayout").DataTable({
+            'responsive': true,
+            'info': false,
+            'lengthChange': true,
+            'autoWidth': false,
+            'pageLength': 10,
+            'paging': false,
+            'scrollY': "300px",
+            'scrollCollapse': true,
+            dom: '<"float-left"><"float-right"f>rt<"row"<"col-sm-2"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'columnDefs': [{ 'visible': false, 'targets': [0] }]
+        });
+        $("#edit_queryLayout").DataTable({
+            'responsive': true,
+            'info': false,
+            'lengthChange': true,
+            'autoWidth': false,
+            'pageLength': 10,
+            'paging': false,
+            'scrollY': "300px",
+            'scrollCollapse': true,
+            dom: '<"float-left"><"float-right"f>rt<"row"<"col-sm-2"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            'columnDefs': [{ 'visible': false, 'targets': [0] }]
+        });
+    });
+</script>
+<!-- SCRIPT FOR EditSubmitRoleDetail BUTTON -->
+<script>
+    $('#EditSubmitRoleDetail').click(function () {
+        var isAllValid = true;
+        if ($('#edit_role_name').val().trim() == '') {
+            $('#edit_role_name').siblings('span.error').css('visibility', 'visible');
+            isAllValid = false;
+        }
+        else {
+            $('#edit_role_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        var menu_checkList = [];
+        var dashboard_checkList = [];
+        var report_checkList = [];
+        var kpi_checkList = [];
+        var query_checkList = [];
+
+        $('#edit_menuLayout tbody>tr').each(function () {
+            var menuItem = {
+                menu_id: $('#edit_menu_id', this).val(),
+                role_menu_create: $('input[name="edit_menu_create_mode"]', this).is(':checked'),
+                role_menu_read: $('input[name="edit_menu_view_mode"]', this).is(':checked'),
+                role_menu_update: $('input[name="edit_menu_update_mode"]', this).is(':checked'),
+                role_menu_delete: $('input[name="edit_menu_delete_mode"]', this).is(':checked')
+            }
+            menu_checkList.push(menuItem);
+        });
+
+        $('#edit_dbLayout tbody>tr').each(function () {
+            var dbItem = {
+                dashboard_id: $('#edit_dashboard_id', this).val(),
+                role_dashboard_read: $('input[name="edit_dashboard_view_mode"]', this).is(':checked')
+                //role_dashboard_create: $('input[name="edit_dashboard_create_mode"]', this).is(':checked'),
+                //role_dashboard_read: $('input[name="edit_dashboard_view_mode"]', this).is(':checked'),
+                //role_dashboard_update: $('input[name="edit_dashboard_update_mode"]', this).is(':checked'),
+                //role_dashboard_delete: $('input[name="edit_dashboard_delete_mode"]', this).is(':checked')
+            }
+            dashboard_checkList.push(dbItem);
+        });
+
+        $('#edit_rptLayout tbody>tr').each(function () {
+            var rptItem = {
+                report_id: $('#edit_report_id', this).val(),
+                role_report_read: $('input[name="edit_report_view_mode"]', this).is(':checked')
+                //role_report_create: $('input[name="edit_report_create_mode"]', this).is(':checked'),
+                //role_report_update: $('input[name="edit_report_update_mode"]', this).is(':checked'),
+                //role_report_delete: $('input[name="edit_report_delete_mode"]', this).is(':checked')
+            }
+            report_checkList.push(rptItem);
+        });
+
+        $('#edit_kpiLayout tbody>tr').each(function () {
+            var kpiItem = {
+                kpi_id: $('#edit_kpi_id', this).val(),
+                role_kpi_read: $('input[name="edit_kpi_view_mode"]', this).is(':checked')
+                //role_kpi_create: $('input[name="edit_kpi_create_mode"]', this).is(':checked'),
+                //role_kpi_update: $('input[name="edit_kpi_update_mode"]', this).is(':checked'),
+                //role_kpi_delete: $('input[name="edit_kpi_delete_mode"]', this).is(':checked')
+            }
+            kpi_checkList.push(kpiItem);
+        });
+
+        $('#edit_queryLayout tbody>tr').each(function () {
+            var queryItem = {
+                query_id: $('#edit_query_id', this).val(),
+                role_query_read: $('input[name="edit_query_view_mode"]', this).is(':checked')
+                //role_query_create: $('input[name="edit_query_create_mode"]', this).is(':checked'),
+                //role_query_update: $('input[name="edit_query_update_mode"]', this).is(':checked'),
+                //role_query_delete: $('input[name="edit_query_delete_mode"]', this).is(':checked')
+            }
+            query_checkList.push(queryItem);
+        });
+
+        //console.log("dashboard_checkList:", dashboard_checkList);
+        //console.log("report_checkList:", report_checkList);
+        //console.log("kpi_checkList:", kpi_checkList);
+        //console.log("query_checkList:", query_checkList);
+
+        if (isAllValid) {
+            var editData = {
+                role_id: $('#edit_role_id').val(),
+                role_name: $('#edit_role_name').val().trim(),
+                role_description: $('#edit_role_description').val().trim(),
+                dashboard_map_data: dashboard_checkList,
+                report_map_data: report_checkList,
+                menu_map_data: menu_checkList,
+                kpi_map_data: kpi_checkList,
+                query_map_data: query_checkList
+            }
+            console.log("data:", editData);
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Content("~/User/EditRoleFormData")',
+                data: JSON.stringify(editData),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data.startsWith("ERROR")) {
+                        var res = data.split(";");
+                        var error = '';
+                        if (res.length > 1) {
+                            error = res[1];
+                        } else {
+                            error = data;
+                        }
+                        alert(error);
+                    }
+                    else {
+                        alert('Data updated successfully!!!');
+                        //$('#edit_modal').modal('hide');
+                        param_list = [];
+                        query_list = [];
+                        location.reload();
+                    }
+                },
+                error: function (error) {
+                    alert("Error");
+                }
+
+            });
+        }
+    });
+</script>
+

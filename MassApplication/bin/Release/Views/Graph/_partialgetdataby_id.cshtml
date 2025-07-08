@@ -1,0 +1,60 @@
+﻿@using MassApplication.Models.Graph;
+@model ChartParameters
+@using System.Data;
+
+<style>
+    .dataTables_filter {
+        display: none;
+    }
+
+    table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control, table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control {
+        position: relative;
+        padding-left: 25px;
+        cursor: pointer;
+        padding-top: 26px;
+    }
+    div.dataTables_wrapper div.dataTables_paginate {
+        padding-right: 50px;
+    }
+</style>
+
+<div style="overflow:hidden">
+    <table id="kpiFunctionData" class="kpiData table table-bordered table-striped" cellspacing="0" rules="all" border="1" style="border-collapse: collapse; margin-top: 0px !important;">
+        <thead>
+            <tr>
+                @foreach (System.Data.DataColumn col in Model.data_t.Columns)
+                {
+                    <th class="text-capitalize" style="background: #343a40;color: #fff; border-radius: 4px; font-size:10px;">@col.Caption</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (System.Data.DataRow row in Model.data_t.Rows)
+            {
+                <tr>
+                    @foreach (var cell in row.ItemArray)
+                    {
+                        <td class="text-center">@cell.ToString()</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    $(function () {
+        $('#kpiFunctionData').DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 8,
+            "columnDefs": [{ "className": "dt-center", "targets": "_all" }],
+            language: {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                }
+            }
+        });
+    });
+</script>
+

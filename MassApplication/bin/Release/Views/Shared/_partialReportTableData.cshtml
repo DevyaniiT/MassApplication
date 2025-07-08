@@ -1,0 +1,80 @@
+﻿@model IEnumerable<MassApplication.Models.Report_Class>
+
+@foreach (var m in Model)
+{
+         <tr data-target="#form-modal" class="link" data-id ="@m.report_id">
+        <td><input class="checkbox-rounded" type="checkbox"></td>
+        <td>
+           
+                @m.report_name
+            
+        </td>
+        <td style="word-wrap: break-word;min-width: 160px;max-width: 160px;">@m.report_description</td>
+        <td style="text-align:center;">
+
+            @*<a onclick="BtnLoad('Report Parameters',@m.report_id)" class="btn btn-default btn-sm" data-toggle="tooltip" title="Load"><i class="fa fa-tasks"></i></a>
+        <a class="btn btn-default btn-sm" data-toggle="tooltip" title="Schedular"><i class="fa fa-envelope"></i></a>*@
+
+            @*<div class="col-sm-6">
+            <button type="button" class="btn btn-block btn-success btn-sm" data-toggle="modal" data-target="#form-modal" onclick="BtnLoad('Report Parameters',@m.report_id)">Load</button>
+        </div>
+        <div class="col-sm-6">
+            <button type="button" class="btn btn-block btn-info btn-sm" data-toggle="modal" data-target="#email_modal" onclick="BtnEmailLoad('Schedular Parameters',@m.report_id)">Schedular</button>
+        </div>*@
+            <p>
+                <a class="mr-4" href="#" data-toggle="modal" data-target="#form-modal" onclick="BtnLoadRptData('Report Parameters',@m.report_id)">
+                <i class="fas fa-upload nav-icon1"></i></a>
+            <a href="#" data-toggle="modal" data-target="#email-modal" onclick="BtnEmailLoad('Schedule Parameters',@m.report_id)">
+                <i class="fas fa-clock nav-icon1"></i>
+            </a>
+            </p>
+
+            @*<button type="button" class="btn btn-success badge-pill" style="width:90px;" data-toggle="modal" data-target="#form-modal" onclick="BtnLoadRptData('Report Parameters',@m.report_id)">Load</button>
+        <button type="button" class="btn btn-info badge-pill" style="width:90px;" data-toggle="modal" data-target="#email_modal" onclick="BtnEmailLoad('Schedular Parameters',@m.report_id)">Schedular</button>*@
+
+
+        </td>
+    </tr>
+}
+
+<script>
+    function BtnLoadRptData(title,report_id) {
+        $.ajax({
+         url: '@Url.Content("~/Report/InputSqlData?report_id=")' + report_id, // The method name + parameter
+         success: function(data) {
+             $('#form-modal .modal-body').html(data);
+             $('#form-modal .modal-title').html(title);
+             $('#form-modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+             $('.date').datetimepicker({
+               defaultDate: moment().subtract(1, 'days'),
+               format: 'YYYY-MM-DD'
+            });
+        }
+    });
+}
+</script>
+<script>
+    function BtnEmailLoad(title,report_id) {
+        $.ajax({
+         url: '@Url.Content("~/Report/EmailerInputData?report_id=")' + report_id, // The method name + parameter
+        success: function(data) {
+             $('#email_modal .modal-body').html(data);
+            $('#email_modal .modal-title').html(title);
+            $('#email_modal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+            $('.date').datetimepicker({
+               defaultDate: moment().subtract(1, 'days'),
+               format: 'YYYY-MM-DD'
+        });
+        }
+    });
+}
+</script>
+
+
+
+
+
+
+
+
+

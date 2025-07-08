@@ -1,0 +1,204 @@
+﻿@model MassApplication.Models.Diagnostic_Class
+@{
+    ViewBag.Title = "Diagnostic View";
+}
+
+<link rel="stylesheet" href="~/GraphStyles/css/styles.css?v=1" />
+<link rel="stylesheet" href="~/MasterStyles/DaterangePicker/daterangepicker.css" />
+<script src="~/MasterStyles/DaterangePicker/daterangepicker.js"></script>
+
+<style>
+    .current {
+        display: block;
+    }
+
+    .step {
+        height: 30px;
+        width: 30px;
+        cursor: pointer;
+        margin: 0 2px;
+        color: #fff;
+        background-color: #bbbbbb;
+        border: none;
+        border-radius: 50%;
+        display: inline-block;
+        opacity: 0.8;
+        padding: 5px
+    }
+
+        .step.active {
+            opacity: 1;
+            background-color: #69c769;
+        }
+
+        .step.finish {
+            background-color: #4CAF50;
+        }
+</style>
+<style>
+    .meter-details .tooltip {
+        position: relative;
+        display: inline-block;
+        border-bottom: 1px solid #2a5b6c;
+        opacity: 1;
+    }
+
+        .meter-details .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: -55%;
+            right: 111%;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+            .meter-details .tooltip .tooltiptext::after {
+                content: " ";
+                position: absolute;
+                top: 50%;
+                left: 100%; /* To the right of the tooltip */
+                margin-top: -5px;
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent transparent transparent black;
+            }
+
+        .meter-details .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="row" style="box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);">
+            <div class="col-md-10 pl-4 pt-2 mb-2">
+                <ul class="nav nav-tabs border-bottom-0 myTabMeter" id="myTabMeter" role="tablist" style="position:relative">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="fd-tab" data-toggle="tab" href="#">
+                            <img src="~/Images/functional.png" style="width:30px" />
+                            <p> Functional Diagnostics </p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pd-tab" data-toggle="tab" href="#"> <img src="~/Images/process-diagnostics-icon.png" style="width:30px" /><p>Process Diagnostics</p></a>
+                    </li>
+                    <li class="nav-item" style="border-right: 1px solid #448C9B">
+                        <a class="nav-link" id="md-tab" data-toggle="tab" href="#"><img src="~/Images/measurement.png" style="width:30px" /> <p class="pt-1">Measurement Diagnostics</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="tf-tab" data-toggle="tab" href="#"><img src="~/Images/transducer.png" style="width:30px" /> <p>Transducer failure</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="dp-tab" data-toggle="tab" href="#"> <img src="~/Images/detection.png" style="width:30px" /> <p>Detection Problem</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="un-tab" data-toggle="tab" href="#"><img src="~/Images/ultrasonic.png" style="width:30px" /><p>Ultrasonic Noise</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pcp-tab" data-toggle="tab" href="#"><img src="~/Images/pressure-icon.png" style="width:30px" /><p>Condition Pressure</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="pct-tab" data-toggle="tab" href="#"><img src="~/Images/temprature-icon.png" style="width:30px" /><p>Condition Temprature</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="cfp-tab" data-toggle="tab" href="#"> <img src="~/Images/change-flow-icon.png" style="width:30px" /><p>Change in the flow Profile</p> </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="fl-tab" data-toggle="tab" href="#"><img src="~/Images/fouling-icon.png" style="width:30px" /><p>Fouling</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="hv-tab" data-toggle="tab" href="#"><img src="~/Images/velocity.png" style="width:30px" /><p>High Velocity</p></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-2 pt-2 pr-3 ">
+                <div class="meter-details" style="float:right;">
+                    <button type="button" class="btn bg-info btn-lg" data-toggle="tooltip" title="Back" onclick="BtnBackToDiagnostic()">
+                        <i class="fa fa-backward"></i>
+                    </button>
+                    <button type="button" class="btn bg-info btn-lg daterange" data-toggle="tooltip" title="Date range">
+                        <i class="fa fa-calendar"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="GraphPortion">
+        @{Html.RenderAction("DiagnosticViewerData", "Graph", new { menuName = "fd" });}
+    </div>
+</section>
+
+<script>
+    $('.daterange').daterangepicker({
+        singleDatePicker: true,
+        ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')]
+            //'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            //'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            //'This Month': [moment().startOf('month'), moment().endOf('month')],
+            //'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        startDate: moment()
+        //startDate: moment().subtract(29, 'days'),
+        //endDate: moment()
+    }, function (start, end) {
+        /*window.alert('You chose: ' + start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))*/
+        @*var assetId = @Html.Raw(Model.asset_id);*@
+        var assetId = @Html.Raw(Model.asset_id);
+        var streamNo = @Html.Raw(Model.stream_no);
+        var start_date = start.format('YYYY-MM-DD');
+        var end_date = end.format('YYYY-MM-DD');
+        var active_tab = $('#myTabMeter li.nav-item a.active').attr('id');
+        var split_tab = active_tab.split("-");
+
+        //console.log("assetId:", assetId);
+        //console.log("streamNo:", streamNo);
+        //console.log("start_date:", start_date);
+        //console.log("end_date:",end_date);
+        //console.log("split_tab:", split_tab[0]);
+
+        var data = 'id=' + assetId + '&streamNum=' + streamNo + '&start_date=' + start_date +'&tab_name=' + split_tab[0];
+
+        $.ajax({
+            type: 'GET',
+            url: '@Url.Content("~/Graph/GetDynamicData")',
+            data: data,
+            success: function (data) {
+                $("#GraphPortion").html(data);
+            }
+        });
+    });
+    function BtnBackToDiagnostic() {
+        var gc_url = '@Url.Content("~/Dynamic/Index?menu_name=Diagnostic Summary")';
+        window.location.href = gc_url;
+    }
+</script>
+<script>
+    $('#myTabMeter li.nav-item').click(function () {
+            var valData = $(this).find('a').attr('id');
+            var splits = valData.split("-");
+            console.log(splits[0]);
+            $.ajax({
+                type: "GET",
+                url: '@Url.Content("~/Graph/DiagnosticViewerData?menuName=")' + splits[0],
+                success: function (data) {
+                    $("#GraphPortion").html(data);
+                },
+               "error": function (data) {
+                  alert("Some Error Occured!");
+               }
+            });
+
+        });
+</script>
+
+

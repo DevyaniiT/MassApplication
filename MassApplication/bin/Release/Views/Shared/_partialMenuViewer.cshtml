@@ -1,0 +1,188 @@
+﻿<nav class="navbar navbar-expand  main-menu-bar p-0">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav nav nav-tabs border-bottom-0 pl-4 report-detail text-center" id="myTabmains" role="tablist">
+        <li><img src="~/Images/mass-logo.png" alt="logo" style="width:80px;filter:brightness(0) invert(1);" /></li>
+
+        <li class="nav-item pl-4">
+            <a href='#db-tab' id="db-table-tab" data-toggle="tab" role="tab" aria-controls="sms-tab" aria-selected="false" class="main_menu nav-link"> View Dashboard</a>
+        </li>
+
+        @foreach (var m in ViewBag.MenuViewerItems)
+        {
+            var parent_id = m.menu_parent_id;
+            <li class="nav-item">
+                @if (parent_id == 0 && m.menu_allow_read == "true" && m.menu_allow_create == "true" && m.menu_allow_update == "true" && m.menu_allow_delete == "true")
+                {
+                    var a_href = "#" + m.menu_url;
+                    <a href='@a_href' id="@m.menu_route" data-toggle="tab" role="tab" aria-controls="@m.menu_url" aria-selected="false" class="main_menu nav-link">@m.menu_name</a>
+                }
+            </li> 
+        }
+
+        <li class="nav-item">
+            <a href='#reconcile_report' id="reconcile-report-tab" data-toggle="tab" role="tab" aria-controls="reconcile-report" aria-selected="false" class="main_menu nav-link ">Pipeline Reports</a>
+        </li>
+
+        @*<li class="nav-item">
+                <a href="#asset-tab" id="asset-tab-main" data-toggle="tab" role="tab" aria-controls="asset-tab" aria-selected="false" class="main_menu nav-link">Asset Management</a>
+            </li>*@
+
+    </ul>
+    <ul class="navbar-nav ml-auto report-detail">
+        <li class="nav-item">
+            <a class="nav-link" data-widget="fullscreen" href="#" role="button" id="fullscreen">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="right-customise" href="#" role="button">
+                <i class="fas fa-th-large"></i>
+            </a>
+        </li>
+        <li class="nav-item dropdown">
+            <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
+                <i class="fas fa-user-circle" style="font-size:20px;"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="left: inherit; right: 0px; top:31px">
+                <div class="report-detail logout">
+                    <ul class="mb-0">
+                        <li style="width:45%">
+                            <a class="" href='@Url.Content("~/Login/Index")'>
+                                <div class="media">
+
+                                    <i class="fas fa-sign-out-alt text-white mr-3"></i>
+                                    <div class="media-body ">
+                                        <p class="text-white text-left"> Log-Out</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </li>
+    </ul>
+</nav>
+<!-- /.navbar -->
+<!-- Main Sidebar Container -->
+<aside class="bg">
+    <nav>
+        <div class="tab-content container" id="myTabContentinner">
+
+            <div class="tab-pane" id="db-tab" role="tabpanel" aria-labelledby="db-table-tab">
+                <div class="report-detail view-dashboard" id="dashboardItems">
+                    <ul class="mb-0 list-inline">
+                        @{Html.RenderAction("DashboardViewer", "Base");}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="sign-out" role="tabpanel" aria-labelledby="sign-out-tab">
+                <div class="report-detail">
+                    <ul class="mb-0 list-inline">
+                        <li class="list-inline-item">
+                            <a class="" href='@Url.Content("~/Login/Index")'>
+                                <i class="fas fa-sign-out-alt nav-icon "></i>
+                                <p>Log-Out</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tab-pane" id="reconcile_report" role="tabpanel" aria-labelledby="reconcile-report-tab">
+                <div class="report-detail">
+                    <ul class="mb-0 list-inline">
+                        <li class="list-inline-item" title="Volume Reconciliation">
+                            <a href='@Url.Content("~/Reconcile/Index?menu_name=Volume Reconciliation")'>
+                                @*<img src="~/Images/view-report-icon.png" style="width:30px" />*@
+                                <i class="fab fa-codepen" style="font-size: 25px; color: #378aa7; "></i>
+                                <p class="side_span"> Volume Reconciliation </p>
+                            </a>
+                        </li>
+                        <li class="list-inline-item" title="Energy Reconciliation">
+                            <a href='@Url.Content("~/Reconcile/Index?menu_name=Energy Reconciliation")'>
+                                <i class="fas fa-burn" style="font-size: 25px; color: #FBB741; "></i>
+                                <p class="side_span"> Energy Reconciliation </p>
+                            </a>
+                        </li>
+                        <li class="list-inline-item" title="Check Meter Volume Reconciliation">
+                            <a href='@Url.Content("~/Reconcile/Index?menu_name=Check Meter Volume Reconciliation")'>
+                                <i class="fas fa-digital-tachograph" style="font-size: 25px; color: #37a792; "></i>
+                                <p class="side_span"> Check Meter Volume Reconciliation </p>
+                            </a>
+                        </li>
+                        <li class="list-inline-item" title="Check Meter Energy Reconciliation">
+                            <a href='@Url.Content("~/Reconcile/Index?menu_name=Check Meter Energy Reconciliation")'>
+                                <i class="fas fa-digital-tachograph" style="font-size: 25px; color: #cf469f; "></i>
+                                <p class="side_span"> Check Meter Energy Reconciliation </p>
+                            </a>
+                        </li>
+                        <li class="list-inline-item" title="Exception Reconciliation">
+                            <a href='@Url.Content("~/Reconcile/Index?menu_name=Exception Reconciliation")'>
+                                <i class="fas fa-file-excel" style="font-size: 25px; color: #dd0404; "></i>
+                                <p class="side_span"> Exception Reconciliation </p>
+                            </a>
+                        </li>
+                        <li class="list-inline-item" title="Reconciliation Trend">
+                            <a href='#'>
+                                <i class="fas fa-poll-h" style="font-size: 25px; color: #08c141; "></i>
+                                <p class="side_span"> Reconciliation Trend </p>
+                            </a>
+                        </li>
+                        <li class="list-inline-item" title="Group Wise Linepack">
+                            <a href='@Url.Content("~/Reconcile/Index?menu_name=Group Wise Linepack")'>
+                                <i class="fas fa-layer-group" style="font-size: 25px; color: #cda412; "></i>
+                                <p class="side_span"> Group Wise Linepack </p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+            @{
+                var menuID = 0;
+                foreach (var m in ViewBag.MenuViewerItems)
+                {
+                    var labelby = m.menu_url + "-tab";
+                    if (m.menu_parent_id == 0 && m.menu_allow_read == "true" && m.menu_allow_create == "true" && m.menu_allow_update == "true" && m.menu_allow_delete == "true")
+                    {
+                        menuID = m.menu_id;
+                        var divId = "DynamicMenuList" + menuID;
+                        <div class="tab-pane" id="@m.menu_url" role="tabpanel" aria-labelledby="@labelby">
+                            <div id="@divId" class="report-detail DynamicMenuList" data-id="@menuID">
+                            </div>
+                        </div>
+                    }
+                }
+            }
+
+        </div>
+        <div class="float-right" style="margin-top:-20px; margin-right:13px;">
+            <a href="javascript:void(0)" id="innerNav"><i class="fas fa-thumbtack nav-icon" style="font-size:12px"></i></a>
+        </div>
+    </nav>
+</aside>
+
+<script>
+    $(document).load('load', '.DynamicMenuList', function () {
+        $('.DynamicMenuList').each(function (i, item) {
+            var id = $(item).attr('data-id');
+            var data = 'id=' + id;
+            console.log("data:", data);
+            $.ajax({
+                type: 'GET',
+                url: '@Url.Content("~/Base/MenuIDViewer")',
+                data: data,
+                success: function (data) {
+                    console.log("DATA:", data);
+                    $("#DynamicMenuList"+id).html(data);
+                }
+            });
+
+        });
+    });
+</script>
+

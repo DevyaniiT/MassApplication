@@ -1,0 +1,325 @@
+﻿@using Npgsql;
+@using System.Configuration;
+@using System.Data;
+@using System.Text.RegularExpressions;
+@using Newtonsoft.Json;
+@using MassApplication.ClassFolder;
+@model IEnumerable<MassApplication.Models.Parameter_Class>
+
+<style>
+    .error {
+        color: red;
+        display: none;
+    }
+    #Selective_network {
+        display: none;
+    }
+</style>
+@using (Html.BeginForm("GridQueryData", "Report", FormMethod.Post, new { target = "_blank" }))
+{
+    if (Model != null)
+    {
+        foreach (var m in Model)      //contains var variables
+        {
+            <div class="row mb-3">
+                <div class="col-sm-6">
+                    <label ID="labelClass" style="margin-bottom:5px;"> @m.param_label </label>
+                    @*<label id="labelClass" class="labelClass"> @m.param_label </label>*@
+                </div>
+                <div class="col-sm-6">
+                    @{
+                        List<SelectListItem> items = new List<SelectListItem>();
+                        string method_val = m.param_method;
+                        string query_val = m.param_query;
+                        string variable_val = m.param_variable.ToLower();
+                        string SwitchCase_type = m.param_type;
+                        string constr = ConfigurationManager.ConnectionStrings["DatabaseServer"].ConnectionString;
+                        string function_script = "";
+                        string region = MassApplication.ClassFolder.Login_Class.region_id;
+                        switch (SwitchCase_type.ToLower())
+                        {
+                            case "dropdown":
+                                if (method_val.ToLower() == "static")
+                                {
+                                    DataTable dt = new DataTable();
+                                    dt = (DataTable)JsonConvert.DeserializeObject(query_val, (typeof(DataTable)));
+                                    int s = dt.Rows.Count;
+                                    for (int i = 0; i < s; i++)
+                                    {
+                                        string d1 = dt.Rows[i]["Text"].ToString();
+                                        string d2 = dt.Rows[i]["Value"].ToString();
+                                        items.Add(new SelectListItem { Text = d1, Value = d2 });
+                                    }
+                                    ViewBag.VariableData = items;
+                                    @Html.DropDownList("paramsdata", new SelectList(ViewBag.VariableData, "Text", "Value"), new { @class = "form-control drop_down_daily" })
+                                }
+                                else
+                                {
+                                    if (variable_val == "varpipelinemst_id")
+                                    {
+                                        ViewBag.ActualData = "";
+                                        //using (NpgsqlConnection con = new NpgsqlConnection(constr))
+                                        //{
+                                        //    string function_str = (query_val);
+                                        //    string sPattern, Correctval;
+                                        //    Regex regex = new Regex(@"\[var([a-zA-Z0-9_\.\-]+)\]");
+                                        //    MatchCollection matchCollection = regex.Matches(query_val);
+                                        //    foreach (Match match in matchCollection)
+                                        //    {
+                                        //        string longid = match.ToString();
+                                        //        string input = region;
+
+                                        //        sPattern = match.Value.Replace("[", "\\[");
+                                        //        sPattern = sPattern.Replace("]", "\\]");
+
+                                        //        Correctval = input;
+                                        //        function_str = Regex.Replace(function_str, sPattern, Correctval);
+
+                                        //        function_script = function_str;
+                                        //    }
+                                        //    using (NpgsqlCommand cmd = new NpgsqlCommand(function_script))
+                                        //    {
+                                        //        cmd.Connection = con;
+                                        //        con.Open();
+                                        //        using (NpgsqlDataReader sdr = cmd.ExecuteReader())
+                                        //        {
+                                        //            while (sdr.Read())
+                                        //            {
+                                        //                items.Add(new SelectListItem
+                                        //                {
+                                        //                    Text = sdr["id"].ToString(),
+                                        //                    Value = sdr["value"].ToString()
+                                        //                });
+                                        //            }
+                                        //        }
+                                        //        con.Close();
+                                        //    }
+                                        //}
+
+                                        string function_str = (query_val);
+                                        string sPattern, Correctval;
+                                        Regex regex = new Regex(@"\[var([a-zA-Z0-9_\.\-]+)\]");
+                                        MatchCollection matchCollection = regex.Matches(query_val);
+                                        foreach (Match match in matchCollection)
+                                        {
+                                            string longid = match.ToString();
+                                            string input = region;
+
+                                            sPattern = match.Value.Replace("[", "\\[");
+                                            sPattern = sPattern.Replace("]", "\\]");
+
+                                            Correctval = input;
+                                            function_str = Regex.Replace(function_str, sPattern, Correctval);
+
+                                            function_script = function_str;
+                                        }
+
+                                        MASSODBC.MASSODBC obj = new MASSODBC.MASSODBC();
+                                        obj.DatabaseName = CrystalConnection_Class.database;
+                                        obj.OdbcName = CrystalConnection_Class.odbc_name;
+                                        obj.UserId = CrystalConnection_Class.user;
+                                        obj.Password = CrystalConnection_Class.password;
+                                        DataTable dt = new DataTable();
+                                        dt = obj.OpenTable(function_script, "query");
+
+                                        foreach (DataRow dr in dt.Rows)
+                                        {
+                                            items.Add(new SelectListItem
+                                            {
+                                                Text = dr["id"].ToString(),
+                                                Value = dr["value"].ToString()
+                                            });
+                                        }
+                                        dt.Dispose();
+
+                                        ViewBag.NetworkData = items;
+                                        @Html.DropDownList("NetworkList", new SelectList(ViewBag.NetworkData, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily", id = "NetworkList" })
+                                    }
+                                    else { }
+                                }
+                                break;
+                            case "dropdown-multi":
+                                if (variable_val == "varpipelinemst_id")
+                                {
+                                    //using (NpgsqlConnection con = new NpgsqlConnection(constr))
+                                    //{
+                                    //    string function_str = (query_val);
+                                    //    string sPattern, Correctval;
+                                    //    Regex regex = new Regex(@"\[var([a-zA-Z0-9_\.\-]+)\]");
+                                    //    MatchCollection matchCollection = regex.Matches(query_val);
+                                    //    foreach (Match match in matchCollection)
+                                    //    {
+                                    //        string longid = match.ToString();
+                                    //        string input = region;
+
+                                    //        sPattern = match.Value.Replace("[", "\\[");
+                                    //        sPattern = sPattern.Replace("]", "\\]");
+
+                                    //        Correctval = input;
+                                    //        function_str = Regex.Replace(function_str, sPattern, Correctval);
+
+                                    //        function_script = function_str;
+                                    //    }
+
+                                    //    using (NpgsqlCommand cmd = new NpgsqlCommand(function_script))
+                                    //    {
+                                    //        cmd.Connection = con;
+                                    //        con.Open();
+                                    //        using (NpgsqlDataReader sdr = cmd.ExecuteReader())
+                                    //        {
+                                    //            while (sdr.Read())
+                                    //            {
+                                    //                items.Add(new SelectListItem
+                                    //                {
+                                    //                    Text = sdr["id"].ToString(),
+                                    //                    Value = sdr["value"].ToString()
+                                    //                });
+                                    //            }
+                                    //        }
+                                    //        con.Close();
+                                    //    }
+                                    //}
+
+                                    string function_str = (query_val);
+                                    string sPattern, Correctval;
+                                    Regex regex = new Regex(@"\[var([a-zA-Z0-9_\.\-]+)\]");
+                                    MatchCollection matchCollection = regex.Matches(query_val);
+                                    foreach (Match match in matchCollection)
+                                    {
+                                        string longid = match.ToString();
+                                        string input = region;
+
+                                        sPattern = match.Value.Replace("[", "\\[");
+                                        sPattern = sPattern.Replace("]", "\\]");
+
+                                        Correctval = input;
+                                        function_str = Regex.Replace(function_str, sPattern, Correctval);
+
+                                        function_script = function_str;
+                                    }
+
+                                    MASSODBC.MASSODBC obj = new MASSODBC.MASSODBC();
+                                    obj.DatabaseName = CrystalConnection_Class.database;
+                                    obj.OdbcName = CrystalConnection_Class.odbc_name;
+                                    obj.UserId = CrystalConnection_Class.user;
+                                    obj.Password = CrystalConnection_Class.password;
+                                    DataTable dt = new DataTable();
+                                    dt = obj.OpenTable(function_script, "query");
+
+                                    foreach (DataRow dr in dt.Rows)
+                                    {
+                                        items.Add(new SelectListItem
+                                        {
+                                            Text = dr["id"].ToString(),
+                                            Value = dr["value"].ToString()
+                                        });
+                                    }
+                                    dt.Dispose();
+
+                                    ViewBag.NetworkDDData = items;
+
+                                    <div class="row">
+                                        <div id="network_selection" class="content-checkbox col-md-4">
+                                            <label>
+                                                @Html.RadioButton("network_selection_daily", "All", true)
+                                                All
+                                            </label>
+                                            <label>
+                                                @Html.RadioButton("network_selection_daily", "Selective_network", false, new { id = "pipeselection" })
+                                                Selective
+                                            </label>
+                                        </div>
+                                        <div id="Selective_network" class="check_container check_container_box col-md-8">
+                                            <table id="tblNetworks">
+                                                @for (var i = 0; i < items.Count(); i++)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @Html.CheckBoxFor(it => items[i].Selected, new { @class = "Check_list" })
+                                                        </td>
+                                                        <td>
+                                                            @Html.DisplayFor(it => items[i].Value)
+                                                            @Html.HiddenFor(it => items[i].Value)
+                                                            @Html.HiddenFor(it => items[i].Text)
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </table>
+                                        </div>
+                                    </div>
+                                }
+                                else if (variable_val.ToLower() == "varsection_id")
+                                {
+                                    MassApplication.ClassFolder.RptParams_Class.query_val = m.param_query;
+                                    <div id="partialSectionDiv">
+                                        @Html.Partial("~/Views/Shared/_partialDropdwnSection.cshtml")
+                                    </div>
+                                }
+                                break;
+                            case "datetime":
+
+                                <div class='input-group date' id='datetimepicker1'>
+                                    <input class="form-control" type="date" name="paramsdata" placeholder="YYYY-MM-DD" />
+                                </div>
+                                break;
+
+                            default:
+                                <input class="form-control drop_down_daily" type="text" name="paramsdata" />
+                                break;
+                        }
+                    }
+                </div>
+            </div>
+        }
+    }
+
+
+    <div class="row">
+        <div class="col-sm-5"></div>
+        <div class="col-sm-7">
+            <span class="error">Please select at-least one item!!!</span>
+        </div>
+    </div>
+
+    <div style="padding:10px 0; text-align:right">
+        <input id="BtnReportLoad" type="submit" value="View Report" class="parambtn btn btn-dash mr-2" style="padding:10px 20px" name="BtnLoad" formaction="~/Report/QueryData" formtarget="_blank" />
+        <input id="BtnGridLoad" type="submit" value="View Grid" class="parambtn btn btn-dash" style="padding: 10px 20px; background: #dc5252; color:#fff;" name="BtnLoad" formaction="~/Report/GridQueryData" formtarget="_blank" />
+    </div>
+
+}
+
+<script>
+    $(".parambtn").click(function () {
+
+        var net_sel = $("input:radio[name='network_selection_daily']:checked").val();
+        var sec_sel = $("input:radio[name='section_selection_daily']:checked").val();
+        var net_val = $("#NetworkList option:selected").val();
+
+        if (net_sel === "Selective_network") {
+            var checked_checkboxes = $("#tblNetworks input[type=checkbox]:checked");
+            if (checked_checkboxes.length == 0) {
+                alert("Please select network!!!");
+                //$(".error").show();
+                return false;
+            }
+        }
+        else if (sec_sel === "Selective_section") {
+            var checked_checkboxes = $("#tblSections input[type=checkbox]:checked");
+            if (checked_checkboxes.length == 0) {
+                alert("Please select section!!!");
+                //$(".error").show();
+                return false;
+            }
+
+        }
+        else if (net_val == "") {
+            alert("Please select network!!!");
+            ///$(".error").show();
+            return false;
+        }
+
+        //$("#form-modal").modal('hide');
+        return true;
+    });
+</script>
+

@@ -1,0 +1,785 @@
+﻿@model MassApplication.Models.Diagnostic_Class
+
+<style>
+    .headerText {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="container">
+    <div class="row" id="chartContainer">
+        <div class="col-4">
+            <div class="card mt-3 mr-3 pb-5" id="sticky0">
+                <div class="card-body chartCard0 pb-5 pt-4" id="myChart0">
+                    <div class="row" id="mylabel0">
+                        <div class="col-sm-5">
+                            <div class="float-left mt-3">
+                                <img src="~/Images/3d-meter-icon.png" class="mt-2 " style="width:140px" />
+                            </div>
+                        </div>
+                        <div class="col-sm-7 consumer-details pt-4 pl-3">
+                            <h3 class="headerText pt-2"> Consumer Details</h3>
+                            <p><span style="font-weight:bold; font-style:italic; font-size: 16px;">@Html.Raw(Model.consumer_name)</span></p>
+                            <p><span class="pr-5" style="font-weight:bold;">Network</span><span>@Model.pipeline_name </span></p>
+                            <p><span style="margin-right: 20px; font-weight: bold;">Meter Type</span><span>@Model.meter_type </span></p>
+                            <p><span style="margin-right: 10px; font-weight:bold;">Maintenance</span><span>@Model.maintenance_name </span></p>
+                            <p><span style="margin-right:55px; font-weight:bold;">Date</span><span>@Model.diagnostic_date </span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/Chart-js/chart.js"></script>
+<script type="text/javascript">
+    $(window).on('load', function () {
+        $("#myTabContentinner .tab-pane").removeClass("active");
+        $(".main-menu-bar .report-detail li a").removeClass("active");
+        $(".main-menu-bar .report-detail li a").removeClass("lastVisit");
+    });
+    $(document).ready(function () {
+        LoadData();
+    });
+    function LoadData() {
+        var chart;
+        var chartId = 1;
+        var kpiList = @Html.Raw(Json.Encode(Model.kpiListItem));
+        console.log("kpiList:", kpiList);
+        if (kpiList != null) {
+            for (var i = 0; i < kpiList.length; i++) {
+                var jsonData = kpiList[i].json_tuple;
+                var chartName = kpiList[i].kpi_name;
+                var dataval = kpiList[i].chart_params;
+                var chartType = kpiList[i].chart_type;
+                var chart_caption = kpiList[i].chart_caption;
+                var chart_color = kpiList[i].chart_color;
+                var QueryId = kpiList[i].kpi_query_id;
+                var tval = eval('(' + dataval + ')');
+                var newNote = "";
+                if (chartType.toLowerCase() == 'tabular') {
+
+                    newNote = $("<div class='col-4'><div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chViewBagrtId + "' style='overflow:auto'>"
+                        + "<div class= 'card-header border-0'><h3 class='card-title'>"
+                        + "<i class='fa fa-th mr-1'></i>" + chartName + "</h3></div>"
+                        + "<div class='card-body chartCard" + chartId + "'>"
+                        + "<div id='myChart" + chartId + "' class='chartCanvas' ></div>"
+                        + "</div></div></div>");
+
+                    $("#chartContainer").append(newNote);
+                    DrawTheTable(tval, dataval, QueryId, chartType, chartId);
+
+                }
+                else if (chartType.toLowerCase() == 'label') {
+
+                    newNote = $("<div class='col-4'><div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chartId + "'>"
+                        + "<div class='card-body chartCard" + chartId + "' id='myChart" + chartId + "'>"
+                        + "</div></div></div>");
+
+                    $("#chartContainer").append(newNote);
+                    DrawTheLabel(tval, dataval, QueryId, chartType, chartId, chart_caption, chart_color);
+
+                }
+                else {
+
+                    newNote = $("<div class='col-4'><div class='card mt-3 mr-3 plainCard" + chartId + "' id='sticky" + chartId + "'>"
+                        + "<div class= 'card-header border-0'><h3 class='card-title'>"
+                        + "<i class='fa fa-th mr-1'></i>" + chartName + "</h3></div>"
+                        + "<div class='card-body chartCard" + chartId + "'>"
+                        + "<canvas id='myChart" + chartId + "' class='chartCanvas'></canvas>"
+                        + "</div></div></div>");
+
+                    $("#chartContainer").append(newNote);
+                    DrawTheGraph(tval, chartType, jsonData, chartId);
+
+                }
+
+                chartId++;
+            }
+        }
+    }
+</script>
+
+<!-- create dynamic chart -->
+<script>
+    var myChart;
+    function DrawTheGraph(data, name, jsonData,chartId) {
+        var t = [data];
+        @*var model = @Html.Raw(Json.Encode(Model.kpiList.Select(x => x.json_tuple)));*@
+        var xvl;
+        var hvl;
+        var gvl;
+        var cvl;
+        var thval;
+        var actualHeightData = [];
+        var actualThresholdData = [];
+        var myObject = eval('(' + jsonData + ')');
+        let obj = Object.keys(t[0]);
+        let Arr = [];
+
+        for (let i = 0; i < obj.length; i++) {
+
+            let item = obj[i];
+            if (item == 'Xaxis') {
+                xvl = t[0][item];
+              let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                      return item[xvl];
+                        })
+                }
+                Arr.push(data);
+            }
+
+            //else if (item == 'Height') {
+            //    //alert(t[0][item]);
+            //    hvl = t[0][item];
+            //      let data = {
+            //        key: item,
+            //      value: myObject.map((item) => {
+            //          return item[hvl];
+            //            })
+            //    }
+            //    Arr.push(data);
+            //}
+
+
+            else if (item == 'Height') {
+                hvl = t[0][item].split(",");
+                for (let j = 0; j < hvl.length; j++) {
+                    var dataval = hvl[j];
+                    let data = {
+                        key: item,
+                        value: myObject.map((item) => {
+                            return item[dataval];
+                        })
+                    }
+                    actualHeightData.push(data);
+                    Arr.push(data);
+                }
+            }
+
+            else if (item == 'Threshold') {
+                thvl = t[0][item].split(",");
+                for (let j = 0; j < thvl.length; j++) {
+                    var threshold_dataval = thvl[j];
+                    let data = {
+                        key: item,
+                        value: myObject.map((item) => {
+                            return item[threshold_dataval];
+                        })
+                    }
+                    actualThresholdData.push(data);
+                    Arr.push(data);
+                }
+            }
+
+            else if (item == 'Group') {
+                //alert(t[0][item]);
+                gvl = t[0][item];
+                  let data = {
+                    key: item,
+                  value: myObject.map((item) => {
+                      return item[gvl];
+                        })
+                }
+                Arr.push(data);
+            }
+
+            else if (item == 'Color') {
+                cvl = t[0][item];
+                let data = {
+                    key: item,
+                    value: myObject.map((item) => {
+                        return item[cvl];
+                    })
+                }
+                Arr.push(data);
+            }
+
+            else { }
+        }
+
+        //DrawDynamicGraph(Arr, name, xvl, gvl, hvl, cvl, chartId);
+        DrawDynamicGraph(Arr, actualHeightData, actualThresholdData, name, xvl, gvl, hvl, cvl, chartId);
+    }
+    function DrawDynamicGraph(data, actualHeightData, actualThresholdData, name, xval, gval, hval, cval,chartId) {
+            var Xaxisvalue = [];
+            var result = data.filter(function (element) {
+                return element.key == 'Xaxis';
+            });
+
+            if (result.length > 0) {
+                Xaxisvalue = (result[0].value);
+            }
+
+            var Hightvalue = [];
+
+            var result = data.filter(function (element) {
+                return element.key == 'Height';
+            });
+
+            if (result.length > 0) {
+                Hightvalue = (result[0].value);
+            }
+
+
+            var Groupvalue = [];
+
+            var result = data.filter(function (element) {
+                return element.key == 'Group';
+            });
+
+            if (result.length > 0) {
+                Groupvalue = (result[0].value);
+            }
+
+
+            var Colorvalue = [];
+
+            var result = data.filter(function (element) {
+                return element.key == 'Color';
+            });
+
+            if (result.length > 0) {
+                Colorvalue = (result[0].value);
+        }
+
+        change(name, Xaxisvalue, actualHeightData, actualThresholdData, Hightvalue, Groupvalue, Colorvalue, xval, hval, gval, cval,chartId);
+    }
+    function change(newType, Xaxisvalue, actualHeightData, actualThresholdData, Hightvalue, Groupvalue, Colorvalue, xvll, hvll, gvll, cvll, chartId) {
+       var datasset = [];
+       var colors = ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "purple", "red", "gray", "violet", "black"];//#FFD580(orange), #cb504d(light red)
+       var colors_threshold = ["pink", "#FFD580", "#cb504d", "lightblue", "lightgreen", "yellow", "red", "purple",  "gray", "violet", "black"];
+       for (let i = 0; i < actualHeightData.length; i++) {
+            datasset.push({
+                label: hvll[i],
+                backgroundColor: colors[i],
+                borderColor: colors[i],
+                data: actualHeightData[i].value,
+            });
+        }
+       if (newType.toLowerCase() == "pie" || newType.toLowerCase() == "doughnut" || newType.toLowerCase() == "polararea") {
+           var config = {
+               type: newType,
+               data: {
+                   labels: Xaxisvalue,
+                   datasets: [
+                       {
+                           backgroundColor: ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"],
+                           data: Hightvalue,
+                       },
+                   ]
+               },
+               //plugins: {
+               //    datalabels: {
+               //        formatter: (value, ctx) => {
+               //            let datasets = ctx.chart.data.datasets;
+               //            if (datasets.indexOf(ctx.dataset) === datasets.length - 1) {
+               //                let sum = datasets[0].data.reduce((a, b) => a + b, 0);
+               //                let percentage = Math.round((value / sum) * 100) + '%';
+               //                return percentage;
+               //            } else {
+               //                return percentage;
+               //            }
+               //        },
+               //        color: '#fff',
+               //    }
+               //},
+               options: {
+                   responsive: true,
+                   maintainAspectRatio: false,
+                   legend: {
+                       display: false,
+                       labels: {
+                           fontSize: 10
+                       }
+                   },
+
+                   //legend: {
+                   //    layout: 'vertical',
+                   //    align: 'right',
+                   //    verticalAlign: 'top',
+                   //    y: 30,
+                   //    navigation: {
+                   //        activeColor: '#3E576F',
+                   //        animation: true,
+                   //        arrowSize: 12,
+                   //        inactiveColor: '#CCC',
+                   //        style: {
+                   //            fontWeight: 'bold',
+                   //            color: '#333',
+                   //            fontSize: '12px'
+                   //        }
+                   //    }
+                   //},
+
+                   scales: {
+                       x: {
+                           stacked: true,
+                       },
+                       y: {
+                           stacked: true
+                       }
+                   }
+               }
+           };
+       }
+       else if (newType.toLowerCase() == "bubble" || newType.toLowerCase() == "scatter") {
+           var xlabel = [];
+           var label_data = [];
+           while (datasset.length > 0) {
+               datasset.pop();
+           }
+           if (Hightvalue.length > 0) {
+               if (newType == "bubble") {
+                   for (let i = 0; i < actualHeightData.length; i++) {
+                       var datal = [];
+                       for (let j = 0; j < Xaxisvalue.length; j++) {
+                           if (i == 0) {
+                               xlabel.push(Xaxisvalue[j]);
+                           }
+                           datal.push({
+                               x: Xaxisvalue[j],
+                               y: Hightvalue[i][j],
+                               r: 6
+                           });
+                       }
+                       label_data.push({
+                           label: hvll[i],
+                           data: datal,
+                           backgroundColor: colors[i],// random_rgba()
+                       });
+                   }
+               }
+               else if (newType == "scatter") {
+                   for (let i = 0; i < actualHeightData.length; i++) {
+                       var datal = [];
+                       for (let j = 0; j < Xaxisvalue.length; j++) {
+                           if (i == 0) {
+                               xlabel.push(Xaxisvalue[j]);
+                           }
+                           datal.push({
+                               x: Xaxisvalue[j],
+                               y: Hightvalue[i][j]
+                           });
+                       }
+                       label_data.push({
+                           label: hvll[i],
+                           data: datal,
+                           backgroundColor: colors[i]
+                       });
+                   }
+               }
+               var config = {
+                   type: newType,
+                   data: {
+                       labels: Xaxisvalue,
+                       datasets: label_data
+                   },
+                   options: {
+                       responsive: true,
+                       maintainAspectRatio: false,
+                       legend: {
+                           display: false, position: 'top',
+                           labels: {
+                               filter: function (item, data) {
+                                   if (item.text != xvll) {
+                                       return true;
+                                   }
+                                   else {
+                                       return false;
+                                   }
+                               }
+                           }
+                       },
+                       scales: {
+                           yAxes: [{
+                               //scaleLabel: {
+                               //    display: true,
+                               //    labelString: "Probability",
+                               //    fontSize: 10
+                               //},
+                               ticks: {
+                                   display: true, //this will remove only the label
+                                   fontSize: 10
+                                   //beginAtZero: true,
+                                   //userCallback: function (label, index, labels) {
+                                   //    return label / 100000;
+                                   //}
+                               },
+                               gridLines: {
+                                   display: true,
+                               }
+                           }],
+                           xAxes: [{
+                               ticks: {
+                                   display: true, //this will remove only the label
+                                   fontSize: 10
+                                   //beginAtZero: true,
+                                   //userCallback: function (label, index, labels) {
+                                   //    return label / 100000;
+                                   //}
+                               },
+                               gridLines: {
+                                   display: true,
+                               }
+                           }]
+                       }
+
+                   }
+               };
+           }
+       }
+       else if (newType.toLowerCase() == "radar") {
+           var config = {
+               type: newType,
+
+               data: {
+                   labels: Xaxisvalue,
+                   datasets: [
+                       {
+                           label: xvll,
+                           backgroundColor: "lightgreen",
+                           borderColor: "green",
+                           data: Xaxisvalue,
+                       },
+                       {
+                           label: hvll,
+                           backgroundColor: "lightblue",
+                           borderColor: "blue",
+                           data: Hightvalue,
+                       }
+                   ]
+               },
+               options: {
+                   responsive: true,
+                   maintainAspectRatio: false,
+                   legend: {
+                       display: false,
+                       position: 'top',
+                       labels: {
+                           //boxWidth: 10,
+                           fontSize: 10
+                       }
+                   },
+                   tooltips: {
+                       enabled: true
+                   },
+                   scales: {
+                       x: {
+                           stacked: true
+
+                       },
+                       y: {
+                           stacked: true
+
+                       }
+                   }
+               }
+           };
+       }
+       else if (newType.toLowerCase() == "line_threshold" || newType.toLowerCase() == "bar_threshold") {
+           var fl = false;
+           var sl = false;
+           var stked = false;
+           var splin = 0;
+           while (datasset.length > 0) {
+               datasset.pop();
+           }
+           if (actualHeightData.length > 0) {
+               if (newType.toLowerCase() == "bar_threshold") {
+                   newType = "bar";
+                   fl = false;
+                   sl = false;
+                   stked = false;
+               }
+               else if (newType.toLowerCase() == "line_threshold") {
+                   newType = "line";
+                   splin = 0.6;
+                   fl = false;
+                   sl = false;
+                   stked = false;
+               }
+               for (let i = 0; i < actualThresholdData.length; i++) {
+                   datasset.push({
+                       type: "line",
+                       label: actualThresholdData[i].key,
+                       backgroundColor: colors_threshold[i],
+                       borderColor: colors_threshold[i+1],
+                       borderDash: [10, 10],
+                       data: actualThresholdData[i].value,
+                       lineTension: splin,
+                       fill: fl,
+                       steppedLine: sl
+                   });
+               }
+               for (let i = 0; i < actualHeightData.length; i++) {
+                   datasset.push({
+                       type: newType,
+                       label: hvll[i],
+                       backgroundColor: colors[i],
+                       borderColor: colors[i],
+                       data: actualHeightData[i].value,
+                       lineTension: splin,
+                       fill: fl,
+                       steppedLine: sl
+                   });
+               }
+               var config = {
+                   data: {
+                       type: newType,
+                       labels: Xaxisvalue,
+                       datasets: datasset
+                   },
+                   options: {
+                       responsive: true,
+                       maintainAspectRatio: false,
+                       plugins: {
+                           legend: {
+                               display: true,
+                               position: 'top',
+                               align: 'center',
+                               labels: {
+                                   fontColor: 'black',
+                                   boxWidth: 10,
+                                   fontSize: 10,
+                                   font: {
+                                       size: 10,
+                                       family: 'arial',
+                                       style: 'normal'
+                                   }
+                               }
+                           },
+                           tooltips: {
+                               enabled: true
+                           }
+                       },
+                       scales: {
+                           x: {
+                               stacked: false,
+                               display: true,
+                               ticks: {
+                                   font: {
+                                       family: 'arial',
+                                       size: 10,
+                                       style: 'normal'
+                                   }
+                               },
+                               grid: {
+                                   display: true
+                               }
+                           },
+                           y: {
+                               stacked: false,
+                               display: true,
+                               ticks: {
+                                   font: {
+                                       family: 'arial',
+                                       size: 10,
+                                       style: 'normal'
+                                   }
+                               },
+                               grid: {
+                                   display: true
+                               }
+                           }
+                       }
+                   }
+               };
+           }
+       }
+       else {
+           var config = {
+               type: newType,
+               data: {
+                   labels: Xaxisvalue,
+                   datasets: datasset
+                   //datasets: [
+                   //    //{
+                   //    //    label: xvll,
+                   //    //    backgroundColor: "lightgreen",
+                   //    //    borderColor: "green",
+                   //    //    data: Xaxisvalue,
+                   //    //},
+                   //    {
+                   //        label: hvll,
+                   //        backgroundColor: "lightblue",
+                   //        borderColor: "blue",
+                   //        data: Hightvalue,
+                   //    }
+                   //]
+               },
+               options: {
+                   responsive: true,
+                   maintainAspectRatio: false,
+                   plugins: {
+                       legend: {
+                           display: true,
+                           position: 'top',
+                           align: 'center',
+                           labels: {
+                               fontColor: 'black',
+                               boxWidth: 10,
+                               fontSize: 10,
+                               font: {
+                                   size: 10,
+                                   family: 'arial',
+                                   style: 'normal'
+                               }
+                           }
+                       },
+                       tooltips: {
+                           enabled: true
+                       }
+                   },
+                   scales: {
+                       x: {
+                           stacked: false,
+                           display: true,
+                           ticks: {
+                               //color: 'black',
+                               font: {
+                                   family: 'arial',
+                                   size: 10,
+                                   style: 'normal'
+                               }
+                           },
+                           grid: {
+                               display: true
+                           }
+                       },
+                       y: {
+                           stacked: false,
+                           display: true,
+                           ticks: {
+                               callback: function (val, index) {
+                                   return val / 100000;
+                               },
+                               //color: 'black',
+                               font: {
+                                   family: 'arial',
+                                   size: 10,
+                                   style: 'normal'
+                               }
+                           },
+                           grid: {
+                               display: true
+                           }
+                       }
+                   }
+               }
+           };
+        }
+
+        var chartElement = "myChart" + chartId;
+        var ctx = document.getElementById(chartElement).getContext('2d');
+        if (myChart) {
+            //myChart.destroy();
+        }
+
+        var temp = jQuery.extend(true, {}, config);
+        temp.type = newType;
+        myChart = new Chart(ctx, temp);
+    };
+</script>
+<script>
+    function createdynamictable(yourdata, chartname, id) {
+
+        var tablename = '#mytable' + id;
+        var parsedata = JSON.parse(yourdata);
+        var table = document.createElement("table");
+        table.setAttribute("id", tablename);
+        table.classList.add('table');
+
+        for (var i = 0; i <= parsedata.length; i++) {
+            tr = table.insertRow(-1);
+
+            for (var key in parsedata[0]) {
+                if (i == 0) {
+                    //Inserting columns fields to the table
+                    var trCell = tr.insertCell(-1);
+                    trCell.innerHTML = key;
+                }
+                else {
+                    //Inserting table values to the table
+                    var trCell = tr.insertCell(-1);
+                    trCell.innerHTML = parsedata[i - 1][key];
+                }
+            };
+
+        }
+
+
+        var div = document.getElementById(chartname);
+        div.innerHTML = "";
+        div.appendChild(table);
+
+        $(function () {
+            $(tablename).DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false
+            });
+        });
+
+
+
+    }
+    function createdynamiclabel(yourdata, chartname, caption, color, id) {
+        var array = yourdata.split(/:|}|]/g);
+        var dataValue = array[1];
+        var eleName = "#" + chartname;
+        var label_id = "#mylabel" + id;
+        var newLabel = "";
+        newLabel = $("<div class='row' id='mylabel" + id + "'>"
+            + "<div class='col-sm-10'>"
+            + "<h3 class='headerText ml-1'>" + dataValue + "</h3>"
+            + " <p class='headerText ml-1'>" + caption + "</p>"
+            + "</div><div class='col-sm-2'>"
+            + "<div class='float-right'>"
+            + " <i class='fas fa-signal iconClass mr-1'></i>"
+            + "</div></div></div>");
+
+
+        $(eleName).append(newLabel);
+        var colorName = '';
+        if (color.indexOf("#") < 0)
+            colorName = '#' + color;
+        else
+            colorName = color;
+
+        $(eleName).css("backgroundColor", colorName);
+        $('.iconClass').css("color", "White");
+        $('.headerText').css("color", "White");
+
+    }
+</script>
+<script>
+    function DrawTheTable(tval, data, qid, chartType, chartId) {
+        $.ajax({
+                type: "POST",
+                //contentType: false,
+                url: '@Url.Content("~/DashBoard/KpiTabularData?QueryId=")' + qid + "&chartparams=" + data,
+                success: function (modelval) {
+                    var mainTab = "myChart" + chartId;
+                    createdynamictable(modelval, mainTab, chartId);
+                }
+            });
+
+    };
+    function DrawTheLabel(tval, data, qId, chartType, chartId, chart_caption, chart_color) {
+        data = data.replace("#", "");
+           $.ajax({
+                type: "POST",
+               url: '@Url.Content("~/DashBoard/KpiLabelData?QueryId=")' + qId + "&chartparams=" + data,
+                success: function (modelval) {
+                    var modelData = modelval.Success;
+                    var modelColor = modelval.Message;
+                    var modelCaption = modelval.DataVal;
+                    var mainTab = "myChart" + chartId;
+                    createdynamiclabel(modelData, mainTab, modelCaption, modelColor, chartId);
+                }
+            });
+
+    };
+</script>

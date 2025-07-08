@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/LoginStyles/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="~/LoginStyles/fonts/iconic/css/material-design-iconic-font.min.css" />
+    <link rel="stylesheet" href="~/LoginStyles/vendor/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/LoginStyles/css/util.css" />
+    <link rel="stylesheet" href="~/LoginStyles/css/Login_main.css" />
+</head>
+<body>
+    <div>
+        @RenderBody()
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            //localStorage.clear();
+            localStorage.removeItem("activeTab");
+        });
+    </script>
+
+</body>
+</html>

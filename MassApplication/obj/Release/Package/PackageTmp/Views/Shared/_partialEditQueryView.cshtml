@@ -1,0 +1,441 @@
+﻿@model MassApplication.Models.DBQueryClass
+
+<style>
+    /*.table tr td input {
+        display: block;
+    }*/
+
+    span.error {
+        display: block;
+        visibility: hidden;
+        color: red;
+        font-size: 90%;
+    }
+
+    table td.param_id {
+        display: none;
+    }
+
+    textarea {
+        resize: none;
+        width: 100%;
+    }
+
+    #tabContent .nav-link {
+        color: #000;
+        background-color: #e1e1e1;
+        border: 0;
+        margin: 0 4px;
+        padding: 13px 23px;
+        font-size: 13px;
+        border-radius: 5px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+
+        #tabContent .nav-link.active, .nav-tabs .nav-item.show .nav-link {
+            color: #ffffff;
+            background-color: #2a5b6c;
+            border: 0;
+            padding: 13px 23px;
+            margin: 0 4px;
+            border-radius: 5px;
+            text-transform: uppercase;
+            font-size: 13px;
+            font-weight: 600;
+        }
+</style>
+
+@using (Html.BeginForm("EditQueryData", "Report", FormMethod.Post, new { target = "_blank" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        <ul class="nav nav-tabs border-bottom-0" id="tabContent">
+            <li class="nav-item "><a href="#editconnectionTab" class="nav-link active" data-toggle="tab">Connection Details</a></li>
+            <li class="nav-item"><a href="#editqueryTab" class="nav-link" data-toggle="tab">Parameters Details</a></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane mt-4" id="editqueryTab">
+                <div class="master">
+                    @Html.HiddenFor(model => model.queryId, new { id = "edit_query_id" })
+                    <table id="EditQueryTable" class="table table-bordered table-responsive-md table-striped">
+                        <thead>
+                            <tr>
+                                <th width="25%">Name</th>
+                                <th width="15%">Type</th>
+                                <th width="15%">User Type</th>
+                                <th class="text-center">Query</th>
+                                @*<th class="text-center">
+                                        <button type="button" class="addNewQuery btn btn-default"><i class="fa fa-plus"></i></button>
+                                    </th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                @*<td class="Edit_qry_id col-md-2" style="display:none;">
+                                        @Model.queryId
+                                    </td>*@
+                                <td class="Edit_Query_qryname" contenteditable="true">
+                                    @Model.query_name
+                                </td>
+                                <td class="qry_type">
+                                    @Html.DropDownList("edit_queryType", new SelectList(ViewBag.EditQueryType, "Value", "Value", Model.query_type), new { @class = "edit_queryType form-control" })
+                                </td>
+                                <td class="qry_usertype">
+                                    @Html.DropDownList("edit_queryUserType", new SelectList(ViewBag.EditUserRoleType, "Value", "Text", Model.query_user_id), new { @class = "edit_queryUserType form-control" })
+                                </td>
+                                <td class="script">
+                                    <textarea class="Edit_Query_query">@Model.query_qrydata</textarea>
+                                </td>
+                                @*<td style="text-align:center">
+                                        <a class="deleteQuerydata" title="Delete" data-toggle="tooltip"><i class="fa fa-trash"></i></a>
+                                    </td>*@
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane active mt-4" id="editconnectionTab">
+                <div class="row">
+                    <div class="col-sm-8">
+                        @*<h3 class="">Connection List</h3>*@
+                    </div>
+                    <div class="col-sm-4" style="text-align:right">
+                        <button type="button" class="btn btn-dash mb-3" data-toggle="modal" data-target="#addEditQryConnModal"><i class="fa fa-plus"></i> Add New</button>
+                    </div>
+                </div>
+
+                <table id="editQryConnectionTable" class="table table-bordered" cellspacing="0" rules="all" border="1" style="border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="text-align:center">Select</th>
+                            <th>Connection Name</th>
+                            <th>DSN</th>
+                            <th>User Id</th>
+                            <th>Database Name</th>
+                            <th style="text-align:center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in ViewBag.ConnectionValues)
+                        {
+                            @Html.HiddenFor(modelItem => Model.con_id, new { id = "edit_qry_conn_id" })
+                            <tr>
+                                <td style="text-align:center;">
+
+                                    @{
+                                        var con_id = m.connection_id;
+                                        if (con_id == Model.con_id)
+                                        {
+                                            <input class="select_Connnection" type="radio" data-id="@m.connection_id" name="select_Connnection" checked="checked">
+                                        }
+                                        else
+                                        {
+                                            <input class="select_Connnection" type="radio" data-id="@m.connection_id" name="select_Connnection">
+                                        }
+                                    }
+                                </td>
+                                <td class="conn_name">@m.connection_name</td>
+                                <td class="dsn_name">@m.dsn_name</td>
+                                <td class="user_id">@m.user_id</td>
+                                <td class="db_name">@m.db_schema_name</td>
+                                <td class="conn_event" style="text-align:center;">
+
+                                    <a onclick="BtnConnection_edit('Edit Connection Data',@m.connection_id,@Model.queryId)" class="dropdown_icon" data-toggle="modal" data-target="#EditConnectionModal" title="Edit">
+                                        <i class="fas fa-edit" style="margin-left: 10px;  color: #dc5252;"></i>
+                                    </a>
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <div style="padding:10px 0; text-align:right">
+            <input id="submitEditQueryDetail" type="button" value="Save" class="btn btn-dash" style="padding:10px 20px" />
+            <input type="button" value="Close" class="btn btn-default" data-dismiss="modal" style="padding: 10px 20px; background-color: #e1e1e1; color: #000;" />
+        </div>
+
+        <!-- popup modal for edit connection -->
+        <div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="EditQueryConnectionModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title"></h3>
+                        @*<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>*@
+                    </div>
+                    <div class="modal-body">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- popup modal for adding new connection -->
+        <div class="modal" tabindex="-1" role="dialog" aria-hidden="true" id="addEditQryConnModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Add New Connection</h3>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label ID="Lbl_Editdsn"> DSN: </label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="edt_dsn_name" name="edt_dsn_name" placeholder="Enter dsn">
+                                <span class="error">DSN required</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label ID="Lbl_Editusername"> User Name: </label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="edt_user_name" name="edt_user_name" placeholder="Enter user name">
+                                <span class="error">User name required</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label ID="Lbl_Editpwd"> Password: </label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="password" class="form-control" id="edt_password" name="edt_password" placeholder="Enter password">
+                                <span class="error">Password required</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <label ID="Lbl_Editdb_name"> Database Name: </label>
+                            </div>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="edt_db_name" name="edt_db_name" placeholder="Enter database name">
+                                <span class="error">Database name required</span>
+                            </div>
+                        </div>
+
+                        <div style="padding:10px 0; text-align:right">
+                            <input type="button" class="BtnTestConnEdit btn btn-success" value="Test" />
+                            <input type="button" class="BtnSaveConnEdit btn btn-dash" value="Save" />
+                            <input type="button" class="BtnCloseConnEdit btn btn-danger" value="Close" />
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+}
+
+<script>
+    $(function () {
+        $('#editQryConnectionTable').DataTable({
+            "paging": false,
+            "lengthChange": true,
+            "searching": true,
+            // "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "scrollY": "350px",
+            "scrollCollapse": true,
+            "initComplete": function (settings, json) {
+                $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+            },
+            /* dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>rt<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',*/
+            "order": [[1, 'desc']],
+            deferRender: true,
+            language: {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                },
+                "search": '',
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "lengthMenu": "Rows :  _MENU_",
+            },
+            columnDefs: [
+                { orderable: false, targets: 0 }
+            ]
+        });
+    });
+</script>
+<script>
+    function BtnConnection_edit(title, conn_id, qry_id) {
+        $.ajax({
+         url: '@Url.Content("~/DashBoard/EditConnectionValue?conn_id=")' + conn_id + '&query_id=' + qry_id,  // The method name + parameter
+            success: function (data) {
+             $('#EditQueryConnectionModal .modal-body').html(data);
+             $('#EditQueryConnectionModal .modal-title').html(title);
+             $('#EditQueryConnectionModal').modal('show');// This should be an empty div where you can inject your new html (the partial view)
+        }
+    });
+}
+</script>
+<script>
+    $(document).on('click', '.BtnCloseConnEdit', function () {
+    //$('.BtnCloseConnEdit').click(function () {
+        $('#addEditQryConnModal').modal('hide');
+        $('#edt_dsn_name').siblings('span.error').css('visibility', 'hidden');
+        $('#edt_dsn_name').val('');
+        $('#edt_user_name').siblings('span.error').css('visibility', 'hidden');
+        $('#edt_user_name').val('');
+        $('#edt_password').siblings('span.error').css('visibility', 'hidden');
+        $('#edt_password').val('');
+        $('#edt_db_name').siblings('span.error').css('visibility', 'hidden');
+        $('#edt_db_name').val('');
+    });
+    $(document).on('click', '.BtnTestConnEdit', function () {
+     //$('.BtnTestConnEdit').click(function () {
+        var isAllValid = true;
+        //alert('hello');
+        if ($('#edt_dsn_name').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_dsn_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_dsn_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#edt_user_name').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_user_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_user_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#edt_password').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_password').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_password').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#edt_db_name').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_db_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_db_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var DataTest = {
+                dsn_name: $("#edt_dsn_name").val().trim(),
+                user_id: $('#edt_user_name').val().trim(),
+                password: $('#edt_password').val().trim(),
+                db_schema_name: $('#edt_db_name').val().trim()
+            }
+            //alert(DataTest);
+
+          $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/ConnectionTest")',
+            data: JSON.stringify(DataTest),
+            contentType: 'application/json',
+            success: function (data) {
+                    alert(data);
+            }
+        });
+     }
+    });
+    $(document).on('click', '.BtnSaveConnEdit', function () {
+     //$('.BtnSaveConnEdit').click(function () {
+     var isAllValid = true;
+        if ($('#edt_dsn_name').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_dsn_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_dsn_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#edt_user_name').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_user_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_user_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#edt_password').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_password').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_password').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if ($('#edt_db_name').val().trim() == '') {
+            isAllValid = false;
+            $('#edt_db_name').siblings('span.error').css('visibility', 'visible');
+        }
+        else {
+            $('#edt_db_name').siblings('span.error').css('visibility', 'hidden');
+        }
+
+        if (isAllValid) {
+            var DataSave = {
+                dsn_name: $("#edt_dsn_name").val().trim(),
+                user_id: $('#edt_user_name').val().trim(),
+                password: $('#edt_password').val().trim(),
+                db_schema_name: $('#edt_db_name').val().trim()
+            }
+            //alert(newData);
+
+          $.ajax({
+            type: 'POST',
+            url: '@Url.Content("~/Report/ConnectionSave")',
+            data: JSON.stringify(DataSave),
+            contentType: 'application/json',
+            success: function (data) {
+                  if (data.startsWith("ERROR")) {
+                      var res = data.split(";");
+                      var error = '';
+                      if (res.length > 1) {
+                          error = res[1];
+                      } else {
+                          error = data;
+                      }
+                      alert(error);
+                  } else {
+                      alert('Updated successfully!!!');
+                      $('#addConn_editmodal').modal('hide');
+                      $('#edit_modal .modal-body').html(null);
+                      $('#edit_modal .modal-body').html(data);
+
+                      //$(".nav li:eq(0)").removeClass('active');
+                      //$(".nav li:eq(2)").addClass('active');
+                      //$("#newReportTab").removeClass('active');
+                      //$("#newConnectionTab").addClass('active');
+                  }
+                  //else {
+                      // alert('Please check connection entries!!!');
+                       //var msgData = '@TempData["msg"]';
+                       //alert(msgData);
+                  //}
+            },
+            error: function (error) {
+                alert('Error');
+            }
+        });
+     }
+    });
+</script>

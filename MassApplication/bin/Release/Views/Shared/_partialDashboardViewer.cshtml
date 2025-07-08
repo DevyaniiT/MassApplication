@@ -1,0 +1,34 @@
+﻿
+@model IEnumerable<MassApplication.Models.Dashboard_class>
+<style>
+    #dashboardItems .list-inline-item.active {
+        width: 150px;
+        min-width: 80px;
+        color: #000;
+        background-color: transparent;
+        border: 0;
+        padding: 3px;
+        margin: 0 5px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #448C9B;
+    }
+</style>
+
+@foreach (var m in ViewBag.DashboardViewerItems)
+{
+    string pagepath = "~/DashBoard/ShowDashboard?id=" + m.dashboard_id;
+    var active_status = "";
+    if (ViewBag.ActiveDashboard == m.dashboard_id)
+    {
+        active_status = "active";
+    }
+
+    <li class="list-inline-item @active_status" style="width:150px;">
+        @{
+            <a href='@Url.Content(pagepath)'>
+                <img src="~/Images/new-dashboard-icon.png" style="width:30px" />
+                <p>  @m.dashboard_name</p>
+            </a>
+        }
+    </li>
+}

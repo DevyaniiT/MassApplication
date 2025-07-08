@@ -1,0 +1,159 @@
+﻿@using System.Globalization;
+@using System.Linq;
+@{
+    ViewBag.Title = "Job History";
+}
+<link rel="stylesheet" href="~/MasterStyles/css/WebPageStyle.css" />
+<style>
+    #load {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        z-index: 9999;
+        background: url('@Url.Content("~/Images/blueLoader.gif")') no-repeat center center rgba(255,255,255,255);
+    }
+</style>
+<style>
+    #JobHistoryList .form-control {
+        background-image: url('@Url.Content("~/Images/loupe.png")');
+        background-repeat: no-repeat;
+        background-color: #fff;
+        background-position: 4px 4px !important;
+        background-size: 14px;
+    }
+
+        #JobHistoryList .form-control:focus {
+            background-image: none;
+        }
+
+    #JobHistoryList_filter .form-control {
+        background-image: url('@Url.Content("~/Images/loupe.png")');
+        background-repeat: no-repeat;
+        background-color: #fff;
+        background-position: 4px 4px !important;
+        background-size: 14px;
+    }
+
+        #JobHistoryList_filter .form-control:focus {
+            background-image: none;
+        }
+
+    .dataTable th {
+        text-transform: capitalize;
+    }
+
+    .table {
+        width: 100% !important;
+    }
+
+    .dataTables_scrollHeadInner {
+        width: 100% !important;
+        padding-right: 0 !important;
+    }
+</style>
+
+<body style="overflow:hidden">
+    <div id="load"></div>
+    <div id="PageContents">
+        <section class="content">
+            <div class="container contain_min">
+                <div class="row mt-2">
+                    <div class="col-12 pt-1">
+                        <div class="card">
+                            <!-- card-body -->
+                            <div class="card-body table-responsive">
+                                <table id="JobHistoryList" class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr>
+                                            @foreach (System.Data.DataColumn col in ViewBag.JobHistoryData.Columns)
+                                            {
+                                                <th>@col.Caption.Replace("_", " ")</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (System.Data.DataRow row in ViewBag.JobHistoryData.Rows)
+                                        {
+                                            var id = row.ItemArray[0];
+                                            <tr class="jobLink" data-id="@id">
+                                                @foreach (var cell in row.ItemArray)
+                                                {
+                                                    <td>@cell.ToString().Replace("\"", "")</td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <!-- card-body -->
+                        </div>
+                        <!-- card -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+
+<script src="~/MasterStyles/TableStyles/datatables/jquery.mockjax.min.js"></script>
+<!-- DATATABLE INITIALIZING FORMAT -->
+<script>
+    $(function () {
+        $('#JobHistoryList').DataTable({
+            "paging": true,
+            "processing": true,
+            "lengthChange": true,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": false,
+            "responsive": true,
+            "scrollY": "350px",
+            "scrollCollapse": true,
+            "initComplete": function (settings, json) {
+                $('body').find('.dataTables_scrollBody').addClass("scrollbar");
+            },
+            dom: '<"row toolbarinner mb-1 pb-1"<"col-sm-9"<"toolbar">><"col-sm-3"<"float-right"f>>>tr<"row pt-3 pl-2"<"col-sm-2 pt-1"i><"col-sm-1 pt-2"l><"col-sm-9"p>>',
+            "order": [[1, 'desc']],
+            deferRender: true,
+            language: {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                "search": '',
+                "info": "Showing page _PAGE_ of _PAGES_",
+                "lengthMenu": "Rows :  _MENU_",
+            },
+            columnDefs: [
+                { 'visible': false, 'targets': [0] },
+                { orderable: false, targets: [0] },
+                {
+                    targets: [6],
+                    render: function (data, type, row) {
+                        var newData = data == "SUCCESS" ? 'green' : 'red';
+                        return '<span style="color:' + newData + '">' + data + '</span>';
+                    }
+                }
+            ]
+        });
+        $("div.toolbar").html('<div style="display:flex;"><p><strong> Job History </strong></p></ul></div>');
+    });
+</script>
+<!-- LOADER SCRIPT -->
+<script>
+    $(document).on('readystatechange', function () {
+        var state = document.readyState;
+        if (state == 'interactive') {
+            document.getElementById('PageContents').style.visibility = "hidden";
+        }
+        else if (state == 'complete') {
+            setTimeout(function () {
+                document.getElementById('interactive');
+                document.getElementById('load').style.visibility = "hidden";
+                document.getElementById('PageContents').style.visibility = "visible";
+            }, 100);
+        }
+    });
+</script>
+

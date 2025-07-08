@@ -1,0 +1,650 @@
+﻿<input type="hidden" id="TodateValue" value="@ViewBag.Todate" />
+<input type="hidden" id="FromdateValue" value="@ViewBag.FromDate" />
+@if (ViewBag.UrlData == "volumereconciliation" || ViewBag.UrlData == "energyreconciliation")
+{
+    <div class="table-responsive">
+        <table id="OverallData" class="table table-bordered table-striped">
+        </table>
+    </div>
+    <div class="table-responsive mt-4" id="ReconcilePortion">
+        <table id="ReconciliationData" class="table table-bordered table-striped">
+        </table>
+    </div>
+}
+else
+{
+    <div class="table">
+        <table id="ReconcileData" class="table table-bordered table-striped">
+        </table>
+    </div>
+}
+
+<script>
+    var overall_table;
+    var pipeline_table;
+    var partialsection_table;
+    var OverallArrayData = [];
+    var PipelineArrayData = [];
+    $(function () {
+        var report_name = $("#pipelineReports").attr("data-val");
+        if (report_name === 'volumereconciliation' || report_name == 'energyreconciliation') {
+            createReconciliationTable(report_name);
+        }
+        else if (report_name == 'checkmetervolumereconciliation' || report_name == 'checkmeterenergyreconciliation') {
+            createCheckmeterTable(report_name);
+        }
+        else if (report_name == 'exceptionreconciliation') {
+            createExceptionTable();
+        }
+        else if (report_name == 'groupwiselinepack') {
+            createGrpLinepackTable();
+        }
+        else { }
+
+       $('.tableTag').click(function () {
+           var tabletype = $(this).attr("id");
+           //var frequency = $("input:radio[name='summaryperiod']:checked").val();
+           var frequency = $('#Duration_List').find(':selected').val();
+           var unitVal = $("#Unit_List").val();
+           var from_date = $("#FromdateValue").val();
+           var to_date = $("#TodateValue").val();
+
+           var myTable = $('#ReconcileData').DataTable();
+           var tr = $(this).closest("tr");
+           //console.log("tr:", tr);
+           var form_data = myTable.rows(tr).data();
+           //console.log("form_data:", form_data);
+           var check_id = '';
+           $.each(form_data, function (key, value, index) {
+               check_id = value["check_meter_id"];
+           });
+           //console.log("check_id:", check_id);
+           var data = '?type=' + tabletype + '&from_date=' + from_date + '&to_date=' + to_date + '&unit=' + unitVal + '&frequency=' + frequency + '&check_id=' + check_id + '';
+           //console.log('DATA:', data);
+           var url = '@Url.Content("~/Reconcile/TableViewer")' + data;
+           //window.location.href = url;
+           window.open(url, '_blank');
+    })
+       $('.downTag').click(function () {
+           var downtype = $(this).attr("data-val");
+           //var frequency = $("input:radio[name='summaryperiod']:checked").val();
+           var frequency = $('#Duration_List').find(':selected').val();
+           var unitVal = $("#Unit_List").val();
+           var from_date = $("#FromdateValue").val();
+           var to_date = $("#TodateValue").val();
+
+           var myTable = $('#ReconciliationData').DataTable();
+           var tr = $(this).closest("tr");
+           var tr_index = tr[0]["_DT_RowIndex"];
+           localStorage.setItem('trIndex', tr_index);
+
+           console.log("tr:", tr);
+           console.log("tr_index:", tr_index);
+           var form_data = myTable.rows(tr).data();
+           var pipeline_id = '';
+           $.each(form_data, function (key, value, index) {
+               pipeline_id = value["pipeline_id"];
+           });
+           //console.log("pipeline_id:", pipeline_id);
+
+           var data = 'rowIndex=' + tr_index + '&type=' + downtype + '&from_date=' + from_date + '&to_date=' + to_date + '&unit=' + unitVal + '&frequency=' + frequency + '&pipeline_id=' + pipeline_id + '';
+           //console.log('DATA:', data);
+
+            $.ajax({
+            type: "GET",
+            url: '@Url.Content("~/Reconcile/partialSectionViewer")',
+            data: data,
+            success: function (data) {
+                $("#TablePortion").html(data);
+                //$("#ReconcilePortion").html(data);
+                createPartialSectionTable();
+            },
+            "error": function (data) {
+                alert("Some Error Occured!");
+            }
+        });
+    })
+       $('.chartCheckTag').click(function () {
+           var tabletype = $(this).attr("data-val");
+           var from_date = $("#FromdateValue").val();
+           var to_date = $("#TodateValue").val();
+           //var frequency = $("input:radio[name='summaryperiod']:checked").val();
+           var frequency = $('#Duration_List').find(':selected').val();
+           var unitVal = $("#Unit_List").val();
+           var myTable = $('#ReconcileData').DataTable();
+           var tr = $(this).closest("tr");
+           var form_data = myTable.rows(tr).data();
+           var check_id = '';
+           var check_name = '';
+           $.each(form_data, function (key, value, index) {
+               check_id = value["check_meter_id"];
+               check_name = value["check_meter_name"];
+           });
+           //console.log("pipeline_id:", pipeline_id);
+           var data = '?type=' + tabletype + '&from_date=' + from_date + '&to_date=' + to_date + '&frequency=' + frequency + '&unit=' + unitVal + '&id=' + check_id + '&name=' + check_name +'';
+           console.log('DATA:', data);
+           var url = '@Url.Content("~/Reconcile/ChartViewer")' + data;
+           window.open(url, '_blank');
+       });
+    });
+
+    
+    function createReconciliationTable(reportName) {
+        var reportname = '';
+        if (reportName == 'volumereconciliation') { reportname = 'Volume' }
+        else { reportname = 'Energy' }
+        var unit_data = @TempData["UnitValue"];
+        var overall_json = @Html.Raw(Json.Encode(TempData["OverallData"]));
+        var reconcile_json = @Html.Raw(Json.Encode(TempData["ReconciliationData"]));
+        //console.log("reconcile_json:", reconcile_json);
+
+        OverallArrayData = overall_json;
+        PipelineArrayData = reconcile_json;
+
+        var columnsOverallData = [
+            { 'data': 'pipeline_id', 'title': 'Id' },
+            { 'data': 'pipeline_name', 'title': 'Overall', 'className': 'text-center' },
+            { 'data': 'opening_stock', 'title': 'OP Stock', 'className': 'text-center' },
+            { 'data': 'purchases', 'title': 'Purchase', 'className': 'text-center' },
+            { 'data': 'sales', 'title': 'Sale', 'className': 'text-center' },
+            { 'data': 'internal_consumption', 'title': 'IC', 'className': 'text-center' },
+            { 'data': 'closing_stock_derived', 'title': 'Closing Stock', 'className': 'text-center' },
+            { 'data': 'actual_closing_stock', 'title': 'Linepack', 'className': 'text-center' },
+            { 'data': 'loss_gain', 'title': 'Gain/(Loss)', 'className': 'text-center' },
+            { 'data': 'loss_gain_percentage', 'title': 'Gain/(Loss)%', 'className': 'text-center' },
+            { 'title': 'Action' }
+        ];
+        var columnsReconcileData = [
+            { 'data': 'pipeline_id', 'title': 'Id' },
+            { 'data': 'pipeline_name', 'title': 'Network' },
+            { 'data': 'opening_stock', 'title': 'OP Stock', 'className': 'text-center' },
+            { 'data': 'purchases', 'title': 'Purchase', 'className': 'text-center' },
+            { 'data': 'sales', 'title': 'Sale', 'className': 'text-center' },
+            { 'data': 'internal_consumption', 'title': 'IC', 'className': 'text-center' },
+            { 'data': 'closing_stock_derived', 'title': 'Closing Stock', 'className': 'text-center' },
+            { 'data': 'actual_closing_stock', 'title': 'Linepack', 'className': 'text-center' },
+            { 'data': 'loss_gain', 'title': 'Gain/(Loss)', 'className': 'text-center' },
+            { 'data': 'loss_gain_percentage', 'title': 'Gain/(Loss)%', 'className': 'text-center' },
+            { 'title': 'SLD', 'className': 'text-center' },
+            { 'title': 'Trend', 'className': 'text-center' },
+            { 'title': 'Action', 'className': 'text-center' }
+        ];
+
+        overall_table = $('#OverallData').DataTable({
+            data: OverallArrayData,
+            columns: columnsOverallData,
+            'processing': true,
+            'paging': false,
+            'searching': false,
+            'sorting': false,
+            'info': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            /*'order': [[1, 'asc']],*/
+            'columnDefs': [
+                { 'visible': false, 'targets': [0] },
+                { 'targets': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 'className': 'text-center' },
+                { 'orderable': false, 'targets': [10] },
+                { 'orderable': false, 'targets': [1, 2, 3, 4, 5, 6, 7, 8, 9] },
+                {
+                    'targets': [10], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="tableTag dropdown_icon" id="' + reportname +'">'
+                            + '<i class="fa fa-table nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [2, 3, 4, 5, 6, 7],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        return formmatedvalue;
+                    }
+                },
+                {
+                    'targets': [8],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                },
+                {
+                    'targets': [9],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                }
+            ]
+        })
+        pipeline_table = $('#ReconciliationData').DataTable({
+            data: PipelineArrayData,
+            columns: columnsReconcileData,
+            'processing': true,
+            'paging': false,
+            'searching': false,
+            'sorting': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            //'order': [[1, 'asc']],
+            //"language": {
+            //    oPaginate: {
+            //        sNext: '<i class="fa fa-forward"></i>',
+            //        sPrevious: '<i class="fa fa-backward"></i>'
+            //    },
+            //    'search': '',
+            //    'info': 'Showing page _PAGE_ of _PAGES_',
+            //    'lengthMenu': 'Rows :  _MENU_',
+            //    'loadingRecords': 'Processing...',
+            //    //'loadingRecords': '&nbsp;',
+            //    //'processing': 'Loading. Please wait...'
+            //},
+            'columnDefs': [
+                { 'visible': false, 'targets': [0] },
+                { 'orderable': false, 'targets': [10, 11, 12] },
+                { 'orderable': false, 'targets': [1, 2, 3, 4, 5, 6, 7, 8, 9] },
+                {
+                    'targets': [10], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="sldTag dropdown_icon" title="" data-val="' + reportname + '" data-content="pipeline">'
+                            + '<i class="fas fa-project-diagram nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [11], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="chartTag dropdown_icon" title="" data-val="' + reportname + '" data-content="pipeline">'
+                            + '<i class="fas fa-chart-line nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [12], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="downTag dropdown_icon" data-val="' + reportname + '" data-content="pipeline">'
+                            + '<i class="fa fa-chevron-down nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [2, 3, 4, 5, 6, 7],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        return formmatedvalue;
+                    }
+                },
+                {
+                    'targets': [8],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                },
+                {
+                    'targets': [9],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                }
+            ]
+        })
+
+    }
+    function createPartialSectionTable() {
+        var reportName = $("#pipelineReports").attr("data-val");
+        var report_name = '';
+        if (reportName == 'volumereconciliation') { report_name = 'Volume' }
+        else if (reportName == 'energyreconciliation') { report_name = 'Energy' }
+        else { }
+
+        var unit_data = @TempData["UnitValue"];
+        var section_json = @Html.Raw(Json.Encode(TempData["SectionData"]));
+        var section_type = @Html.Raw(Json.Encode(TempData["SectionType"]));
+        var section_index = @Html.Raw(Json.Encode(TempData["SectionIndex"]));
+
+        var row_name = 'mytr' + section_index;
+        console.log("row_name:", row_name);
+
+        if (partialsection_table != null && partialsection_table != undefined)
+        {
+            partialsection_table = null;
+            $('#ReconciliationData tbody').find('tr#' + row_name).remove();
+        }
+        else {
+            partialsectionTable(section_json, unit_data, section_type, section_index, report_name);
+        }
+
+    }
+
+    function createCheckmeterTable(reportName) {
+        console.log("reportName:", reportName);
+        var reportname = '';
+        if (reportName == 'checkmetervolumereconciliation') { reportname = 'Check Meter Volume' }
+        else { reportname = 'Check Meter Energy' }
+        var unit_data = @TempData["UnitValue"];
+        var reconcile_json = @Html.Raw(Json.Encode(TempData["ReconciliationData"]));
+
+        var columnsReconcileData = [
+                { 'data': 'check_meter_id', 'title': 'Check Meter Id' },
+                { 'data': 'pipeline_id', 'title': 'Pipeline Id' },
+                { 'data': 'check_meter_name', 'title': 'Check Meter Name', 'className': 'text-center' },
+                { 'data': 'supplier_meter_flow', 'title': 'Supply Meter Flow', 'className': 'text-center' },
+                { 'data': 'check_meter_flow', 'title': 'Check Meter Flow', 'className': 'text-center' },
+                { 'data': 'gail_loss', 'title': 'Gain/(Loss)', 'className': 'text-center' },
+                { 'data': 'gail_loss_per', 'title': 'Gain/(Loss)%', 'className': 'text-center' },
+                { 'title': 'Flow', 'className': 'text-center' },
+                { 'title': 'Trend', 'className': 'text-center' }
+            ];
+        $('#ReconcileData').DataTable({
+            data: reconcile_json,
+            columns: columnsReconcileData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[2, 'asc']],
+            'language': {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_',
+                'loadingRecords': 'Processing...'
+                //'loadingRecords': '&nbsp;',
+                //'processing': 'Loading. Please wait...'
+            },
+            'columnDefs': [
+                { 'visible': false, 'targets': [0, 1] },
+                { 'orderable': false, 'targets': [7, 8] },
+                {
+                    'targets': [7], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="tableTag dropdown_icon" data-val="' + reportname + '">'
+                            + '<i class="fa fa-table nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [8], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="chartCheckTag dropdown_icon" data-val="' + reportname + '">'
+                            + '<i class="fas fa-chart-line nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [3, 4],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        return formmatedvalue;
+                    }
+                },
+                {
+                    'targets': [5],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                },
+                {
+                    'targets': [6],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                }
+            ]
+        })
+
+    }
+    function createExceptionTable() {
+        var reconcile_json = @Html.Raw(Json.Encode(TempData["ReconciliationData"]));
+        //console.log('json_reconcile_data:', reconcile_json);
+
+        var columnsExceptionData = [
+            { 'data': 'id', 'title': 'Id' },
+            { 'data': 'data_dte', 'title': 'Time Stamp' },
+            { 'data': 'pipelinemst_name', 'title': 'Network' },
+            { 'data': 'exception_type', 'title': 'Exception Type' },
+            { 'data': 'module_name', 'title': 'Module Name' },
+            { 'data': 'exception_description', 'title': 'Exception Description' }
+        ];
+
+        $('#ReconcileData').DataTable({
+            data: reconcile_json,
+            columns: columnsExceptionData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[1, 'asc']],
+            "language": {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_',
+                'loadingRecords': 'Processing...'
+                //'loadingRecords': '&nbsp;',
+                //'processing': 'Loading. Please wait...'
+            },
+            'columnDefs': [
+                { 'visible': false, 'targets': [0] },
+                {
+                    'targets': [3],
+                    'render': function (data, type, full) {
+                        if (data == 'WARNING') {
+                            color = 'orange';
+                        }
+                        else {
+                            color = 'red';
+                        }
+                        return '<span style="color:' + color + '">' + data + '</span>';
+                    }
+                },
+            ]
+        })
+
+    }
+    function createGrpLinepackTable() {
+        var reconcile_json = @Html.Raw(Json.Encode(TempData["ReconciliationData"]));
+        //console.log('json_reconcile_data:', reconcile_json);
+
+        var columnsGrpLinepackData = [
+            { 'data': 'pipeline_grpid', 'title': 'Group Id' },
+            { 'data': 'pipeline_grp_name', 'title': 'Pipeline Group Name' },
+            { 'data': 'linepacksum', 'title': 'Linepack(SCM)' },
+            { 'title': 'Action', 'className': 'text-center' }
+        ];
+
+        $('#ReconcileData').DataTable({
+            data: reconcile_json,
+            columns: columnsGrpLinepackData,
+            'processing': true,
+            'paging': true,
+            'searching': false,
+            'lengthChange': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            'order': [[1, 'asc']],
+            "language": {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+                },
+                'search': '',
+                'info': 'Showing page _PAGE_ of _PAGES_',
+                'lengthMenu': 'Rows :  _MENU_',
+                'loadingRecords': 'Processing...'
+                //'loadingRecords': '&nbsp;',
+                //'processing': 'Loading. Please wait...'
+            },
+            'columnDefs': [
+                { 'visible': false, 'targets': [0] },
+                { 'orderable': false, 'targets': [3] },
+                //{
+                //    'targets': [2],
+                //    'render': function (data, type, full) {
+                //        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                //        return formmatedvalue;
+                //    }
+                //},
+                {
+                    'targets': [3], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="dropdown_icon" title="" onclick="">'
+                            + '<i class="fa fa-table nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                }
+            ]
+        })
+
+    }
+
+    function partialsectionTable(sectionJSON, unit_data, type, rowIndex, reportname)
+    {
+        partialsection_table = null;
+        var trname = 'mytr' + rowIndex;
+        var tablename = 'mytable' + rowIndex;
+        $("#ReconciliationData").find('tbody tr:eq(' + rowIndex + ')').after($('<tr>').attr('id', '' + trname + '')
+                .append($('<td>')
+                    .attr('colspan', '13')
+                    .append($('<table>')
+                        .attr('id', ''+ tablename +'')
+                        .attr('class', 'table table-bordered table-striped')
+                    )
+                )
+            );
+
+        var columnSectionData = [
+            { 'data': 'section_id', 'title': 'Id' },
+            { 'data': 'pipeline_id', 'title': 'pipeline_id' },
+            { 'data': 'section_name', 'title': 'Section Name', 'className': 'text-center' },
+            { 'data': 'opening_stock', 'title': 'OP Stock', 'className': 'text-center' },
+            { 'data': 'purchases', 'title': 'Purchase', 'className': 'text-center' },
+            { 'data': 'sales', 'title': 'Sale', 'className': 'text-center' },
+            { 'data': 'internal_consumption', 'title': 'IC', 'className': 'text-center' },
+            { 'data': 'closing_stock_derived', 'title': 'Closing Stock', 'className': 'text-center' },
+            { 'data': 'actual_closing_stock', 'title': 'Linepack', 'className': 'text-center' },
+            { 'data': 'loss_gain', 'title': 'Gain/(Loss)', 'className': 'text-center' },
+            { 'data': 'loss_gain_percentage', 'title': 'Gain/(Loss)%', 'className': 'text-center' },
+            { 'title': 'SLD', 'className': 'text-center' },
+            { 'title': 'Trend', 'className': 'text-center' }
+        ];
+        partialsection_table = $('#' + tablename).DataTable({
+            data: sectionJSON,
+            columns: columnSectionData,
+            'processing': true,
+            'paging': false,
+            'searching': false,
+            'sorting': false,
+            'info': false,
+            'scrollY': '350px',
+            'scrollCollapse': true,
+            //'order': [[2, 'asc']],
+            'columnDefs': [
+                { 'visible': false, 'targets': [0, 1] },
+                { 'orderable': false, 'targets': [11, 12] },
+                {
+                    'targets': [11], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="sldTag dropdown_icon" title="" data-val="' + reportname + '" data-content="section">'
+                            + '<i class="fas fa-project-diagram nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [12], 'type': 'string',
+                    'render': function (data, type, full, meta) {
+                        data = '<a class="chartTag dropdown_icon" title="" data-val="' + reportname + '" data-content="section">'
+                            + '<i class="fas fa-chart-line nav-icon1"></i>'
+                            + '</a>'
+                        return data;
+                    }
+                },
+                {
+                    'targets': [3, 4, 5, 6, 7, 8],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        return formmatedvalue;
+                    }
+                },
+                {
+                    'targets': [9],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data) / unit_data).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                },
+                {
+                    'targets': [10],
+                    'render': function (data, type, full) {
+                        var formmatedvalue = (parseFloat(data)).toFixed(2);
+                        if (parseFloat(formmatedvalue) < 0) {
+                            color = 'red';
+                        } else {
+                            color = 'green';
+                        }
+                        return '<span style="color:' + color + '">' + formmatedvalue + '</span>';
+                    }
+                }
+            ]
+        })
+    }
+
+</script>

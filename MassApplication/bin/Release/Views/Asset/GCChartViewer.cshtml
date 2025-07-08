@@ -1,0 +1,230 @@
+﻿
+@{
+    ViewBag.Title = "Chart Viewer";
+}
+
+<style>
+    .plainCard {
+        width: 100%;
+        height: 350px;
+    }
+
+    .stickyHeader {
+        text-align: center;
+        font-size: 18px;
+        color: tomato;
+    }
+
+    .page-title {
+        margin: 5px 0;
+        font-size: 20px;
+        font-weight: bolder;
+    }
+</style>
+
+<section class="content">
+    <div class="container contain_min">
+        <div class="row mt-2">
+            <div class="col-12 pt-1">
+                <div id="main-container" class="row">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="~/Scripts/Chart-js/chart.js"></script>
+<!-- SCRIPT FOR DRAW AND CREATE CHART -->
+<script>
+    $(document).ready(function () {
+        var chartmodel1 = @Html.Raw(Json.Encode(ViewBag.GCDiagnosticC1_C6));
+        var chartmodel2 = @Html.Raw(Json.Encode(ViewBag.GCDiagnosticC126));
+        var chartmodel3 = @Html.Raw(Json.Encode(ViewBag.GCDiagnosticC345));
+        console.log("chartmodel1:", chartmodel1);
+        console.log("chartmodel2:", chartmodel2);
+        console.log("chartmodel3:", chartmodel3);
+
+        var chartvalue1 = @Html.Raw(Json.Encode(ViewBag.GCValueC1_C6));
+        var chartvalue2 = @Html.Raw(Json.Encode(ViewBag.GCValueC126));
+        var chartvalue3 = @Html.Raw(Json.Encode(ViewBag.GCValueC345));
+        console.log("chartvalue1:", chartvalue1);
+        console.log("chartvalue2:", chartvalue2);
+        console.log("chartvalue3:", chartvalue3);
+
+        var chartData = [];
+        chartData.push(chartmodel1);
+        chartData.push(chartmodel2);
+        chartData.push(chartmodel3);
+
+        var headerText = [];
+        headerText.push('GC DIAGNOSTIC (GAS C1,C2,C3,nC4,nC5,C6)');
+        headerText.push('GC DIAGNOSTIC (GAS C1,C2,C6))');
+        headerText.push('GC DIAGNOSTIC (GAS C3,nC4,nC5)');
+
+
+        var chartValue = [];
+        chartValue.push('GcDiagnosticC1_C6');
+        chartValue.push('GcDiagnosticC126');
+        chartValue.push('GcDiagnosticC345');
+
+        DrawChart(headerText, chartData, chartValue, chartvalue1);
+
+    });
+
+    function DrawChart(headingText, chartData, chartVal, chartNum)
+    {
+        var newNote = '';
+
+        for (var i = 0; i < 3; i++) {
+            if (chartData[i].length != 0) {
+                //newNote = $("<div class='card mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                //    + "<div class='card-header border-0'><h3 class='card-title'>"
+                //    + "<i class='fa fa-th mr-1'></i>" + headingText[i] + "</h3></div>"
+                //    + "<div class='card-body chartCard" + i + "'>"
+                //    + "<canvas id='myChart" + i + "' class='chartCanvas'></canvas>"
+                //    + "</div></div>");
+                var numData = '';
+                for (var j = 0; j < chartNum.length; j++) {
+                    if (chartVal[i] == chartNum[j]['type']) {
+                        numData = chartNum[j]['corr'];
+                    }
+                }
+                //console.log('numData:', numData);
+
+                newNote = $("<div class='card ml-3 mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                    + "<div class='card-header pb-0 border-0'><h2 class='mr-2 card-title w-100 stickyHeader' id='mainHeader" + i + "'>" + headingText[i] + "</h2>"
+                    + "<h5 class='mr-2 card-title w-100' style='text-align: center;font-size: 18px;color: blue;'> R<sup>2</sup> = " + numData +"</h5>"
+                    + "<h5 class='mr-2 card-title w-100' style='text-align:center;font-size:14px;color: tomato;'>Log(MASS) Vs. Log(RF)</h5></div>"
+                    + "<div class='card-body pt-0 chartCard" + i + "'>"
+                    + "<canvas id='myChart" + i + "' class='chartCanvas'></canvas>"
+                    + "</div></div>");
+
+                $("#main-container").append(newNote);
+                createChart(chartData[i], i);
+            }
+            else {
+                //newNote = $("<div class='card mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                //    + "<div class='card-header border-0'><h3 class='card-title'>"
+                //    + "<i class='fa fa-th mr-1'></i>" + headingText[i] + "</h3></div>"
+                //    + "<div class='card-body align-items-center d-flex justify-content-center chartCard" + i + "'' style='font-size:12px;font-weight:bold;color:#666666;fill:#666666;'>No data to display"
+                //    + "</div></div>");
+
+                newNote = $("<div class='card ml-3 mt-3 mr-3 plainCard' id='sticky" + i + "'>"
+                    + "<div class='card-header pb-0 border-0'><h2 class='mr-2 card-title w-100 stickyHeader' id='mainHeader" + i + "'>" + headingText[i] + "</h2>"
+                    + "<h5 class='mr-2 card-title w-100' style='text-align:center;font-size:12px;'>Log(MASS) Vs. Log(RF)</h5></div>"
+                    + "<div class='card-body align-items-center d-flex justify-content-center chartCard" + i + "'' style='font-size:12px;font-weight:bold;color:#666666;fill:#666666;'>No data to display"
+                    + "</div></div>");
+
+                $("#main-container").append(newNote);
+            }
+        }
+    }
+
+    function createChart(model, id) {
+        var dataSet = [];
+        var labelSet = [];
+
+        for (let i = 0; i < model.length; i++) {
+            labelSet.push(model[i]["log_mass"]);
+            dataSet.push(model[i]["log_rf"]);
+        }
+        var data = {
+            labels: labelSet,
+            datasets: [{
+                label: 'Value',
+                data: dataSet,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgb(75, 192, 192)'
+            }]
+        };
+
+        var config = {
+            type: 'line',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                        position: 'bottom',
+                        align: 'center',
+                        labels: {
+                            boxWidth: 20,
+                            font: {
+                                size: 15,
+                                family: 'Arial',
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    tooltips: {
+                        enabled: true
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: 'Log(MASS)',
+                            font: {
+                                family: 'Arial',
+                                size: 10,
+                                style: 'normal',
+                            },
+                            padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                        },
+                        ticks: {
+                            display: true,
+                            font: {
+                                family: 'Arial',
+                                size: 10,
+                                //weight: 'bold',
+                                //align: 'center',
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        stacked: false,
+                        title: {
+                            display: true,
+                            text: 'Log(RF)',
+                            font: {
+                                family: 'Arial',
+                                size: 10,
+                                style: 'normal',
+                            },
+                            padding: { top: 30, left: 0, right: 0, bottom: 0 }
+                        },
+                        ticks: {
+                            display: true,
+                            font: {
+                                family: 'Arial',
+                                size: 10,
+                                //weight: 'bold',
+                                //align: 'center',
+                            }
+                        },
+                        grid: {
+                            display: true
+                        }
+                    }
+                }
+            }
+        };
+
+        var chartElement = "myChart" + id;
+        var ctx = document.getElementById(chartElement).getContext('2d');
+
+        var temp = jQuery.extend(true, {}, config);
+        temp.type = 'line';
+        var myChart = new Chart(ctx, temp);
+    }
+
+</script>
+

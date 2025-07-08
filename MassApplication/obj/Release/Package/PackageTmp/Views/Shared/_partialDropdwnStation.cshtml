@@ -1,0 +1,6 @@
+﻿@model MassApplication.Models.Input_Class
+
+
+@Html.DropDownList("paramsdata", new SelectList(Model.AvailableStations, "Text", "Value"), "--SELECT--", new { @class = "form-control drop_down_daily" })
+
+

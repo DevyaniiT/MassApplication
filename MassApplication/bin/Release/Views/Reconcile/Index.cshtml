@@ -1,0 +1,313 @@
+﻿@model MassApplication.Models.InputClass
+
+@{
+    ViewBag.Title = ViewBag.titlename;
+}
+
+<link href="~/MasterStyles/css/WebPageStyle.css" rel="stylesheet" />
+
+<section class="content">
+    <div class="container contain_min">
+        <div class="row mt-2">
+            <div class="col-12 pt-1">
+                <div class="card">
+                    <div class="card-header border-0">
+                        <h3 class="ml-3" id="mainHeader">@ViewBag.Title</h3>
+                    </div>
+                    <!-- card-body -->
+                    <div id="pipelineReports" class="card-body" data-val="@ViewBag.UrlData">
+                        @if (ViewBag.UrlData == "volumereconciliation" || ViewBag.UrlData == "energyreconciliation" || ViewBag.UrlData == "checkmetervolumereconciliation" || ViewBag.UrlData == "checkmeterenergyreconciliation")
+                        {
+                            @Html.Partial("~/Views/Shared/_ReconcileView.cshtml")
+
+                            <div id="TablePortion">
+                                @{Html.RenderAction("TableViewerData", "Reconcile", new { menuName = ViewBag.Title });}
+                            </div>
+
+                        }
+                        else if (ViewBag.UrlData == "exceptionreconciliation" || ViewBag.UrlData == "groupwiselinepack")
+                        {
+                            <input type="hidden" id="titlename" name=titlename value="@ViewBag.titlename" />
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-11">
+                                    <div id="Daily">
+                                        <div class="ml-4" style=" float: left; max-width: 80%; min-width: auto;">
+                                            <label ID="Label3" class="cust-lable"> Date </label>
+                                            <input class="form-control1 calender-input" style="width: 76% !important;" type="date" id="TxtExceptionDate" name="TxtDate" placeholder="YYYY-MM-DD" value="@ViewBag.CurrentDate" />
+                                        </div>
+                                    </div>
+
+                                    @*<button id="btnExceptionSubmit" class="btn btn-dash" title="Load"><i class="fas fa-upload"></i></button>
+                                    <button id="btnExceptionExport" class="btn btn-success" title="Export"><i class="fas fa-file-export" style="font-size: 16px; border-radius: 5px"></i></button>*@
+
+                                    <div style="float: left; width: 10%;">
+                                        <a id="btnExceptionSubmit" class="ml-2"><img src="~/Images/load.png" alt="Load" title="Load" style="width: 29px; height: 29px; cursor: pointer;" /></a>
+                                        <a id="btnExceptionExport"><img src="~/Images/export.png" alt="Export" title="Export" style="width: 31px; height: 32px; cursor: pointer;" /></a>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div id="TablePortion">
+                                @{Html.RenderAction("TableViewerData", "Reconcile", new { menuName = ViewBag.Title });}
+                            </div>
+                        }
+                        else { }
+                    </div>
+                    <!-- card-body -->
+                </div>
+                <!-- card -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="~/MasterStyles/js/WebPageScript.js"></script>
+<script>
+    $(document).ready(function () {
+        var url_name = $('#pipelineReports').attr('data-val');
+        if (url_name == 'groupwiselinepack') {
+            //$('#btnExceptionExport').addClass('disabled');
+            //$("#btnExceptionExport").prop('disabled', true);
+            //$('#btnExceptionExport').attr("disabled", "disabled");
+            $('#btnExceptionExport').attr("href", "javascript:void(0);");
+            $('#btnExceptionExport').off('click');
+        }
+    })
+    $('#btnSubmit').click(function () {
+        var title_name = $("#titlename").val();
+        //var duration = $("input:radio[name='summaryperiod']:checked").val();
+        var duration = $('#Duration_List').find(':selected').val();
+        var unitVal = $("#Unit_List").val();
+
+        var from_date = '';
+        var to_date = '';
+        var monthVal = '';
+        var yearVal = '';
+        var dayVal = '';
+
+        if (duration.toLowerCase() === "fortnightly") {
+            dayVal = $("#Fortnightly_DayList").val();
+            monthVal = $("#Fortnightly_MonthList").val();
+            yearVal = $("#Fortnightly_YearList").val();
+        }
+        else if (duration.toLowerCase() === "hourly") {
+            from_date = $("#HourlyTxtDate").val();
+            to_date = $("#HourlyTxtDate").val();
+            yearVal = $("#Hourly_HourList").val();
+        }
+        else if (duration.toLowerCase() === "monthly") {
+            monthVal = $("#Monthly_MonthList").val();
+            yearVal = $("#Monthly_YearList").val();
+        }
+        else if (duration.toLowerCase() === "quarterly") {
+            monthVal = $("#Quarterly_QuarterList").val();
+            yearVal = $("#Quarterly_YearList").val();
+        }
+        else if (duration.toLowerCase() === "halfyearly") {
+            monthVal = $("#HalfYearly_MonthList").val();
+            yearVal = $("#HalfYearly_YearList").val();
+        }
+        else if (duration.toLowerCase() === "yearly") {
+            yearVal = $("#Yearly_YearList").val();
+        }
+        else if (duration.toLowerCase() === "custom") {
+            from_date = $("#FromTxtDate").val();
+            to_date = $("#ToTxtDate").val();
+        }
+        else {
+            from_date = $("#TxtDate").val();
+            to_date = $("#TxtDate").val();
+        }
+
+        var data = 'titlename=' + title_name + '&unit=' + unitVal + '&duration=' + duration + '&fromDate=' + from_date + '&toDate=' + to_date + '&monthname=' + monthVal + '&day=' + dayVal + '&yearname=' + yearVal;
+        //console.log("DATA:", data);
+
+         $.ajax({
+            type: "GET",
+            url: '@Url.Content("~/Reconcile/ReconcileViewer")',
+            data: data,
+            success: function (data) {
+                $("#TablePortion").html(data);
+            },
+            "error": function (data) {
+                alert("Some Error Occured!");
+            }
+        });
+    });
+    $('#btnExport').click(function () {
+        var title_name = $("#titlename").val();
+        //title_name = title_name.substr(0, title_name.indexOf(' '));
+
+        var txtArray = title_name.split(/\s+/);
+        txtArray = txtArray.slice(0, -1);
+        let text = txtArray.join("");
+        //console.log("txtArray:", txtArray);
+        //console.log("text:", text);
+
+        //var duration = $("input:radio[name='summaryperiod']:checked").val();
+        var duration = $('#Duration_List').find(':selected').val();
+        var unitVal = $("#Unit_List").val();
+        var data = '';
+
+        var from_date = '';
+        var to_date = '';
+        var monthVal = '';
+        var yearVal = '';
+        var dayVal = '';
+
+        if (duration.toLowerCase() === "fortnightly") {
+             dayVal = $("#Fortnightly_DayList").val();
+             monthVal = $("#Fortnightly_MonthList").val();
+             yearVal = $("#Fortnightly_YearList").val();
+            data = 'year=' + yearVal + '&month=' + monthVal + '&day=' + dayVal + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+         }
+        else if (duration.toLowerCase() === "hourly") {
+            from_date = $("#HourlyTxtDate").val();
+            to_date = $("#HourlyTxtDate").val();
+            //yearVal = $("#Hourly_HourList").val();
+            data = 'from_date=' + from_date + '&from_date=' + to_date + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+        }
+        else if (duration.toLowerCase() === "monthly") {
+            monthVal = $("#Monthly_MonthList").val();
+            yearVal = $("#Monthly_YearList").val();
+            data = 'year=' + yearVal + '&month=' + monthVal + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+        }
+        else if (duration.toLowerCase() === "quarterly") {
+            monthVal = $("#Quarterly_QuarterList").val();
+            yearVal = $("#Quarterly_YearList").val();
+            data = 'year=' + yearVal + '&month=' + monthVal + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+        }
+        else if (duration.toLowerCase() === "halfyearly") {
+            monthVal = $("#HalfYearly_MonthList").val();
+            yearVal = $("#HalfYearly_YearList").val();
+            data = 'year=' + yearVal + '&month=' + monthVal + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+        }
+        else if (duration.toLowerCase() === "yearly") {
+            yearVal = $("#Yearly_YearList").val();
+            data = 'year=' + yearVal + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+        }
+        else if (duration.toLowerCase() === "custom") {
+            from_date = $("#FromTxtDate").val();
+            to_date = $("#ToTxtDate").val();
+            data = 'from_date=' + from_date + '&to_date=' + to_date + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+        }
+        else {
+            from_date = $("#TxtDate").val();
+            data = 'data_date=' + from_date + '&duration=' + duration + '&unit=' + unitVal + '&pipeline_id=all&type=' + text;
+         }
+
+         var url = '@Url.Content("~/WebForms/NetworkReconciliationForm.aspx?")' + data;
+         //Response.Redirect(pageurl);
+         window.open(url, '_blank');
+    });
+    $('#btnExceptionSubmit').click(function () {
+        var title_name = $("#titlename").val();
+        var from_date = $("#TxtExceptionDate").val();
+        var data = 'titlename=' + title_name + '&fromDate=' + from_date;
+        //console.log("DATA:", data);
+
+         $.ajax({
+            type: "GET",
+            url: '@Url.Content("~/Reconcile/ExceptionViewer")',
+            data: data,
+            success: function (data) {
+                $("#TablePortion").html(data);
+            },
+            "error": function (data) {
+                alert("Some Error Occured!");
+            }
+        });
+    });
+    $('#btnExceptionExport').click(function () {
+        var title_name = $("#titlename").val();
+        var txtArray = title_name.split(/\s+/);
+        txtArray = txtArray.slice(0, -1);
+        let text = txtArray.join("");
+        //console.log("txtArray:", txtArray);
+        //console.log("text:", text);
+
+        //var unitVal = $("#Unit_List").val();
+        var from_date = $("#TxtExceptionDate").val();
+        var data = 'data_date=' + from_date + '&duration=daily&pipeline_id=all&type=' + text;
+
+         var url = '@Url.Content("~/WebForms/NetworkReconciliationForm.aspx?")' + data;
+         window.open(url, '_blank');
+    });
+    $(document).on('click', '.chartTag', function () {
+        var tabletype = $(this).attr("data-val");
+        var network_type = $(this).attr("data-content");
+        var tr = $(this).closest("tr");
+        var from_date = $("#FromdateValue").val();
+        var to_date = $("#TodateValue").val();
+        //var frequency = $("input:radio[name='summaryperiod']:checked").val();
+        var frequency = $('#Duration_List').find(':selected').val();
+        var unitVal = $("#Unit_List").val();
+        var pipeline_id = '';
+        var pipeline_name = '';
+        var section_id = '';
+        var section_name = '';
+        var data = '';
+        if (network_type.toLowerCase() == 'section') {
+            var rowIndex = localStorage.getItem('trIndex');
+            var tablename = 'mytable' + rowIndex;
+            console.log("Table name:", tablename);
+            var myTable = $('#' + tablename).DataTable();
+            var form_data = myTable.rows(tr).data();
+            $.each(form_data, function (key, value, index) {
+                pipeline_id = value["pipeline_id"];
+                section_id = value["section_id"];
+                section_name = value["section_name"];
+            });
+            data = '?type=' + tabletype + '&from_date=' + from_date + '&to_date=' + to_date + '&frequency=' + frequency + '&unit=' + unitVal + '&typename=' + network_type + '&pipeline_id=' + pipeline_id + '&id=' + section_id + '&name=' + section_name + '';
+        }
+        else {
+            var myTable = $('#ReconciliationData').DataTable();
+            var form_data = myTable.rows(tr).data();
+            $.each(form_data, function (key, value, index) {
+                pipeline_id = value["pipeline_id"];
+                pipeline_name = value["pipeline_name"];
+            });
+            data = '?type=' + tabletype + '&from_date=' + from_date + '&to_date=' + to_date + '&frequency=' + frequency + '&unit=' + unitVal + '&typename=' + network_type + '&pipeline_id=' + pipeline_id + '&name=' + pipeline_name + '';
+        }
+        //var data = '?type=' + tabletype + '&from_date=' + from_date + '&to_date=' + to_date + '&frequency=' + frequency + '&unit=' + unitVal + '&typename=' + network_type + '&id=' + pipeline_id + '&name=' + pipeline_name + '';
+        console.log('DATA:', data);
+        var url = '@Url.Content("~/Reconcile/ChartViewer")' + data;
+        window.open(url, '_blank');
+    });
+    $(document).on('click', '.sldTag', function () {
+        var tabletype = $(this).attr("data-val");
+        var network_type = $(this).attr("data-content");
+        var from_date = $("#FromdateValue").val();
+        var to_date = $("#TodateValue").val();
+        var tr = $(this).closest("tr");
+        //console.log("tr:", tr);
+        var pipeline_id = '';
+        if (network_type.toLowerCase() == 'section') {
+            var rowIndex = localStorage.getItem('trIndex');
+            var tablename = 'mytable' + rowIndex;
+            console.log("Table name:", tablename);
+            var myTable = $('#' + tablename).DataTable();
+            var form_data = myTable.rows(tr).data();
+            $.each(form_data, function (key, value, index) {
+                pipeline_id = value["section_id"];
+            });
+        }
+        else {
+            var myTable = $('#ReconciliationData').DataTable();
+            var form_data = myTable.rows(tr).data();
+            $.each(form_data, function (key, value, index) {
+                pipeline_id = value["pipeline_id"];
+            });
+        }
+
+        //console.log("check_id:", check_id);
+        var data = '?type=' + tabletype + '&from_date=' + from_date + '&to_date=' + to_date + '&typename=' + network_type + '&id=' + pipeline_id + '';
+        console.log('DATA:', data);
+        var url = '@Url.Content("~/Reconcile/SLDViewer")' + data;
+        window.open(url, '_blank');
+    });
+</script>
+
+

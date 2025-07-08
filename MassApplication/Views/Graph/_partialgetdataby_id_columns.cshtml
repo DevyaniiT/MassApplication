@@ -1,0 +1,1520 @@
+﻿@using MassApplication.Models.Graph;
+@model ChartParameters
+@using System.Data;
+
+<div class="row">
+    @if (@Session["Data_id"] != null)
+    {
+        if (Convert.ToString(@Session["edit_select"]) != "")
+        {
+            <ul id="lstproducts" style="list-style:none; padding:0;">
+                @foreach (var item in Model.keyvalue_tuple)
+                {
+                    <li draggable="true" class="list_css card2 draggable" ondragstart="drag(event)" data-id="@item.Key" data-content="@item.Key"> @item.Key </li>
+                    @*<li class="list_css"> @datatbl.Value </li>
+                        <input type="hidden" value=@item.Value />*@
+
+
+                    @*<a class="card2 draggable" href="#" data-id="@item.Key">
+                            <p class="p-2 draggable" draggable="true" data-id="@item.Key"><span class="pr-3"></span>@item.Key</p>
+                        </a>*@
+                    @*</li>*@
+                }
+            </ul>
+        }
+        else
+        {
+            <ul id="lstproducts" style="list-style:none; padding:0;">
+                @foreach (var item in Model.keyvalue_tuple)
+                {
+
+                    <li draggable="true" class="list_css card2 draggable" data-id="@item.Key"> @item.Key </li>
+                    @*<li class="list_css"> @datatbl.Value </li>
+                        <input type="hidden" value=@item.Value />*@
+
+
+                    @*<a class="card2 draggable" href="#" data-id="@item.Key">
+                            <p class="p-2 draggable" draggable="true" data-id="@item.Key"><span class="pr-3"></span>@item.Key</p>
+                        </a>*@
+                    @*</li>*@
+                }
+            </ul>
+        }
+    }
+</div>
+
+<script>
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        //ev.dataTransfer.setData("text", ev.target.id);
+        //jQuery.event.props.push('dataTransfer');
+        //event.originalEvent.dataTransfer.setData("text/plain",  ev.target.getAttribute("data-id"));
+        ev.dataTransfer.setData("input", ev.target.getAttribute("data-id"));
+        //console.log("DRAG:", KpiId);
+        console.log("DRAG:", ev.target.getAttribute("data-id"));
+
+    }
+    function drop(ev) {
+        ev.preventDefault();
+        var KpiId = ev.dataTransfer.getData("input");
+        ev.target.append(KpiId);
+        document.getElementById(ev.target.id).value = KpiId;
+        console.log("DRAG:", KpiId);
+        console.log("DRAG:", document.getElementById(ev.target.id).value);
+    }
+</script>
+<script>
+    $('.draggable').draggable({
+        containment: ".panel-container",
+        scroll: false,
+        revert: "invalid",
+        stack: ".draggable",
+        helper: 'clone'
+    });
+</script>
+<!-- CLICK EVENT FOR LOAD CHART -->
+<script>
+    $('#loadchart1').click(function () {
+        var imagedata = $('#container').find('.card-img-top').attr('alt');
+        $('#container').hide();
+        $("#saviid").show();
+        document.getElementById('chartDiv').style.display = "block";
+        var model = @Html.Raw(Json.Encode(Model.json_tuple));
+        var dictData = [];
+        var dta = "a";
+        var chartpara = "";
+        if (imagedata != "tabular" && imagedata != "label") {
+            var id, trimid, name;
+            $('.drag-style input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                chartpara += grade;
+                id = $(item).attr("id");
+                name = $(item).attr("name");
+                trimgrade = grade.trim();
+                trimid = id.trim();
+
+                var myObject = eval('(' + model + ')');
+                var grade = [];
+                if (trimgrade !== "" && trimid !== "") {
+                    for (i in myObject) {
+                        storedata = myObject[i][trimgrade]
+                        grade.push(storedata);
+                    }
+                    dictData.push({
+                        key: id,
+                        value: grade
+                    });
+                }
+            });
+
+            if (imagedata == "bar" || imagedata == "line" || imagedata == "line_threshold" || imagedata == "bar_threshold" || imagedata == "heatmap" || imagedata == "histogram") { }
+                $('.drag-style1 input[type=search]').each(function (i, item) {
+                    var grade = $(item).val();
+                    chartpara += grade;
+                    id = $(item).attr("data_id_name");
+                    name = $(item).attr("name");
+                    trimgrade = grade.trim();
+                    trimid = id.trim();
+                    var myObject = eval('(' + model + ')');
+                    var grade = [];
+
+                    if (trimgrade !== "" && trimid !== "") {
+                        for (i in myObject) {
+                            storedata = myObject[i][trimgrade]
+                            grade.push(storedata);
+                        }
+                        dictData.push({
+                            key: id,
+                            value: grade
+                        });
+                    }
+
+                });
+
+            if (imagedata == "line_threshold" || imagedata == "bar_threshold") {
+                $('.drag-style2 input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                chartpara += grade;
+                id = $(item).attr("data_id_name");
+                name = $(item).attr("name");
+                trimgrade = grade.trim();
+                trimid = id.trim();
+                var myObject = eval('(' + model + ')');
+                var grade = [];
+
+                if (trimgrade !== "" && trimid !== "") {
+                    for (i in myObject) {
+                        storedata = myObject[i][trimgrade]
+                        grade.push(storedata);
+                    }
+                    dictData.push({
+                        key: id,
+                        value: grade
+                    });
+                }
+
+                });
+            }
+
+            console.log("dictData:", dictData);
+        }
+
+        if (imagedata == "label")
+        {
+            $("#myChart").hide();
+            $('#tabular_container').hide();
+            $('#labelgraph_container').show();
+            //label_plot1();
+            plot_label();
+        }
+        else
+        {
+            if (imagedata == "tabular") {
+                $("#myChart").hide();
+                $('#labelgraph_container').hide();
+                $('#tabular_container').show();
+                //tabular1(dictData);
+                Newtabular();
+            }
+            if (imagedata != "label" && imagedata != "tabular") {
+
+                $("#myChart").show();
+                $('#tabular_container').hide();
+                $('#labelgraph_container').hide();
+                DrowTheGraph(dictData, imagedata);
+            }
+        }
+        });
+</script>
+<!-- CREATING DYNAMIC CHART -->
+<script type="text/javascript">
+    var myChart;
+    var myChartConfig;
+    var script;
+    function plot_label() {
+        var colors;
+        var formData = decodeURIComponent($('form').serialize());
+        //var formData = unescape($('form').serialize());
+        formData = formData.split("&remove_");
+        //console.log("formData:", formData);
+        var newData = [];
+        for (let i = 0; i < formData.length; i++) {
+            let obj = {};
+            for (let entry of formData[i].split("&")) {
+                let pair = entry.split("=");
+                if (pair[0].toLowerCase() == 'label') {
+                    if (pair[1] == null || pair[1] == '') {
+                        obj = null
+                        i++;
+                        break;
+                    }
+                    else {
+                        obj[pair[0]] = pair[1];
+                    }
+                }
+                //if (pair[1] == null || pair[1] == '') {
+                //    //obj[pair[0]] = pair[1];
+                //    obj = null
+                //    i++;
+                //    break;
+                //}
+                else
+                {
+                    obj[pair[0]] = pair[1];
+                }
+            }
+            newData.push(obj);
+        }
+
+        console.log("newData:", newData);
+        
+        $('.drag-style input[name=togglePaletteOnly]').each(function (i, item) {
+            colors = $(item).val();
+        });
+
+        if (colors == "") {
+            //colors = "rgb(255, 235, 205)";
+            colors = "rgb(111, 168, 220)";
+        }
+        newData[0]["togglePaletteOnly"] = colors;
+
+        $.ajax({
+            type: "POST",
+            url: '../Graph/_partialLabelChart',
+            data: { jsonInput: JSON.stringify(newData) },
+            success: function (data) {
+                if (data.startsWith("ERROR")) {
+                    var res = data.split(";");
+                    var error = '';
+                    if (res.length > 1) {
+                        error = res[1];
+                    } else {
+                        error = data;
+                    }
+                    alert(error);
+                }
+                else {
+                    $('#container_chart').hide;
+                    $('#labelgraph_container').empty();
+                    $("#labelgraph_container").append(data);
+
+                }
+            },
+            error: function (error) {
+                alert('Label cannot be null!!!');
+            }
+
+        });
+
+    }
+    function plot_label1() {
+        var dictData = [];
+        var labels, captions, selects, colors;
+        $('.drag-style input[type=search]').each(function (i, item) {
+            var grade = $(item).val();
+            grade = "" + grade + "";
+            //id = $(item).attr("id");    //trimid: XAxis,Heigth,Group,Color
+            id = $(item).attr("data-id");    //trimid: XAxis,Heigth,Group,Color
+            trimgrade = grade.trim();
+            trimid = id.trim();
+            dictData.push({
+                key: id,
+                value: grade
+            });
+        });
+        var chartpara = "";
+        var name1 = "";
+        for (let i = 0; i < dictData.length; i++) {
+
+            if (i == 0) {
+                labels = dictData[i].value;
+            }
+            else if (i == 1) {
+
+                captions = dictData[i].value;
+                if (captions == "") {
+                    captions = labels;
+                    vale = captions;
+                }
+                else {
+                    captions = dictData[i].value;;
+                    vale = captions;
+                }
+            }
+        }
+        $('.drag-style select[name=drop_down_label]').each(function (i, item) {
+            selects = $(item).val();
+        });
+        $('.drag-style input[type =text]').each(function (i, item) {
+            colors = $(item).val();
+        });
+
+        if (colors == "") {
+            colors = "rgb(255, 235, 205)";
+        }
+
+        $.ajax(
+            {
+                type: "POST",
+                url: '../Graph/_partialgetdataby_label',
+                datatype: "html",
+                //data: { columnname: chartpara, name: name1},
+                data: { label1: labels, caption1: captions, select1: selects, color1: colors },
+                //success: function (data) {
+                //    if (data) {
+
+                //        $('#container_chart').hide;
+                //        $('#labelgraph_container').empty();
+                //        $("#labelgraph_container").append(data);
+
+
+                //    }
+                //}
+
+                success: function (data) {
+                    if (data.startsWith("ERROR")) {
+                        var res = data.split(";");
+                        var error = '';
+                        if (res.length > 1) {
+                            error = res[1];
+                        } else {
+                            error = data;
+                        }
+                        alert(error);
+                    }
+                    else {
+                        $('#container_chart').hide;
+                        $('#labelgraph_container').empty();
+                        $("#labelgraph_container").append(data);
+
+                    }
+                },
+                error: function (error) {
+                    alert('Label cannot be null!!!');
+                }
+
+            });
+
+    }
+    function label_plot2() {
+            var dictData = [];
+            var chartpara = "";
+            var name1 = "";
+
+            var resultJSON = @Html.Raw(Json.Encode(Model.chart_selected_params_edit));
+            $('.drag-style select[name=drop_down_label]').each(function (i, item) {
+                selects = $(item).val();
+            });
+            $('.drag-style input[type =text]').each(function (i, item) {
+                colors = $(item).val();
+            });
+            $.ajax(
+                {
+                    type: "POST",
+                    url: '../Graph/_partialgetdataby_label_edit',
+                    datatype: "html",
+                    data: { columnname: resultJSON, select1: selects, color1: colors },
+                    success: function (data) {
+                        if (data) {
+                            $('#container_chart').hide;
+                            $('#labelgraph_container').empty();
+                            $("#labelgraph_container").append(data);
+                        }
+                    }
+                });
+    }
+    function label_plot1() {
+        var dictData = [];
+        var labels, captions, selects, colors;
+        $('.drag-style input[type=search]').each(function (i, item) {
+            console.log("ITEM:", item);
+            var grade = $(item).val();
+            grade = "" + grade + "";
+            console.log("GRADE:", grade);
+            id = $(item).attr("id");    //trimid: XAxis,Heigth,Group,Color
+            console.log("id:", id);
+            trimgrade = grade.trim();
+            trimid = id.trim();
+            dictData.push({
+                key: id,
+                value: grade
+            });
+        });
+        var chartpara = "";
+        var name1 = "";
+        for (let i = 0; i < dictData.length; i++) {
+
+            if (i == 0) {
+                labels = dictData[i].value;
+            }
+            else if (i == 1) {
+
+                captions = dictData[i].value;
+                if (captions == "") {
+                    captions = labels;
+                    vale = captions;
+                }
+                else {
+                    captions = dictData[i].value;;
+                    vale = captions;
+                }
+            }
+        }
+        $('.drag-style select[name=drop_down_label]').each(function (i, item) {
+            selects = $(item).val();
+        });
+        $('.drag-style input[type =text]').each(function (i, item) {
+            colors = $(item).val();
+        });
+
+        if (colors == "") {
+            colors = "rgb(255, 235, 205)";
+        }
+        $.ajax(
+            {
+                type: "POST",
+                url: '../Graph/_partialgetdataby_label',
+                datatype: "html",
+                //data: { columnname: chartpara, name: name1},
+                data: { label1: labels, caption1: captions, select1: selects, color1: colors },
+                //success: function (data) {
+                //    if (data) {
+
+                //        $('#container_chart').hide;
+                //        $('#labelgraph_container').empty();
+                //        $("#labelgraph_container").append(data);
+
+
+                //    }
+                //}
+
+                success: function (data) {
+                         if (data.startsWith("ERROR")) {
+                             var res = data.split(";");
+                             var error = '';
+                             if (res.length > 1) {
+                                 error = res[1];
+                             } else {
+                                 error = data;
+                             }
+                             alert(error);
+                         }
+                         else {
+                             $('#container_chart').hide;
+                             $('#labelgraph_container').empty();
+                             $("#labelgraph_container").append(data);
+
+                         }
+                   },
+                error: function (error) {
+                       alert('Label cannot be null!!!');
+                   }
+
+            });
+
+    }
+    function tabular1(data) {
+        var dictData = [];
+        $("#kpiFunctionData1 input.getdata").each(function () {
+            var row = $(this).closest('tr');
+            var columns = row.find('select.org').val();
+            var columns1 = row.find('.getdata').val();
+
+            dictData.push({
+                key: columns,
+                value: columns1
+            });
+
+        });
+
+            var arr = [];
+
+            var dta = "a";
+            var chartpara = "";
+            for (let i = 0; i < dictData.length; i++) {
+
+                arr.push(dictData[i].key + " as  " + "  " + dictData[i].value)
+                if (i < dictData.length - 1) {
+
+                    dta = dictData[i].value;
+                    if (dta != "") {
+                        dta =  "\"" + dictData[i].value + "\"";
+                    }
+                    else {
+                        //dta = dictData[i].key;
+                        dta = "\"" + dictData[i].key + "\"";
+
+                    }
+                    chartpara += dictData[i].key + " as " + "" + dta + ","
+                }
+                else {
+
+                    dta = dictData[i].key;//"\"" + dictData[i].key + "\"";
+                    dtv = dictData[i].value;
+                    if (dtv != "") {
+                        //dtv = dictData[i].value;
+                         dtv ="\"" + dictData[i].value+ "\"";
+                    }
+                    else {
+                        //dtv = dictData[i].key
+                         dtv ="\"" + dictData[i].key + "\"";
+
+                    }
+                    chartpara += dta + "  as  " + "" + dtv;//dictData[i].value;
+                }
+            }
+
+
+            $.ajax({
+                    type: "POST",
+                    url: '../Graph/tabular_plot',
+                    datatype: "html",
+                    data: { columnname: chartpara },
+                    success: function (data) {
+                        if (data) {
+                            $('#container_chart').hide;
+                            $('#tabular_container').empty();
+                            $("#tabular_container").append(data);
+                        }
+                    }
+                });
+        }
+    function Newtabular() {
+        var dictData = [];
+        $("#DynamicRow input.getdatapass").each(function () {
+            var row = $(this).closest('td');
+            var columns = row.find('select.SelectiveCol').val();
+            var columns1 = row.find('input.getdatapass').val();
+
+            if (columns != '' || columns1 != '') {
+                dictData.push({
+                    key: columns,
+                    value: columns1
+                });
+            }
+            //console.log("ID dictData:", dictData);
+        })
+
+        var arr = [];
+        var dta = "a";
+        var chartpara = "";
+        for (let i = 0; i < dictData.length; i++) {
+
+            arr.push(dictData[i].key + " as  " + "  " + dictData[i].value)
+            if (i < dictData.length - 1) {
+
+                dta = dictData[i].value;
+                if (dta != "") {
+                    dta = "\"" + dictData[i].value + "\"";
+                }
+                else {
+                    //dta = dictData[i].key;
+                    dta = "\"" + dictData[i].key + "\"";
+
+                }
+                chartpara += dictData[i].key + " as " + "" + dta + ","
+            }
+            else {
+
+                dta = dictData[i].key;//"\"" + dictData[i].key + "\"";
+                dtv = dictData[i].value;
+                if (dtv != "") {
+                    //dtv = dictData[i].value;
+                    dtv = "\"" + dictData[i].value + "\"";
+                }
+                else {
+                    //dtv = dictData[i].key
+                    dtv = "\"" + dictData[i].key + "\"";
+
+                }
+                chartpara += dta + "  as  " + "" + dtv;//dictData[i].value;
+            }
+        }
+
+        console.log("chartpara:", chartpara);
+        $.ajax({
+            type: "POST",
+            url: '../Graph/tabular_plot',
+            datatype: "html",
+            data: { columnname: chartpara },
+            success: function (data) {
+                if (data) {
+                    //updateData = data;
+                    $('#container_chart').hide;
+                    $('#tabular_container').empty();
+                    $("#tabular_container").append(data);
+                    defineTableFormat();
+                }
+            }
+        });
+
+    }
+    function defineTableFormat() {
+        $("#kpitabularData").DataTable({
+            "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 8,
+            language: {
+                oPaginate: {
+                    sNext: '<i class="fa fa-forward"></i>',
+                    sPrevious: '<i class="fa fa-backward"></i>'
+
+                }
+            }
+        });
+    }
+    function tabular2(data) {
+            var dictData = [];
+           var resultJSON = @Html.Raw(Json.Encode(Model.chart_selected_params_edit));
+
+            $.ajax({
+                    type: "POST",
+                    url: '../Graph/tabular_plot_edit',
+                    datatype: "html",
+                    data: { columnname: resultJSON },
+                    success: function (data) {
+                        if (data) {
+                            $('#container_chart').hide;
+                            $('#tabular_container').empty();
+                            $("#tabular_container").append(data);
+                        }
+                    }
+                });
+
+        }
+    function DrowTheGraph(data, name) {
+        var ActualdictData = [];
+        var threshld = [];
+        var Xaxisvalue = [];
+        var colors1 = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Xaxis';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Xaxisvalue = (result[0].value);
+        }
+        var Hightvalue = [];
+
+        var result = data.filter(function (element) {
+            return element.key == 'Height';
+        });
+
+        if (name == "line_threshold" || name == "bar_threshold" || name == "spline" || name == "bar" || name == "line" || name == "scatter" || name == "bubble" || name == "stacked_bar" || name == "step_line" || name == "area" || name == "heatmap" || name == "histogram") {
+            var dictData = [];
+            $('.drag-style1 input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                dictData.push(grade);
+            });
+
+            $('.drag-style1 input[type=text]').each(function (i, item) {
+                var colorData = $(item).val();
+                if (colorData != null && colorData != '' && colorData != undefined) {
+                    colors1.push(colorData);
+                }
+            });
+
+            for (i = 0; i < result.length; i++) {
+                Hightvalue[i] = (result[i].value);
+                ActualdictData.push({
+                    key: dictData[i],
+                    value: Hightvalue[i]
+                })
+            }
+        }
+        else {
+            if (result.length > 0) {
+                // we have found a corresponding element
+                Hightvalue = (result[0].value);
+            }
+        }
+
+        var Groupvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Group';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Groupvalue = (result[0].value);
+        }
+
+        var Colorvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Color';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Colorvalue = (result[0].value);
+        }
+
+        var Datevalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Date';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Datevalue = (result[0].value);
+        }
+
+        var Highvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'High';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Highvalue = (result[0].value);
+        }
+
+        var Lowvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Low';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Lowvalue = (result[0].value);
+        }
+
+        var Openvalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Open';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Openvalue = (result[0].value);
+        }
+
+        var Closevalue = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Close';
+        });
+
+        if (result.length > 0) {
+            // we have found a corresponding element
+            Closevalue = (result[0].value);
+        }
+
+
+        var threshold = [];
+        var result = data.filter(function (element) {
+            return element.key == 'Threshold';
+        });
+
+
+
+        if (name == "line_threshold" || name == "bar_threshold") {
+            var thrhld = []
+            $('.drag-style2 input[type=search]').each(function (i, item) {
+                var grade = $(item).val();
+                thrhld.push(grade);
+            });
+
+            for (i = 0; i < result.length; i++) {
+                Hightvalue[i] = (result[i].value);
+                threshld.push({
+                    key: thrhld[i],
+                    value: result[i].value
+                })
+            }
+        }
+        else {
+
+            if (result.length > 0) {
+                // we have found a corresponding element
+                threshold = (result[0].value);
+            }
+
+        }
+
+        var xvl = $("#Xaxis").val();
+        var hvl = $("#Height").val();
+        var gvl = $("#Group").val();
+        var cvl = $("#Color").val();
+        var dvl = $("#Date").val();
+        var highvl = $("#High").val();
+        var lowvl = $("#Low").val();
+        var openvl = $("#Bars").val();
+        var closevl = $("#Bars").val();
+
+        change(name, colors1, ActualdictData, threshld, Xaxisvalue, Hightvalue, Groupvalue, Colorvalue, Datevalue, Highvalue, Lowvalue, Openvalue, Closevalue, xvl, gvl, hvl, cvl, dvl, highvl, lowvl, openvl, closevl);
+    }
+    function random_rgba() {
+    var o = Math.round, r = Math.random, s = 255;
+    return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ',' + r().toFixed(1) + ')';
+    }
+    function generateData() {
+  var data = [];
+  var dt = moment()
+    .subtract(365, "days")
+    .startOf("day");
+  var end = moment().startOf("day");
+  //console.log(end);
+  while (dt <= end) {
+    data.push({
+      x: dt.format("YYYY-MM-DD"),
+      y: dt.format("e"),
+      d: dt.format("YYYY-MM-DD"),
+      v: Math.random() * 50
+    });
+    dt = dt.add(1, "day");
+  }
+  return data;
+  }
+    function getData(title) {
+        switch (title) {
+            case "chart":
+                var s = document.createElement("script");
+                s.type = "text/javascript";
+                s.src = "/Scripts/Chart.js";
+                s.onload = function () { };
+                //document.getElementById("output").innerHTML = "";
+                document.body.appendChild(s);
+                break;
+            case "heatmap":
+                var s = document.createElement("script");
+                s.type = "text/javascript";
+                s.src = "/GraphStyles/dst/Chart.HeatMap.S.js";
+                s.onload = function () { };
+                //document.getElementById("output").innerHTML = "";
+                document.body.appendChild(s);
+                break;
+            default:
+                void (0);
+        }
+    }
+    function change(newType, colors1, ActualdictData, threshold, Xaxisvalue, Hightvalue, Groupvalue, Colorvalue, Datevalue, Highvalue, Lowvalue, Openvalue, Closevalue, xvl, gvl, hvl, cvl, dvl, highvl, lowvl, openvl, closevl) {
+        $('#myChart').css("height", "334px");
+        var tempcolors = ["#1b5583", "#41516D", "#4D8FAC", "#695acd", "#2a52be", "#0073cf", "#00a8ff", "#89CFF0", "#008081", "#40e0d0", "#00ffff"];
+        var colorarray = '@ViewBag.DefineColor';
+        var tempcolor = colorarray.split(",");
+        var i = -1;
+        colors1 = colors1.map(function (x) { i++; return x.replace('#fff', tempcolor[i]); });
+        if (newType.toLowerCase() == "bubble" || newType.toLowerCase() == "scatter") {
+            var xlabel = [];
+            var label_data = [];
+            if (Hightvalue.length > 0) {
+                var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+
+                if (newType == "bubble") {
+                    for (let i = 0; i < ActualdictData.length; i++) {
+                        var datal = [];
+                        for (let j = 0; j < Xaxisvalue.length; j++) {
+                            if (i == 0) {
+                                xlabel.push(Xaxisvalue[j]);
+                            }
+                            datal.push({
+                                x: Xaxisvalue[j],
+                                y: Hightvalue[i][j],
+                                r: 6
+                            });
+                        }
+                        label_data.push({
+                            label: ActualdictData[i].key,
+                            data: datal,
+                            backgroundColor: colors1[i],// random_rgba()
+                        });
+                    }
+                }
+                else if (newType == "scatter") {
+                    for (let i = 0; i < ActualdictData.length; i++) {
+                        var datal = [];
+                        for (let j = 0; j < Xaxisvalue.length; j++) {
+                            if (i == 0) {
+                                xlabel.push(Xaxisvalue[j]);
+                            }
+                            datal.push({
+                                x: Xaxisvalue[j],
+                                y: Hightvalue[i][j]
+                            });
+                        }
+                        label_data.push({
+                            label: ActualdictData[i].key,
+                            data: datal,
+                            backgroundColor: colors1[i]
+                        });
+                    }
+                }
+                //console.log("labeldata_bubble", label_data);
+                var config = {
+                    type: name,
+                    data: {
+                        labels: Xaxisvalue,
+                        //labels: xlabel,
+                        datasets: label_data
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            display: true, position: 'top',
+                            labels: {
+                                filter: function (item, data) {
+                                    //alert(item.text);
+                                    if (item.text != xvl) {
+                                        return true;
+                                    }
+                                    else {
+                                        return false;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            xAxes: {
+                                stacked: true
+                            },
+                            yAxes: {
+                                stacked: true
+                            }
+                        }
+
+                    }
+                };
+            }
+        }
+        else if (newType.toLowerCase() == "pie" || newType.toLowerCase() == "doughnut" || newType.toLowerCase() == "polararea") {
+            var hat = [];
+            var leng = Hightvalue.length;
+            hat = Hightvalue;
+            var config = {
+                type: name,
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: [
+                        {
+                            /*backgroundColor: ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"],*/
+                            backgroundColor: tempcolor,
+                            data: Hightvalue,
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            right: "100px",
+                            align: "middle"
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "line" || newType.toLowerCase() == "bar" || newType.toLowerCase() == "area" || newType.toLowerCase() == "spline") {
+            var delayed;
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+            var datasset = [];
+            var o_datasset = [];
+            var o_dataset = null;
+
+            var fl = false;
+            var sl = false;
+            var stked = false;
+            var splin = 0;
+            if (ActualdictData.length > 0) {
+                if (newType == "area".toLowerCase().toString()) {
+                    fl = true;
+                    newType = "line";
+                    sl = false;
+                }
+                else if (newType == "spline".toLowerCase().toString()) {
+                    newType = "line";
+                    splin = 0.6;
+                    fl = false;
+                    sl = false;
+                    stked = false;
+                }
+
+                for (let i = 0; i < ActualdictData.length; i++) {
+                    datasset.push({
+                        label: ActualdictData[i].key,
+                        backgroundColor: colors1[i],
+                        borderColor: colors1[i],
+                        hoverBackgroundColor: colors1[i],
+                        hoverBorderColor: colors1[i],
+                        data: ActualdictData[i].value,
+                        lineTension: splin,
+                        fill: fl,
+                        steppedLine: sl,
+                    });
+                }
+                //console.log("DatasSet Line", datasset);
+
+                var config = {
+                    type: newType,
+                    data: {
+                        labels: Xaxisvalue,
+                        datasets: datasset
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true
+                            },
+                            tooltips: {
+                                enabled: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false
+                            },
+                            y: {
+                                stacked: false
+                            }
+                        }
+                    }
+                };
+            }
+        }
+        else if (newType.toLowerCase() == "line_threshold" || newType.toLowerCase() == "bar_threshold") {
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+            var colors2 = ["red", "orange", "black", "purple"];
+            var data22 = [0, 1500, 1500, 1500];
+            var datasset = [];
+            var o_datasset = [];
+            var o_dataset = null;
+            var th_m_set_max = [];
+            var th_m_set_min = [];
+            //console.log("threshold:", threshold);
+            var fl = false;
+            var sl = false;
+            var stked = false;
+            var splin = 0;
+
+            if (ActualdictData.length > 0) {
+
+                for (i = 0; i < Xaxisvalue.length; i++) {
+                    th_m_set_max.push(1550);
+                }
+
+                for (i = 0; i < Xaxisvalue.length; i++) {
+                    th_m_set_min.push(100);
+                }
+
+                if (newType == "bar_threshold".toLowerCase().toString()) {
+                    newType = "bar";
+                    fl = false;
+                    sl = false;
+                    stked = false;
+                }
+                else if (newType == "line_threshold".toLowerCase().toString()) {
+                    newType = "line";
+                    splin = 0.6;
+                    fl = false;
+                    sl = false;
+                    stked = false;
+                }
+
+
+                for (let i = 0; i < threshold.length; i++) {
+                    datasset.push({
+                        type: "line",
+                        label: threshold[i].key,
+                        backgroundColor: colors[i],
+                        borderColor: colors2[i],
+                        borderDash: [10, 10],
+                        data: threshold[i].value,
+                        lineTension: splin,
+                        fill: fl,
+                        steppedLine: sl,
+                    });
+                }
+
+                for (let i = 0; i < ActualdictData.length; i++) {
+                    datasset.push({
+                        type: newType,
+                        label: ActualdictData[i].key,
+                        backgroundColor: colors1[i],
+                        borderColor: colors1[i],
+                        data: ActualdictData[i].value,
+                        lineTension: splin,
+                        fill: fl,
+                        steppedLine: sl,
+                    });
+                }
+
+
+                // console.log("DatasSet_BAR", datasset);
+
+                var config = {
+                    //type: newType,
+                    data: {
+                        type: newType,
+                        labels: Xaxisvalue,
+                        datasets: datasset
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'center'
+                            },
+                            tooltips: {
+                                enabled: true
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: false
+                            },
+                            y: {
+                                stacked: false
+                            }
+                        }
+                    }
+                };
+            }
+        }
+
+        else if (newType.toLowerCase() == "radar") {
+            var radarData = {
+                labels: Xaxisvalue,
+                datasets: [{
+                    label: hvl,
+                    data: Hightvalue,
+                    fill: true,
+                    backgroundColor: "lightblue",
+                    borderColor: "blue"
+                }]
+            };
+            var config = {
+                type: newType,
+                data: radarData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center'
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    elements: {
+                        line: {
+                            borderWidth: 3
+                        }
+                    }
+                },
+            };
+        }
+        else if (newType.toLowerCase() == "stacked_bar") {
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+
+            newType = 'bar';
+            var datasset = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                datasset.push({
+                    label: ActualdictData[i].key,
+                    data: ActualdictData[i].value,
+                    backgroundColor: colors1[i],
+                    borderColor: colors1[i],
+                    hoverBackgroundColor: colors1[i],
+                    hoverBorderColor: colors1[i]
+                });
+            }
+            var config = {
+                type: newType,
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: datasset
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "step_line") {
+            newType = 'line';
+            var colors = ["Green", "Blue", "Gray", "Purple", "Yellow", "Red", "Black", "purple", "orange", "violet"];
+            var datasset = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                datasset.push({
+                    label: ActualdictData[i].key,
+                    data: ActualdictData[i].value,
+                    borderColor: colors1[i],
+                    fill: false,
+                    stepped: true
+                });
+            }
+            var config = {
+                type: 'line',
+                data: {
+                    labels: Xaxisvalue,
+                    datasets: datasset,
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false
+                        },
+                        y: {
+                            stacked: false
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        axis: 'x'
+                    }
+                }
+            };
+        }
+
+        else if (newType.toLowerCase() == "treemap") {
+            $('#myChart').css("height", "250px");
+            let arrayData = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                arrayData.push(ActualdictData[i].key);
+            }
+
+            let arr = [];
+            Hightvalue.map((val, index) => {
+                let obj = { [xvl]: Xaxisvalue[index], [hvl]: val, };
+                arr.push(obj);
+            });
+
+            console.log("ARRAY:", arr);
+
+            var config = {
+                type: newType,
+                data: {
+                    datasets: [{
+                        //label: hvl,
+                        tree: arr,
+                        key: hvl,
+                        groups: [xvl],
+                        spacing: 0.5,
+                        borderWidth: 1.5,
+                        fontColor: "black",
+                        fontSize: 9,
+                        borderColor: "grey",
+                        backgroundColor: tempcolor[0]
+                        //backgroundColor: 'rgba(75, 00, 150, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltips: {
+                            callbacks: {
+                                title: function (item, data) {
+                                    return data.datasets[item[0].datasetIndex].key;
+                                },
+                                label: function (item, data) {
+                                    var dataset = data.datasets[item.datasetIndex];
+                                    var dataItem = dataset.data[item.index];
+                                    return dataItem.g + ': ' + dataItem.v;
+                                }
+                            }
+                        }
+                    },
+
+                }
+            }
+
+        }
+        else if (newType.toLowerCase() == "histogram") {
+            newType = 'bar';  //bar
+            var datasset = [];
+            for (let i = 0; i < ActualdictData.length; i++) {
+                datasset.push({
+                    label: ActualdictData[i].key,
+                    data: ActualdictData[i].value,
+                    backgroundColor: colors1[i],
+                    borderColor: colors1[i],
+                    borderWidth: 1,
+                    barPercentage: 1.3,
+                    // categoryPercentage: 1
+                });
+            }
+
+            var histoData = {
+                labels: Xaxisvalue,
+                datasets: datasset
+            };
+            var config = {
+                type: newType,
+                data: histoData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            align: 'center'
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false
+                        },
+                        y: {
+                            stacked: false,
+                            display: true,
+                            ticks: {
+                                beginAtZero: true,
+                                //callback: function (val, index) {
+                                //    return val / 100000;
+                                //}
+                            }
+                        }
+                    }
+                }
+            };
+
+        }
+        else if (newType.toLowerCase() == "candlestick") {
+
+            var dateData = ["2020-01-01", "2020-02-01", "2020-03-01", "2020-04-01", "2020-05-01", "2020-06-01", "2020-07-01", "2020-08-01", "2020-09-01", "2020-10-01", "2020-11-01", "2020-12-01"];
+            let arr = [];
+            dateData.map((val, index) => {
+                let obj = {
+                    x: luxon.DateTime.fromSQL(dateData[index])["ts"],
+                    o: Openvalue[index],
+                    h: Highvalue[index],
+                    l: Lowvalue[index],
+                    c: Closevalue[index]
+                };
+                arr.push(obj);
+            });
+
+            var config = {
+                type: newType,
+                data: {
+                    datasets: [{
+                        label: 'CHRT - Chart.js Corporation',
+                        data: arr
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltips: {
+                            enabled: true
+                        }
+                    }
+                }
+            };
+        }
+        else if (newType.toLowerCase() == "gauge") {
+            newType = 'doughnut';
+
+            var randomValue = function (data) {
+                return Math.max.apply(null, data) * Math.random();
+            };
+            var value = randomValue(Hightvalue);
+
+            var GaugeData;
+            if (Xaxisvalue.length != 0) {
+                GaugeData = {
+                    labels: Xaxisvalue,
+                    datasets: [
+                        {
+                            label: hvl,
+                            backgroundColor: ["lightblue", "lightgreen", "pink", "#FFD580", "#cb504d", "yellow", "orange", "purple", "violet", "blue", "green", "red"],
+                            data: Hightvalue,
+                            needleValue: value,
+                            borderColor: 'Black',
+                            borderWidth: 1,
+                            //cutout: '90%',
+                            circumference: 180,
+                            rotation: 270
+                        }
+                    ]
+                };
+            }
+            //console.log("Gauge Data:", GaugeData);
+
+            var gaugeNeedle = {
+                id: 'gaugeNeedle',
+                afterDatasetDraw(chart, args, options) {
+                    var { ctx, config, data, chartArea: { top, bottom, left, right,
+                        width, height } } = chart;
+                    ctx.save();
+                    //console.log("ctx:",ctx);
+                    var needleValue = data.datasets[0].needleValue;
+                    var dataTotal = data.datasets[0].data.reduce((a, b) => a + b, 0);
+                    var angle = Math.PI + (1 / dataTotal * needleValue * Math.PI);
+                    //console.log("angle:",angle);
+                    var cx = width / 2;
+                    var cy = (chart._metasets[0].data[0].y - 10);
+                    //console.log("offsetTop:",ctx.canvas.offsetTop);
+                    //console.log("cx:",cx);
+                    //console.log("cy:",cy);
+
+                    //needle
+                    ctx.translate(cx, cy);
+                    ctx.beginPath();
+                    ctx.rotate(angle);
+                    ctx.moveTo(0, -10);
+                    ctx.lineTo(height - (ctx.canvas.offsetTop - 40), 10);
+                    ctx.lineTo(0, 10);
+                    ctx.fillStyle = '#444';
+                    ctx.fill();
+                    ctx.restore();
+
+                    // needle dot
+                    //ctx.translate(-cx,-cy);
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, 5, 0, 10);
+                    ctx.fill();
+                    ctx.restore();
+
+                    ctx.font = '20px black';
+                    ctx.fillStyle = '#444';
+                    ctx.fillText(needleValue + '%', cx + 20, cy - 90);
+                    ctx.textAlign = 'center';
+                    ctx.restore();
+                }
+            }
+
+            var config = {
+                type: newType,
+                data: GaugeData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: true,
+                            callbacks: {
+                                label: function (context) {
+                                    //return context['dataset']['label'] + ": " + context['dataset']['data'][context.dataIndex];
+                                    return context.chart.data.labels[context.dataIndex] + ":" + context['dataset']['data'][context.dataIndex];
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [gaugeNeedle]
+            };
+
+        }
+
+        var ctx = document.getElementById("myChart").getContext("2d");
+        if (myChart) {
+            myChart.destroy();
+        }
+        var temp = jQuery.extend(true, {}, config);
+        temp.type = newType;
+        myChart = new Chart(ctx, temp);
+    };
+
+</script>

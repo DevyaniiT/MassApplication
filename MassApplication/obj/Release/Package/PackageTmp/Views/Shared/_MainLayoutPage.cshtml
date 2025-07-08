@@ -1,0 +1,489 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" href="~/MasterStyles/css/fontawesome-free/css/all.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/css/ionicons.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/TableStyles/datatables-bs4/css/dataTables.bootstrap4.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/TableStyles/datatables-responsive/css/responsive.bootstrap4.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/TableStyles/datatables-buttons/css/buttons.bootstrap4.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/dist/css/adminlte.min.css" />
+    <link rel="stylesheet" href="~/MasterStyles/docs/assets/css/style.css?v=1" />
+    <script src="~/MasterStyles/js/jquery.min.js"></script>
+    <script src="~/MasterStyles/js/moment.min.js"></script>
+
+    <style>
+
+        .dark-mode .report-detail ul li a:not(.btn):hover {
+            color: #fff !important;
+        }
+
+        .navbar-light .navbar-nav .nav-link {
+            color: rgb(52 58 64) !important;
+        }
+
+            .navbar-light .navbar-nav .nav-link:hover {
+                color: rgb(52 58 64);
+            }
+
+        body:not(.layout-fixed) .main-sidebar {
+            margin-left: 0px;
+        }
+
+        .main-menu-bar {
+            position: -webkit-sticky; /* Safari */
+            position: sticky;
+            top: 0;
+            z-index: 9
+        }
+
+        .lastVisit {
+            background: #000
+        }
+
+        .toolbarinner {
+            border-bottom: 1px solid #dee2e6;
+        }
+
+            .toolbarinner li a {
+                padding: 0 14px;
+            }
+
+        .nav-icon1 {
+            color: #2a5b6c;
+            font-size: 15px;
+        }
+
+        #reportLayoutData_filter .form-control {
+            background-image: url('../../Images/loupe.png');
+            background-repeat: no-repeat;
+            background-color: #fff;
+            background-position: 4px 4px !important;
+            background-size: 14px;
+        }
+
+            #reportLayoutData_filter .form-control:focus {
+                background-image: none;
+            }
+
+        .disabled-link {
+            pointer-events: none;
+        }
+
+        .addresslink {
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #F1F1F1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2A5B6C;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+    </style>
+</head>
+
+<body class="sidebar-mini sidebar-collapse">
+    @{
+        <div class="wrapper">
+            <nav class="navbar navbar-expand  main-menu-bar p-0">
+                <!-- Left navbar links -->
+                <ul class="navbar-nav nav nav-tabs border-bottom-0 pl-4 report-detail text-center" id="myTabmains" role="tablist">
+                    <li><img src="~/Images/mass-logo.png" alt="logo" style="width:80px;filter:brightness(0) invert(1);" /></li>
+
+                    <li class="nav-item pl-4">
+                        <a href='#db-tab' id="db-table-tab" data-toggle="tab" role="tab" aria-controls="sms-tab" aria-selected="false" class="main_menu nav-link"> View Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href='#report' id="report-tab" data-toggle="tab" role="tab" aria-controls="report" aria-selected="false" class="main_menu nav-link ">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#graph-tab" id="graph-tab-main" data-toggle="tab" role="tab" aria-controls="graph-tab" aria-selected="false" class="main_menu nav-link">Manage Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href='#data-table' id="data-table-tab" data-toggle="tab" role="tab" aria-controls="data-table" aria-selected="false" class="main_menu nav-link">Manage Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href='#user-tab' id="user-table-tab" data-toggle="tab" role="tab" aria-controls="user-tab" aria-selected="false" class="main_menu nav-link">Manage User</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href='#digital-tab' id="digital-table-tab" data-toggle="tab" role="tab" aria-controls="digital-tab" aria-selected="false" class="main_menu nav-link">Diagnostic</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href='#reconcile_report' id="reconcile-report-tab" data-toggle="tab" role="tab" aria-controls="reconcile-report" aria-selected="false" class="main_menu nav-link ">Pipeline Reports</a>
+                    </li>
+                    @*<li class="nav-item">
+                            <a href="#asset-tab" id="asset-tab-main" data-toggle="tab" role="tab" aria-controls="asset-tab" aria-selected="false" class="main_menu nav-link">Asset Management</a>
+                        </li>*@
+
+                </ul>
+                <ul class="navbar-nav ml-auto report-detail">
+                    <li class="nav-item">
+                        <a class="nav-link" data-widget="fullscreen" href="#" role="button" id="fullscreen">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="right-customise" href="#" role="button">
+                            <i class="fas fa-th-large"></i>
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false">
+                            <i class="fas fa-user-circle" style="font-size:20px;"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right" style="left: inherit; right: 0px; top:31px">
+                            <div class="report-detail logout">
+                                <ul class="mb-0">
+                                    <li style="width:45%">
+                                        <a class="" href='@Url.Content("~/Login/Index")'>
+                                            <div class="media">
+
+                                                <i class="fas fa-sign-out-alt text-white mr-3"></i>
+                                                <div class="media-body ">
+                                                    <p class="text-white text-left"> Log-Out</p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+            <!-- /.navbar -->
+            <!-- Main Sidebar Container -->
+            <aside class="bg">
+                <nav>
+                    <div class="tab-content container" id="myTabContentinner">
+
+                        <div class="tab-pane" id="report" role="tabpanel" aria-labelledby="report-tab">
+                            <div class="report-detail">
+                                <ul class="mb-0 list-inline">
+                                    <li class="list-inline-item" id="width_problem">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Reports")'>
+                                            <img src="~/Images/view-report-icon.png" style="width:30px" />
+                                            <p> View Reports </p>
+                                        </a>
+                                    </li>
+
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Schedule Task")'>
+                                            <img src="~/Images/Schedule-icon.png" style="width:30px" />
+                                            <p> Schedule Reports </p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="data-table" role="tabpanel" aria-labelledby="data-table-tab">
+                            <div class="report-detail">
+                                <ul class="mb-0 list-inline">
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Manage Report")'>
+                                            <img src="~/Images/report-icon.png" style="width:30px" />
+                                            <p> Manage Report </p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane" id="graph-tab" role="tabpanel" aria-labelledby="graph-tab-main">
+                            <div class="report-detail">
+                                <ul class="mb-0 list-inline">
+
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=KPI")'>
+                                            <img src="~/Images/kpi-icon.png" style="width:30px" />
+                                            <p>KPI</p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Dashboard")'>
+                                            <img src="~/Images/new-dashboard-icon.png" style="width:30px" />
+                                            <p> Dashboard</p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Query")'>
+                                            <img src="~/Images/kpi-icon.png" style="width:30px" />
+                                            <p>Query</p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="sign-out" role="tabpanel" aria-labelledby="sign-out-tab">
+                            <div class="report-detail">
+                                <ul class="mb-0 list-inline">
+                                    <li class="list-inline-item">
+                                        <a class="" href='@Url.Content("~/Login/Index")'>
+                                            <i class="fas fa-sign-out-alt nav-icon "></i>
+                                            <p>Log-Out</p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane" id="db-tab" role="tabpanel" aria-labelledby="db-table-tab">
+
+                            <div class="report-detail view-dashboard" id="dashboardItems">
+                                <ul class="mb-0 list-inline">
+                                    @{Html.RenderAction("DashboardViewer", "Base");}
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane" id="user-tab" role="tabpanel" aria-labelledby="user-table-tab">
+                            <div class="report-detail">
+                                <ul class="mb-0 list-inline">
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=User")'>
+                                            <img src="~/Images/user-icon.png" style="width:30px" />
+                                            <p> User </p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Role")'>
+                                            <img src="~/Images/user-role-icon.png" style="width:30px" />
+                                            <p>Role</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane" id="digital-tab" role="tabpanel" aria-labelledby="digital-table-tab">
+                            <div class="report-detail">
+                                <ul class="mb-0 list-inline">
+                                    <li class="list-inline-item">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Diagnostic Summary")'>
+                                            <img src="~/Images/diagnostic-icon.png" style="width:30px" />
+                                            <p class="side_span"> Digital Twin</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="list-inline-item" title="GC(Gas Chromatograph)">
+                                        @*<a href='@Url.Content("~/Asset/GCIndex")'>*@
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=GC")'>
+                                            <img src="~/Images/digital_color_meter.png" style="width:30px" />
+                                            <p class="side_span"> GC(Gas Chromatograph)</p>
+                                        </a>
+                                    </li>
+
+                                    <li class="list-inline-item" title="Surveyor">
+                                        <a href='@Url.Content("~/Dynamic/Index?menu_name=Surveyor")'>
+                                            <img src="~/Images/survey.png" style="width:30px" />
+                                            <p class="side_span"> Surveyor</p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+
+                        </div>
+
+                        <div class="tab-pane" id="reconcile_report" role="tabpanel" aria-labelledby="reconcile-report-tab">
+                            <div class="report-detail">
+                                <ul class="mb-0 list-inline">
+                                    <li class="list-inline-item" title="Volume Reconciliation">
+                                        <a href='@Url.Content("~/Reconcile/Index?menu_name=Volume Reconciliation")'>
+                                            @*<img src="~/Images/view-report-icon.png" style="width:30px" />*@
+                                            <i class="fab fa-codepen" style="font-size: 25px; color: #378aa7; "></i>
+                                            <p class="side_span"> Volume Reconciliation </p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item" title="Energy Reconciliation">
+                                        <a href='@Url.Content("~/Reconcile/Index?menu_name=Energy Reconciliation")'>
+                                            <i class="fas fa-burn" style="font-size: 25px; color: #FBB741; "></i>
+                                            <p class="side_span"> Energy Reconciliation </p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item" title="Check Meter Volume Reconciliation">
+                                        <a href='@Url.Content("~/Reconcile/Index?menu_name=Check Meter Volume Reconciliation")'>
+                                            <i class="fas fa-digital-tachograph" style="font-size: 25px; color: #37a792; "></i>
+                                            <p class="side_span"> Check Meter Volume Reconciliation </p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item" title="Check Meter Energy Reconciliation">
+                                        <a href='@Url.Content("~/Reconcile/Index?menu_name=Check Meter Energy Reconciliation")'>
+                                            <i class="fas fa-digital-tachograph" style="font-size: 25px; color: #cf469f; "></i>
+                                            <p class="side_span"> Check Meter Energy Reconciliation </p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item" title="Exception Reconciliation">
+                                        <a href='@Url.Content("~/Reconcile/Index?menu_name=Exception Reconciliation")'>
+                                            <i class="fas fa-file-excel" style="font-size: 25px; color: #dd0404; "></i>
+                                            <p class="side_span"> Exception Reconciliation </p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item" title="Reconciliation Trend">
+                                        <a href='#'>
+                                            <i class="fas fa-poll-h" style="font-size: 25px; color: #08c141; "></i>
+                                            <p class="side_span"> Reconciliation Trend </p>
+                                        </a>
+                                    </li>
+                                    <li class="list-inline-item" title="Group Wise Linepack">
+                                        <a href='@Url.Content("~/Reconcile/Index?menu_name=Group Wise Linepack")'>
+                                            <i class="fas fa-layer-group" style="font-size: 25px; color: #cda412; "></i>
+                                            <p class="side_span"> Group Wise Linepack </p>
+                                        </a>
+                                    </li>
+
+                                </ul>
+                            </div>
+                        </div>
+
+                        @*<div class="tab-pane" id="asset-tab" role="tabpanel" aria-labelledby="asset-tab-main">
+                                <div class="report-detail">
+                                    <ul class="mb-0 list-inline">
+                                        <li class="list-inline-item" title="FC(Flow Computer)">
+                                            <a href='@Url.Content("~/Asset/FCIndex")'>
+                                                <img src="~/Images/computer.png" style="width:30px" />
+                                                <p class="side_span"> FC(Flow Computer)</p>
+                                            </a>
+                                        </li>
+                                        <li class="list-inline-item" title="GC(Gas Chromatograph)">
+                                            <a href='@Url.Content("~/Asset/GCIndex")'>
+                                                <img src="~/Images/digital_color_meter.png" style="width:30px" />
+                                                <p class="side_span"> GC(Gas Chromatograph)</p>
+                                            </a>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>*@
+
+                    </div>
+                    <div class="float-right" style="margin-top:-20px; margin-right:13px;">
+                        <a href="javascript:void(0)" id="innerNav"><i class="fas fa-thumbtack nav-icon" style="font-size:12px"></i></a>
+                    </div>
+                </nav>
+            </aside>
+
+            <div class="grey-bg " id="content">
+                @RenderBody()
+            </div>
+        </div>
+
+        <aside class="control-sidebar control-sidebar-dark" style="right:0px; top:34px; min-height:100%;">
+        </aside>
+        <script src="~/Scripts/jquery-ui.js"></script>
+        <script src="~/MasterStyles/js/bootstrap/bootstrap.bundle.min.js"></script>
+        <script src="~/MasterStyles/dist/js/adminlte.js"></script>
+        <script src="~/MasterStyles/dist/js/demo.js"></script>
+        <script src="~/MasterStyles/DaterangePicker/daterangepicker.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables/jquery.dataTables.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-responsive/js/dataTables.responsive.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-buttons/js/dataTables.buttons.min.js"></script>
+        <script src="~/MasterStyles/TableStyles/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+
+        <script src="~/GraphStyles/js/luxon.min.js"></script>
+        <script src="~/GraphStyles/js/chartjs-adapter-luxon.js"></script>
+        <script src="~/GraphStyles/js/chartjs-chart-financial.js"></script>
+        <script src="~/GraphStyles/js/chartjs-chart-treemapNewVersion.js"></script>
+
+        <script>
+            $(document).ready(function () {
+                $('[data-toggle="tab"]').tooltip({
+                    trigger: 'hover',
+                    placement: 'top',
+                    animate: true,
+                    delay: 500,
+                    container: 'body'
+                });
+
+                //$('.nav-tabs a[href="' + localStorage.getItem('activeTab') + '"]').tab('show');
+                //$(localStorage.getItem('activeTab')).addClass('active');
+
+            });
+        </script>
+        <script>
+            $("#right-customise").click(function (e) {
+                $(".control-sidebar-dark").show();
+                e.stopPropagation();
+            });
+            $(".control-sidebar-dark").click(function (e) {
+                e.stopPropagation();
+            });
+            $(document).click(function () {
+                $(".control-sidebar-dark").hide();
+            });
+        </script>
+
+        <script type="text/javascript">
+            $('#myTabmains a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                localStorage.setItem('activeTab', $(e.target).attr('href'));
+            });
+            var activeTab = localStorage.getItem('activeTab');
+            //var activeTabId = activeTab.replace("#", "");
+            //localStorage.setItem('activeSubTab', activeTabId);
+            if (activeTab) {
+                $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+                $(activeTab).tab('show');
+            }
+        </script>
+
+        <script>
+            $("#myTabmains li.nav-item").click(function (e) {
+                $('#myTabmains li a').removeClass('lastVisit');
+                $('#myTabmains li a.active').addClass('lastVisit');
+            });
+
+            $("#innerNav").click(function () {
+                $("#myTabContentinner .tab-pane").removeClass("active");
+                $(".main-menu-bar .report-detail li a").removeClass("active");
+                $(".main-menu-bar .report-detail li a").removeClass("lastVisit");
+            });
+
+            $("#fullscreen").click(function () {
+                //$("#myTabContentinner .tab-pane").removeClass("active");
+                // $(".main-menu-bar .report-detail li a").removeClass("active");
+                // $(".main-menu-bar .report-detail li a").removeClass("lastVisit");
+            });
+
+        </script>
+        <script>
+            $("input[type=checkbox]").on("change", function () {
+                if ($(this).is(':checked')) {
+                    $(this).closest("tr").css('background-color', '#c2dbff').addClass("Dark");
+                }
+                else
+                    $(this).closest("tr").css('background-color', '').removeClass("Dark");
+            });
+        </script>
+
+        @RenderSection("scripts", required: false)
+
+    }
+
+</body>
+
+
+</html>
+
